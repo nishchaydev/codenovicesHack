@@ -1,4 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
+import { 
+  Network, 
+  Sparkles, 
+  Search, 
+  LayoutDashboard, 
+  History, 
+  Bookmark, 
+  Pin, 
+  PinOff, 
+  EyeOff, 
+  PanelLeftOpen, 
+  ShieldCheck, 
+  Activity,
+  Settings,
+  HelpCircle
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export type NavTab = "overview" | "event_explorer" | "impact_graph" | "ai_hub" | "historical_replay" | "saved_analyses";
 
@@ -7,157 +24,346 @@ interface SidebarProps {
   onTabChange: (tab: NavTab) => void;
 }
 
+interface NavItem {
+  id: NavTab;
+  label: string;
+  icon: React.ReactNode;
+  badge?: string;
+  badgeColor?: string;
+}
+
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
+  const [open, setOpen] = useState(true);
+  const [isPinned, setIsPinned] = useState(true);
+  const [isHidden, setIsHidden] = useState(false);
+
+  const transmissionModules: NavItem[] = [
+    { 
+      id: "impact_graph", 
+      label: "Impact Graph", 
+      icon: <Network className="w-4 h-4 flex-shrink-0 text-blue-500" />, 
+      badge: "LIVE" 
+    },
+    { 
+      id: "ai_hub", 
+      label: "AI Hub", 
+      icon: <Sparkles className="w-4 h-4 flex-shrink-0 text-indigo-500" />, 
+      badge: "INSIGHTS" 
+    },
+    { 
+      id: "event_explorer", 
+      label: "Event Explorer", 
+      icon: <Search className="w-4 h-4 flex-shrink-0 text-[#626260]" />, 
+      badge: "SHOCK" 
+    },
+  ];
+
+  const forensicTools: NavItem[] = [
+    { 
+      id: "overview", 
+      label: "Overview", 
+      icon: <LayoutDashboard className="w-4 h-4 flex-shrink-0 text-[#626260]" /> 
+    },
+    { 
+      id: "historical_replay", 
+      label: "Historical Replay", 
+      icon: <History className="w-4 h-4 flex-shrink-0 text-amber-600" />, 
+      badge: "CRISIS" 
+    },
+    { 
+      id: "saved_analyses", 
+      label: "Saved Analyses", 
+      icon: <Bookmark className="w-4 h-4 flex-shrink-0 text-[#626260]" /> 
+    },
+  ];
+
+  const handleMouseEnter = () => {
+    if (!isPinned && !isHidden) {
+      setOpen(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isPinned && !isHidden) {
+      setOpen(false);
+    }
+  };
+
+  if (isHidden) {
+    return (
+      <button
+        onClick={() => {
+          setIsHidden(false);
+          setOpen(true);
+          setIsPinned(true);
+        }}
+        title="Show Navigation Bar"
+        className="fixed top-3.5 left-4 z-50 p-2 rounded-xl bg-white/90 backdrop-blur-md text-[#111111] hover:bg-white shadow-md transition-all active:scale-95 flex items-center gap-2 border border-slate-200"
+      >
+        <div className="bg-[#111111] p-1.5 rounded-lg text-white">
+          <Activity className="w-3.5 h-3.5" />
+        </div>
+        <span className="text-xs font-semibold tracking-tight">FinGraph</span>
+        <PanelLeftOpen className="w-3.5 h-3.5 text-blue-600 ml-0.5" />
+      </button>
+    );
+  }
+
   return (
-    <aside className="w-56 shrink-0 h-screen sticky top-0 bg-white border-r border-slate-200 flex flex-col justify-between p-4 select-none z-30">
-      {/* Top Brand Logo & Navigation */}
-      <div className="flex flex-col gap-6">
-        {/* Brand Header */}
-        <div className="flex items-center gap-2.5 px-2 py-1">
-          {/* Blue Geometric Logo Mark */}
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-500/20">
-            <svg
-              className="w-5 h-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+    <motion.aside
+      className="h-screen sticky top-0 px-3 py-4 hidden md:flex md:flex-col justify-between bg-white/85 backdrop-blur-md border-r border-[#d3cec6] flex-shrink-0 z-30 shadow-xs overflow-x-hidden select-none"
+      animate={{
+        width: open ? "260px" : "68px",
+      }}
+      transition={{
+        duration: 0.26,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+        {/* Header Brand */}
+        <div className="flex items-center justify-between pb-3.5 border-b border-[#d3cec6]/60 mb-3.5 min-h-[44px]">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Interactive Logo Mark */}
+            <div
+              onClick={() => {
+                if (isPinned) {
+                  setIsPinned(false);
+                  setOpen(false);
+                } else {
+                  setIsPinned(true);
+                  setOpen(true);
+                }
+              }}
+              title={isPinned ? "Click to switch to hover rail mode" : "Click to pin open"}
+              className="bg-[#111111] p-2 rounded-lg text-white cursor-pointer hover:bg-neutral-800 transition-colors shadow-xs flex-shrink-0 flex items-center justify-center w-8 h-8"
             >
-              <circle cx="6" cy="6" r="3" fill="currentColor" />
-              <circle cx="18" cy="8" r="3" fill="currentColor" />
-              <circle cx="12" cy="18" r="3" fill="currentColor" />
-              <path d="M8.5 7.5L15.5 7.5" stroke="white" strokeWidth="2" />
-              <path d="M7.5 8.5L10.5 15.5" stroke="white" strokeWidth="2" />
-              <path d="M16.5 8.5L13.5 15.5" stroke="white" strokeWidth="2" />
-            </svg>
+              <Activity className="w-4 h-4 text-[#f5f1ec]" />
+            </div>
+
+            <motion.div
+              animate={{
+                opacity: open ? 1 : 0,
+                width: open ? "auto" : 0,
+              }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col whitespace-nowrap overflow-hidden"
+            >
+              <div className="flex items-center gap-1.5">
+                <span className="text-[#111111] font-semibold text-sm tracking-tight font-sans">FinGraph</span>
+                <span className="text-[9px] bg-blue-100 text-blue-900 font-bold px-1.5 py-0.5 rounded tracking-wide font-mono">LIVE</span>
+              </div>
+              <span className="text-[10px] text-[#7b7b78] leading-tight">Market Transmission Suite</span>
+            </motion.div>
           </div>
-          <span className="text-xl font-bold tracking-tight text-slate-900 font-sans">
-            FinGraph
-          </span>
+
+          {/* Pin & Hide Controls */}
+          <motion.div
+            animate={{
+              opacity: open ? 1 : 0,
+              width: open ? "auto" : 0,
+            }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="flex items-center gap-1 whitespace-nowrap overflow-hidden flex-shrink-0"
+          >
+            <button
+              onClick={() => {
+                const nextPinned = !isPinned;
+                setIsPinned(nextPinned);
+                if (!nextPinned) setOpen(false);
+              }}
+              title={isPinned ? "Unpin (Auto-expand on hover)" : "Pin Open"}
+              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                isPinned 
+                  ? 'text-[#111111] bg-black/5 hover:bg-black/10' 
+                  : 'text-[#7b7b78] hover:text-[#111111] hover:bg-black/5'
+              }`}
+            >
+              {isPinned ? <Pin className="w-3.5 h-3.5" /> : <PinOff className="w-3.5 h-3.5" />}
+            </button>
+            <button
+              onClick={() => setIsHidden(true)}
+              title="Hide Sidebar completely"
+              className="p-1.5 rounded-md text-[#7b7b78] hover:text-rose-600 hover:bg-black/5 transition-colors cursor-pointer"
+            >
+              <EyeOff className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
         </div>
 
-        {/* Primary Navigation Menu */}
-        <nav className="flex flex-col gap-1 text-[13.5px] font-medium text-slate-600">
-          {/* Overview */}
-          <button
-            onClick={() => onTabChange("overview")}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${
-              activeTab === "overview"
-                ? "bg-blue-50 text-blue-700 font-semibold"
-                : "hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <span>Overview</span>
-          </button>
+        {/* Toggle button when collapsed to rail */}
+        {!open && (
+          <div className="flex flex-col items-center mb-3">
+            <button
+              onClick={() => {
+                setIsPinned(true);
+                setOpen(true);
+              }}
+              title="Pin Sidebar Open"
+              className="p-1.5 rounded-md text-[#7b7b78] hover:text-[#111111] hover:bg-black/5 transition-colors cursor-pointer"
+            >
+              <PanelLeftOpen className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
-          {/* Event Explorer */}
-          <button
-            onClick={() => onTabChange("event_explorer")}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${
-              activeTab === "event_explorer"
-                ? "bg-blue-50 text-blue-700 font-semibold"
-                : "hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span>Event Explorer</span>
-          </button>
-
-          {/* Impact Graph (Active by default) */}
-          <button
-            onClick={() => onTabChange("impact_graph")}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${
-              activeTab === "impact_graph"
-                ? "bg-blue-50 text-blue-600 font-semibold"
-                : "hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <svg className="w-4 h-4 shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-              <circle cx="6" cy="6" r="3" />
-              <circle cx="18" cy="8" r="3" />
-              <circle cx="12" cy="18" r="3" />
-              <path d="M8.5 7.5L15.5 7.5" />
-              <path d="M7.5 8.5L10.5 15.5" />
-              <path d="M16.5 8.5L13.5 15.5" />
-            </svg>
-            <span>Impact Graph</span>
-          </button>
-
-          {/* AI Hub (AI Insights) */}
-          <button
-            onClick={() => onTabChange("ai_hub")}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors ${
-              activeTab === "ai_hub"
-                ? "bg-indigo-50 text-indigo-700 font-semibold"
-                : "hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <svg className="w-4 h-4 shrink-0 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <span>AI Hub</span>
+        {/* Navigation Sections */}
+        <div className="space-y-4">
+          {/* Transmission Engine Section */}
+          <div>
+            <motion.div
+              animate={{
+                opacity: open ? 1 : 0,
+                height: open ? "auto" : 0,
+                marginBottom: open ? 6 : 0,
+              }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="px-2 text-[10px] font-semibold text-[#7b7b78] uppercase tracking-wider overflow-hidden whitespace-nowrap font-mono"
+            >
+              Transmission Engine
+            </motion.div>
+            <div className="space-y-0.5">
+              {transmissionModules.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onTabChange(item.id)}
+                    className={`w-full flex items-center justify-start gap-3 py-2 px-2.5 rounded-lg text-xs relative transition-colors duration-150 cursor-pointer ${
+                      isActive 
+                        ? "bg-[#111111] text-white font-medium shadow-xs" 
+                        : "text-[#626260] hover:text-[#111111] hover:bg-black/5"
+                    }`}
+                  >
+                    <div className="flex-shrink-0 flex items-center justify-center w-5 h-5">
+                      {item.icon}
+                    </div>
+                    <motion.div
+                      animate={{
+                        opacity: open ? 1 : 0,
+                        width: open ? "auto" : 0,
+                      }}
+                      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                      className="flex-1 flex items-center justify-between whitespace-nowrap overflow-hidden"
+                    >
+                      <span className="truncate">{item.label}</span>
+                      {item.badge && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold ml-2 ${
+                          isActive 
+                            ? "bg-white/20 text-white" 
+                            : item.badge === "LIVE" 
+                            ? "bg-blue-100 text-blue-700" 
+                            : item.badge === "INSIGHTS"
+                            ? "bg-indigo-100 text-indigo-700"
+                            : "bg-neutral-200 text-neutral-700"
+                        }`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </motion.div>
+                  </button>
+                );
+              })}
             </div>
-            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 border border-indigo-200">
-              INSIGHTS
-            </span>
-          </button>
+          </div>
 
-          {/* Historical Replay */}
-          <button
-            onClick={() => onTabChange("historical_replay")}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${
-              activeTab === "historical_replay"
-                ? "bg-blue-50 text-blue-700 font-semibold"
-                : "hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>Historical Replay</span>
-          </button>
-
-          {/* Saved Analyses */}
-          <button
-            onClick={() => onTabChange("saved_analyses")}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${
-              activeTab === "saved_analyses"
-                ? "bg-blue-50 text-blue-700 font-semibold"
-                : "hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-            </svg>
-            <span>Saved Analyses</span>
-          </button>
-        </nav>
+          {/* Forensics & Intelligence Section */}
+          <div>
+            <motion.div
+              animate={{
+                opacity: open ? 1 : 0,
+                height: open ? "auto" : 0,
+                marginBottom: open ? 6 : 0,
+              }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="px-2 text-[10px] font-semibold text-[#7b7b78] uppercase tracking-wider overflow-hidden whitespace-nowrap font-mono"
+            >
+              Forensics & History
+            </motion.div>
+            <div className="space-y-0.5">
+              {forensicTools.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onTabChange(item.id)}
+                    className={`w-full flex items-center justify-start gap-3 py-2 px-2.5 rounded-lg text-xs relative transition-colors duration-150 cursor-pointer ${
+                      isActive 
+                        ? "bg-[#111111] text-white font-medium shadow-xs" 
+                        : "text-[#626260] hover:text-[#111111] hover:bg-black/5"
+                    }`}
+                  >
+                    <div className="flex-shrink-0 flex items-center justify-center w-5 h-5">
+                      {item.icon}
+                    </div>
+                    <motion.div
+                      animate={{
+                        opacity: open ? 1 : 0,
+                        width: open ? "auto" : 0,
+                      }}
+                      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                      className="flex-1 flex items-center justify-between whitespace-nowrap overflow-hidden"
+                    >
+                      <span className="truncate">{item.label}</span>
+                      {item.badge && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold ml-2 ${
+                          isActive 
+                            ? "bg-white/20 text-white" 
+                            : "bg-amber-100 text-amber-800"
+                        }`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </motion.div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Bottom Footer Actions */}
-      <div className="flex flex-col gap-1 border-t border-slate-100 pt-3 text-[13px] font-medium text-slate-500">
-        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-slate-100 hover:text-slate-900 transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span>Settings</span>
-        </button>
-        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-slate-100 hover:text-slate-900 transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>Help & Docs</span>
-        </button>
+      {/* Footer Badges & System Telemetry */}
+      <div className="pt-3 border-t border-[#d3cec6]/60 overflow-hidden">
+        <div className="relative min-h-[36px] flex items-center">
+          <motion.div
+            animate={{
+              opacity: open ? 1 : 0,
+              width: open ? "100%" : 0,
+            }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col gap-1 text-[10px] text-[#626260] whitespace-nowrap overflow-hidden"
+          >
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+              <span className="truncate">Autonomous Causal Graph Active</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+              <span className="truncate">Multi-Tier Transmission Sync</span>
+            </div>
+            <div className="flex items-center justify-between text-[#7b7b78] pt-1 border-t border-[#d3cec6]/40 mt-1 font-mono text-[9px]">
+              <span>CFTT-MG</span>
+              <span>v1.2.0 • FinGraph</span>
+            </div>
+          </motion.div>
+
+          {/* Pulse ring dot when collapsed */}
+          <motion.div
+            animate={{
+              opacity: open ? 0 : 1,
+              scale: open ? 0.6 : 1,
+            }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className={`w-full flex justify-center py-1 absolute inset-0 pointer-events-none ${open ? 'hidden' : 'flex'}`}
+            title="Causal Graph Active • FinGraph"
+          >
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100" />
+          </motion.div>
+        </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 };
