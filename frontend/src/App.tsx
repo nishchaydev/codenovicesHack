@@ -8,8 +8,16 @@ import { CompanyDrilldownModal } from "./components/CompanyDrilldownModal";
 import { AddStockModal } from "./components/AddStockModal";
 import { AIHubInsightsView } from "./components/AIHubInsightsView";
 import { SectorHeatmapView } from "./components/SectorHeatmapView";
+import { EngineSettingsView } from "./components/EngineSettingsView";
+import { SavedWatchlistsView } from "./components/SavedWatchlistsView";
+import { AuditReportsView } from "./components/AuditReportsView";
+import { MethodologyDocsView } from "./components/MethodologyDocsView";
+import { MarketOverviewView } from "./components/MarketOverviewView";
+import AuthSectionOne from "@/components/ui/auth-section-1";
+import { RbacLoginModal, PRESET_ROLES } from "./components/RbacLoginModal";
+import { EventRegressionModal } from "./components/EventRegressionModal";
 import { FINGRAPH_SCENARIOS } from "./data/fingraphData";
-import { FinGraphScenario, RadialCardNode, PathwayHop } from "./types";
+import { FinGraphScenario, RadialCardNode, PathwayHop, UserProfile, RegressionCalibration } from "./types";
 import { generateStockScenario } from "./api";
 
 export const App: React.FC = () => {
@@ -21,6 +29,19 @@ export const App: React.FC = () => {
   const [isDrilldownOpen, setIsDrilldownOpen] = useState<boolean>(false);
   const [isAddStockOpen, setIsAddStockOpen] = useState<boolean>(false);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+
+  // RBAS User Authentication & Regression Modals
+  const [currentUser, setCurrentUser] = useState<UserProfile>(PRESET_ROLES[0]);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [isRbacModalOpen, setIsRbacModalOpen] = useState<boolean>(false);
+  const [isRegressionModalOpen, setIsRegressionModalOpen] = useState<boolean>(false);
+  const [extendedNodeIds, setExtendedNodeIds] = useState<string[]>([]);
+
+  const handleToggleExtendNode = (nodeId: string) => {
+    setExtendedNodeIds((prev) =>
+      prev.includes(nodeId) ? prev.filter((id) => id !== nodeId) : [...prev, nodeId]
+    );
+  };
 
   // Handle Event Analysis from Search Bar
   const handleAnalyzeEvent = async (query: string) => {
@@ -254,7 +275,10 @@ export const App: React.FC = () => {
         <TopNav 
           onAnalyze={handleAnalyzeEvent} 
           onOpenAddStock={() => setIsAddStockOpen(true)}
-          isLoading={isAnalyzing} 
+          isLoading={isAnalyzing}
+          userProfile={currentUser}
+          onOpenAuthModal={() => setIsAuthModalOpen(true)}
+          onOpenRbacModal={() => setIsRbacModalOpen(true)}
         />
 
         {/* Content Body Area */}
@@ -279,6 +303,9 @@ export const App: React.FC = () => {
                   scenario={activeScenario}
                   selectedNodeId={selectedNode?.id || null}
                   onSelectNode={handleSelectNode}
+                  onOpenRegressionModal={() => setIsRegressionModalOpen(true)}
+                  extendedNodeIds={extendedNodeIds}
+                  onToggleExtendNode={handleToggleExtendNode}
                 />
               </>
             )}
@@ -467,25 +494,42 @@ export const App: React.FC = () => {
               />
             )}
 
-            {/* Overview / Saved Analyses fallback */}
-            {(activeNavTab === "overview" || activeNavTab === "saved_analyses") && (
-              <div className="p-12 text-center flex flex-col items-center justify-center gap-3 bg-white rounded-3xl border border-slate-200 my-8">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold">
-                  ★
-                </div>
-                <h3 className="text-xl font-bold text-slate-900">
-                  {activeNavTab === "overview" ? "Markets Executive Overview" : "Saved Portfolios & Scenarios"}
-                </h3>
-                <p className="text-sm text-slate-500 max-w-md">
-                  Jump to the interactive transmission diagram to model live macroeconomic and sector shock propagation.
-                </p>
-                <button
-                  onClick={() => setActiveNavTab("impact_graph")}
-                  className="mt-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
-                >
-                  Open Impact Graph
-                </button>
-              </div>
+            {/* AI Engine Settings Tab */}
+            {activeNavTab === "settings" && (
+              <EngineSettingsView />
+            )}
+
+            {/* Audit Reports & System Logs Tab */}
+            {activeNavTab === "audit_reports" && (
+              <AuditReportsView />
+            )}
+
+            {/* Saved Watchlists Tab */}
+            {activeNavTab === "saved_analyses" && (
+              <SavedWatchlistsView
+                onLoadScenario={(scenarioId) => {
+                  const targetScenario = scenarios.find((s) => s.id === scenarioId) || 
+                    (scenarioId === "oil-supply-shock" ? scenarios[0] :
+                     scenarioId === "tsmc-supply-chain" ? scenarios[1] :
+                     scenarioId === "rbi-rate-decision" ? scenarios[2] : scenarios[0]);
+                  if (targetScenario) {
+                    setActiveScenario(targetScenario);
+                  }
+                  setSelectedNode(null);
+                  setSelectedHop(null);
+                  setActiveNavTab("impact_graph");
+                }}
+              />
+            )}
+
+            {/* Methodology & Documentation Tab */}
+            {activeNavTab === "help_docs" && (
+              <MethodologyDocsView />
+            )}
+
+            {/* Market Overview Tab */}
+            {activeNavTab === "overview" && (
+              <MarketOverviewView />
             )}
           </main>
 
@@ -526,6 +570,45 @@ export const App: React.FC = () => {
           setActiveNavTab("impact_graph");
         }}
       />
+
+      {/* 6. Econometric Regression & Causal Hypothesis Gate */}
+      <EventRegressionModal
+        isOpen={isRegressionModalOpen}
+        scenario={activeScenario}
+        onConfirm={(calibration) => {
+          setIsRegressionModalOpen(false);
+          setActiveNavTab("impact_graph");
+        }}
+        onCancel={() => setIsRegressionModalOpen(false)}
+      />
+
+      {/* 7. Institutional Role-Based Access Control Modal (RBAS) */}
+      <RbacLoginModal
+        isOpen={isRbacModalOpen}
+        currentUser={currentUser}
+        onLogin={(profile) => {
+          setCurrentUser(profile);
+          setIsRbacModalOpen(false);
+        }}
+        onClose={() => setIsRbacModalOpen(false)}
+      />
+
+      {/* 8. Full-Fidelity Auth Login Section Screen */}
+      {isAuthModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm">
+          <AuthSectionOne
+            onLogin={(email, name) => {
+              setCurrentUser((prev) => ({
+                ...prev,
+                name: name || prev.name,
+                email: email || prev.email,
+              }));
+              setIsAuthModalOpen(false);
+            }}
+            onClose={() => setIsAuthModalOpen(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

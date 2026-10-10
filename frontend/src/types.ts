@@ -91,7 +91,14 @@ export interface StockHistory {
   data_source: string;
 }
 
-// FinGraph Institutional Radial Schemas
+export interface ReferenceLink {
+  title: string;
+  url: string;
+  publisher: string;
+  date?: string;
+}
+
+// FinGraph / Fin.D Institutional Radial Schemas
 export interface RadialCardNode {
   id: string;
   title: string;
@@ -102,10 +109,49 @@ export interface RadialCardNode {
   badgeType: "red" | "green" | "blue" | "amber";
   category: "commodity" | "economic_variable" | "sector" | "company";
   icon: "oil" | "chart" | "ship" | "currency" | "plane" | "factory" | "chip" | "bank" | "wheat";
-  position: "center" | "top" | "left" | "right" | "bottom-left" | "bottom-right";
+  position: "center" | "top" | "left" | "right" | "bottom-left" | "bottom-right" | "custom";
   timeHorizon?: string;
   lineType?: "positive" | "negative" | "indirect";
   tickers?: string[];
+  // Priority based node importance
+  priority?: "P1 Critical" | "P2 High" | "P3 Moderate";
+  priorityRank?: number;
+  impactScore?: number; // 0 to 100
+  // Causal rationale: WHY event is causing this
+  causalReason?: string;
+  // External reference links & citations
+  refLinks?: ReferenceLink[];
+  // Dynamic 2nd-order node extension
+  isExtended?: boolean;
+  extendedChildren?: RadialCardNode[];
+}
+
+// Role-Based Access Control (RBAS / RBAC)
+export type UserRole = "quant_analyst" | "portfolio_manager" | "risk_officer" | "institutional_trader";
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  roleLabel: string;
+  firm: string;
+  desk: string;
+  permissions: string[];
+}
+
+// Econometric Regression & Causal Hypothesis Calibration
+export interface RegressionCalibration {
+  catalyst: string;
+  shockMagnitude: number; // e.g. 12
+  whyThesis: string; // The explicit "WHY event is causing this"
+  regressionModel: "ols_factor" | "var_impulse" | "bayesian_causal";
+  regressionModelLabel: string;
+  confidenceInterval: number; // e.g. 95
+  rSquared: number; // e.g. 0.84
+  betaFactor: number; // e.g. 1.42
+  tStat: number; // e.g. 3.86
+  pValue: number; // e.g. 0.001
 }
 
 export interface PathwayHop {

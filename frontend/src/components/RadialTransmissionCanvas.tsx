@@ -1,19 +1,56 @@
 import React, { useState } from "react";
-import { FinGraphScenario, RadialCardNode } from "../types";
+import { FinGraphScenario, RadialCardNode, ReferenceLink } from "../types";
+import {
+  PlusCircle,
+  ExternalLink,
+  ShieldAlert,
+  Sliders,
+  CheckCircle2,
+  Sparkles,
+  Link,
+  Layers,
+  ChevronRight,
+  Info,
+  X,
+  Calculator,
+  ArrowUpRight,
+  ArrowDownRight
+} from "lucide-react";
 
 interface RadialTransmissionCanvasProps {
   scenario: FinGraphScenario;
   selectedNodeId: string | null;
   onSelectNode: (node: RadialCardNode) => void;
+  onOpenRegressionModal?: () => void;
+  extendedNodeIds?: string[];
+  onToggleExtendNode?: (nodeId: string) => void;
 }
 
 export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> = ({
   scenario,
   selectedNodeId,
   onSelectNode,
+  onOpenRegressionModal,
+  extendedNodeIds: externalExtendedIds,
+  onToggleExtendNode: externalToggleExtend,
 }) => {
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [localExtendedIds, setLocalExtendedIds] = useState<string[]>([]);
+  const [activeRefNode, setActiveRefNode] = useState<RadialCardNode | null>(null);
+  const [priorityFilter, setPriorityFilter] = useState<"all" | "p1_critical">("all");
+
+  const extendedIds = externalExtendedIds || localExtendedIds;
+
+  const handleToggleExtend = (nodeId: string) => {
+    if (externalToggleExtend) {
+      externalToggleExtend(nodeId);
+    } else {
+      setLocalExtendedIds((prev) =>
+        prev.includes(nodeId) ? prev.filter((id) => id !== nodeId) : [...prev, nodeId]
+      );
+    }
+  };
 
   // Helper to render icon based on category/type
   const renderIcon = (iconName: string, category: string) => {
@@ -71,33 +108,80 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
           </svg>
         );
       default:
-        return (
-          <div className="w-3 h-3 rounded-full bg-blue-500" />
-        );
+        return <div className="w-3 h-3 rounded-full bg-blue-500" />;
     }
   };
 
   const center = scenario.centerNode;
-  const topNode = scenario.radialNodes.find((n) => n.position === "top");
-  const leftNode = scenario.radialNodes.find((n) => n.position === "left");
-  const rightNode = scenario.radialNodes.find((n) => n.position === "right");
-  const bLeftNode = scenario.radialNodes.find((n) => n.position === "bottom-left");
-  const bRightNode = scenario.radialNodes.find((n) => n.position === "bottom-right");
+  const topNode = scenario.radialNodes.find((n) => n.position === "top") || scenario.radialNodes[0];
+  const leftNode = scenario.radialNodes.find((n) => n.position === "left") || scenario.radialNodes[1];
+  const rightNode = scenario.radialNodes.find((n) => n.position === "right") || scenario.radialNodes[2];
+  const bLeftNode = scenario.radialNodes.find((n) => n.position === "bottom-left") || scenario.radialNodes[3];
+  const bRightNode = scenario.radialNodes.find((n) => n.position === "bottom-right") || scenario.radialNodes[4];
+
+  // Helper to test if a node passes priority filter
+  const isNodeDimmed = (node?: RadialCardNode) => {
+    if (!node) return false;
+    if (priorityFilter === "p1_critical") {
+      return node.priority !== "P1 Critical";
+    }
+    return false;
+  };
 
   return (
     <div
-      className={`relative w-full rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-xs flex flex-col transition-all ${
-        isFullscreen ? "fixed inset-4 z-50 shadow-2xl" : "h-[580px]"
+      className={`relative w-full rounded-3xl bg-[#fafafa] border border-slate-200/90 overflow-hidden select-none transition-all duration-300 shadow-2xs ${
+        isFullscreen ? "fixed inset-0 z-50 rounded-none bg-white" : "h-[590px]"
       }`}
     >
-      {/* Dot Grid Background */}
+      {/* Precision Micro-Dot Matrix Background Canvas */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.65]"
+        className="absolute inset-0 pointer-events-none opacity-40"
         style={{
-          backgroundImage: "radial-gradient(#cbd5e1 1.2px, transparent 1.2px)",
-          backgroundSize: "20px 20px",
+          backgroundImage: "radial-gradient(#94a3b8 1.1px, transparent 1.1px)",
+          backgroundSize: "24px 24px",
         }}
       />
+
+      {/* Top Left Toolbar: Priority Filter & Econometric Regression Gate */}
+      <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-2">
+        {/* Priority Filter Toggle */}
+        <div className="flex items-center bg-white/95 backdrop-blur-xs border border-slate-200 rounded-xl p-1 shadow-xs text-xs">
+          <button
+            onClick={() => setPriorityFilter("all")}
+            className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
+              priorityFilter === "all"
+                ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            All Nodes ({scenario.radialNodes.length + 1})
+          </button>
+          <button
+            onClick={() => setPriorityFilter("p1_critical")}
+            className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+              priorityFilter === "p1_critical"
+                ? "bg-red-600 text-white font-semibold shadow-2xs"
+                : "text-red-700 hover:text-red-900"
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+            <span>P1 Critical Priority First</span>
+          </button>
+        </div>
+
+        {/* Calibrate Regression CTA Button */}
+        {onOpenRegressionModal && (
+          <button
+            onClick={onOpenRegressionModal}
+            className="px-3 py-1.5 rounded-xl bg-white/95 hover:bg-white text-slate-800 border border-slate-200 shadow-xs text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-400"
+            title="Formulate Causal Thesis & Run Econometric Regression"
+          >
+            <Calculator className="w-3.5 h-3.5 text-blue-600" />
+            <span>Calibrate Regression</span>
+          </button>
+        )}
+      </div>
 
       {/* Top Right Controls (Zoom & Fullscreen) */}
       <div className="absolute top-4 right-4 z-20 flex items-center gap-1 bg-white/95 backdrop-blur-xs border border-slate-200 rounded-xl p-1 shadow-xs">
@@ -147,13 +231,9 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
         className="relative w-full h-full flex items-center justify-center overflow-hidden transition-transform duration-150"
         style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: "center center" }}
       >
-        {/* SVG Bezier Vector Connectors Layer with standard coordinate space */}
-        <svg
-          viewBox="0 0 1000 600"
-          className="absolute inset-0 w-full h-full pointer-events-none z-0"
-        >
+        {/* SVG Bezier Vector Connectors Layer */}
+        <svg viewBox="0 0 1000 600" className="absolute inset-0 w-full h-full pointer-events-none z-0">
           <defs>
-            {/* Arrowhead Markers */}
             <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
               <path d="M1,1 L7,4 L1,7 Z" fill="#EF4444" />
             </marker>
@@ -163,56 +243,53 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
             <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
               <path d="M1,1 L7,4 L1,7 Z" fill="#3B82F6" />
             </marker>
+            <marker id="arrow-dashed" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M1,1 L5,3 L1,5 Z" fill="#64748B" />
+            </marker>
           </defs>
 
-          {/* Path 1: Center to Top (Inflation) */}
-          <path
-            d="M 500 255 L 500 135"
-            stroke="#EF4444"
-            strokeWidth="2.2"
-            fill="none"
-            markerEnd="url(#arrow-red)"
-          />
+          {/* Primary Transmission Paths */}
+          {/* Path 1: Center to Top */}
+          <path d="M 500 255 L 500 135" stroke="#EF4444" strokeWidth="2.2" fill="none" markerEnd="url(#arrow-red)" />
 
-          {/* Path 2: Center to Left (Import bill) */}
-          <path
-            d="M 405 318 L 290 318"
-            stroke="#EF4444"
-            strokeWidth="2.2"
-            fill="none"
-            markerEnd="url(#arrow-red)"
-          />
+          {/* Path 2: Center to Left */}
+          <path d="M 405 318 L 290 318" stroke="#EF4444" strokeWidth="2.2" fill="none" markerEnd="url(#arrow-red)" />
 
-          {/* Path 3: Center to Right (INR) */}
-          <path
-            d="M 595 318 L 710 318"
-            stroke="#EF4444"
-            strokeWidth="2.2"
-            fill="none"
-            markerEnd="url(#arrow-red)"
-          />
+          {/* Path 3: Center to Right */}
+          <path d="M 595 318 L 710 318" stroke="#EF4444" strokeWidth="2.2" fill="none" markerEnd="url(#arrow-red)" />
 
-          {/* Path 4: Center to Bottom-Left (Airlines) */}
-          <path
-            d="M 440 375 Q 360 415 285 465"
-            stroke="#10B981"
-            strokeWidth="2.2"
-            fill="none"
-            markerEnd="url(#arrow-green)"
-          />
+          {/* Path 4: Center to Bottom-Left */}
+          <path d="M 440 375 Q 360 415 285 465" stroke="#10B981" strokeWidth="2.2" fill="none" markerEnd="url(#arrow-green)" />
 
-          {/* Path 5: Center to Bottom-Right (Paint & Chemicals) */}
-          <path
-            d="M 560 375 Q 640 415 715 465"
-            stroke="#10B981"
-            strokeWidth="2.2"
-            fill="none"
-            markerEnd="url(#arrow-green)"
-          />
+          {/* Path 5: Center to Bottom-Right */}
+          <path d="M 560 375 Q 640 415 715 465" stroke="#10B981" strokeWidth="2.2" fill="none" markerEnd="url(#arrow-green)" />
+
+          {/* Secondary Extended Lines (Dashed) when nodes are extended */}
+          {topNode && extendedIds.includes(topNode.id) && (
+            <>
+              <path d="M 500 80 Q 500 40 430 35" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" fill="none" markerEnd="url(#arrow-dashed)" />
+              <path d="M 500 80 Q 500 40 570 35" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" fill="none" markerEnd="url(#arrow-dashed)" />
+            </>
+          )}
+
+          {bLeftNode && extendedIds.includes(bLeftNode.id) && (
+            <path d="M 230 520 Q 180 540 130 540" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" fill="none" markerEnd="url(#arrow-dashed)" />
+          )}
+
+          {bRightNode && extendedIds.includes(bRightNode.id) && (
+            <path d="M 770 520 Q 820 540 870 540" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" fill="none" markerEnd="url(#arrow-dashed)" />
+          )}
+
+          {leftNode && extendedIds.includes(leftNode.id) && (
+            <path d="M 180 318 L 95 318" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" fill="none" markerEnd="url(#arrow-dashed)" />
+          )}
+
+          {rightNode && extendedIds.includes(rightNode.id) && (
+            <path d="M 820 318 L 905 318" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" fill="none" markerEnd="url(#arrow-dashed)" />
+          )}
         </svg>
 
         {/* Transmission Time Capsules Placed on Connectors */}
-        {/* Top Connector Label */}
         {topNode?.timeHorizon && (
           <div className="absolute left-1/2 -translate-x-1/2 top-[34%] z-10">
             <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs text-[11px] font-medium text-slate-600 whitespace-nowrap">
@@ -221,7 +298,6 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
           </div>
         )}
 
-        {/* Left Connector Label */}
         {leftNode?.timeHorizon && (
           <div className="absolute left-[33%] -translate-x-1/2 top-[55%] z-10">
             <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs text-[11px] font-medium text-slate-600 whitespace-nowrap">
@@ -230,7 +306,6 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
           </div>
         )}
 
-        {/* Right Connector Label */}
         {rightNode?.timeHorizon && (
           <div className="absolute left-[66%] -translate-x-1/2 top-[55%] z-10">
             <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs text-[11px] font-medium text-slate-600 whitespace-nowrap">
@@ -239,7 +314,6 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
           </div>
         )}
 
-        {/* Bottom Left Connector Label */}
         {bLeftNode?.timeHorizon && (
           <div className="absolute left-[37%] top-[69%] -translate-x-1/2 z-10">
             <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs text-[11px] font-medium text-slate-600 whitespace-nowrap">
@@ -248,7 +322,6 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
           </div>
         )}
 
-        {/* Bottom Right Connector Label */}
         {bRightNode?.timeHorizon && (
           <div className="absolute left-[62%] top-[69%] -translate-x-1/2 z-10">
             <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs text-[11px] font-medium text-slate-600 whitespace-nowrap">
@@ -259,15 +332,36 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
 
         {/* ─── NODE CARDS ─── */}
 
-        {/* 1. CENTER ROOT EVENT CARD (Oil Shock) */}
+        {/* 1. CENTER ROOT EVENT CARD */}
         {center && (
           <div
             onClick={() => onSelectNode(center)}
             className="absolute left-1/2 top-[53%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-transform hover:scale-105"
           >
-            <div className="relative p-4 rounded-2xl bg-white border-2 border-red-500 shadow-[0_0_28px_rgba(239,68,68,0.28)] flex flex-col items-center gap-2 min-w-[170px]">
+            <div className="relative p-4 rounded-2xl bg-white border-2 border-red-500 shadow-[0_0_28px_rgba(239,68,68,0.28)] flex flex-col items-center gap-2 min-w-[190px]">
               {/* Pulsing halo ring */}
               <div className="absolute inset-0 rounded-2xl ring-4 ring-red-400/20 pointer-events-none animate-pulse" />
+
+              {/* Priority badge on root */}
+              <div className="flex items-center justify-between w-full">
+                <span className="px-2 py-0.5 rounded-md bg-red-100 text-red-800 font-mono text-[9.5px] font-bold">
+                  P1 CRITICAL • ROOT
+                </span>
+                {center.refLinks && center.refLinks.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveRefNode(center);
+                    }}
+                    className="p-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center gap-0.5"
+                    title="View Reference Links"
+                  >
+                    <ExternalLink className="w-2.5 h-2.5" />
+                    <span>Refs</span>
+                  </button>
+                )}
+              </div>
 
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
@@ -297,9 +391,30 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
             onClick={() => onSelectNode(topNode)}
             className={`absolute left-1/2 top-[13%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-all hover:scale-105 ${
               selectedNodeId === topNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
-            }`}
+            } ${isNodeDimmed(topNode) ? "opacity-35" : "opacity-100"}`}
           >
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-1.5 min-w-[185px]">
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-2 min-w-[200px]">
+              {/* Card Header: Priority & Ref Links */}
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-red-50 text-red-700 border border-red-200">
+                  {topNode.priority || "P1 Critical"}
+                </span>
+
+                {topNode.refLinks && topNode.refLinks.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveRefNode(topNode);
+                    }}
+                    className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-semibold flex items-center gap-1"
+                  >
+                    <ExternalLink className="w-2.5 h-2.5" />
+                    <span>Refs ({topNode.refLinks.length})</span>
+                  </button>
+                )}
+              </div>
+
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
                   {renderIcon(topNode.icon, topNode.category)}
@@ -318,13 +433,56 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
                   </span>
                 </div>
               </div>
-              <div className="flex justify-start">
+
+              {/* Bottom Row: Badge & Extend Node Button */}
+              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
                 <span className="px-2 py-0.5 rounded-full bg-red-50 border border-red-200/80 text-red-600 text-[10.5px] font-semibold">
                   {topNode.badge}
                 </span>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleExtend(topNode.id);
+                  }}
+                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
+                    extendedIds.includes(topNode.id)
+                      ? "bg-blue-600 text-white shadow-xs"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  }`}
+                >
+                  <PlusCircle className="w-3 h-3" />
+                  {extendedIds.includes(topNode.id) ? "Extended" : "+ Extend Node"}
+                </button>
               </div>
             </div>
           </div>
+        )}
+
+        {/* Secondary Extended Sub-Nodes for TOP NODE */}
+        {topNode && extendedIds.includes(topNode.id) && (
+          <>
+            <div className="absolute left-[40%] top-[4%] -translate-x-1/2 -translate-y-1/2 z-20 animate-in fade-in zoom-in-95 duration-200">
+              <div className="p-2.5 rounded-xl bg-white border border-slate-300 shadow-md text-xs min-w-[150px]">
+                <span className="text-[9px] font-mono font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
+                  2ND ORDER HOP
+                </span>
+                <div className="font-bold text-slate-900 mt-1">WPI Fuel & Power</div>
+                <div className="font-extrabold text-red-600">+8.4% Surge</div>
+              </div>
+            </div>
+
+            <div className="absolute left-[60%] top-[4%] -translate-x-1/2 -translate-y-1/2 z-20 animate-in fade-in zoom-in-95 duration-200">
+              <div className="p-2.5 rounded-xl bg-white border border-slate-300 shadow-md text-xs min-w-[150px]">
+                <span className="text-[9px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                  2ND ORDER HOP
+                </span>
+                <div className="font-bold text-slate-900 mt-1">RBI Terminal Rate</div>
+                <div className="font-extrabold text-red-600">+25 bps Deferral</div>
+              </div>
+            </div>
+          </>
         )}
 
         {/* 3. LEFT CARD (Import bill) */}
@@ -333,9 +491,28 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
             onClick={() => onSelectNode(leftNode)}
             className={`absolute left-[18%] top-[53%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-all hover:scale-105 ${
               selectedNodeId === leftNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
-            }`}
+            } ${isNodeDimmed(leftNode) ? "opacity-35" : "opacity-100"}`}
           >
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-1.5 min-w-[185px]">
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-2 min-w-[200px]">
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-red-50 text-red-700 border border-red-200">
+                  {leftNode.priority || "P1 Critical"}
+                </span>
+                {leftNode.refLinks && leftNode.refLinks.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveRefNode(leftNode);
+                    }}
+                    className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-semibold flex items-center gap-1"
+                  >
+                    <ExternalLink className="w-2.5 h-2.5" />
+                    <span>Refs ({leftNode.refLinks.length})</span>
+                  </button>
+                )}
+              </div>
+
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
                   {renderIcon(leftNode.icon, leftNode.category)}
@@ -354,24 +531,73 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
                   </span>
                 </div>
               </div>
-              <div className="flex justify-start">
+
+              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
                 <span className="px-2 py-0.5 rounded-full bg-red-50 border border-red-200/80 text-red-600 text-[10.5px] font-semibold">
                   {leftNode.badge}
                 </span>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleExtend(leftNode.id);
+                  }}
+                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
+                    extendedIds.includes(leftNode.id)
+                      ? "bg-blue-600 text-white shadow-xs"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  }`}
+                >
+                  <PlusCircle className="w-3 h-3" />
+                  {extendedIds.includes(leftNode.id) ? "Extended" : "+ Extend Node"}
+                </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* 4. RIGHT CARD (INR (USD/INR)) */}
+        {/* Secondary Extended Sub-Nodes for LEFT NODE */}
+        {leftNode && extendedIds.includes(leftNode.id) && (
+          <div className="absolute left-[6%] top-[53%] -translate-x-1/2 -translate-y-1/2 z-20 animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-2.5 rounded-xl bg-white border border-slate-300 shadow-md text-xs min-w-[140px]">
+              <span className="text-[9px] font-mono font-bold text-red-700 bg-red-50 px-1.5 py-0.5 rounded">
+                2ND ORDER
+              </span>
+              <div className="font-bold text-slate-900 mt-1">Current Account Deficit</div>
+              <div className="font-extrabold text-red-600">2.1% of GDP</div>
+            </div>
+          </div>
+        )}
+
+        {/* 4. RIGHT CARD (INR USD/INR) */}
         {rightNode && (
           <div
             onClick={() => onSelectNode(rightNode)}
             className={`absolute left-[82%] top-[53%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-all hover:scale-105 ${
               selectedNodeId === rightNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
-            }`}
+            } ${isNodeDimmed(rightNode) ? "opacity-35" : "opacity-100"}`}
           >
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-1.5 min-w-[185px]">
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-2 min-w-[200px]">
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                  {rightNode.priority || "P2 High"}
+                </span>
+                {rightNode.refLinks && rightNode.refLinks.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveRefNode(rightNode);
+                    }}
+                    className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-semibold flex items-center gap-1"
+                  >
+                    <ExternalLink className="w-2.5 h-2.5" />
+                    <span>Refs ({rightNode.refLinks.length})</span>
+                  </button>
+                )}
+              </div>
+
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
                   {renderIcon(rightNode.icon, rightNode.category)}
@@ -390,11 +616,41 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
                   </span>
                 </div>
               </div>
-              <div className="flex justify-start">
+
+              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
                 <span className="px-2 py-0.5 rounded-full bg-red-50 border border-red-200/80 text-red-600 text-[10.5px] font-semibold">
                   {rightNode.badge}
                 </span>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleExtend(rightNode.id);
+                  }}
+                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
+                    extendedIds.includes(rightNode.id)
+                      ? "bg-blue-600 text-white shadow-xs"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  }`}
+                >
+                  <PlusCircle className="w-3 h-3" />
+                  {extendedIds.includes(rightNode.id) ? "Extended" : "+ Extend Node"}
+                </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Secondary Extended Sub-Nodes for RIGHT NODE */}
+        {rightNode && extendedIds.includes(rightNode.id) && (
+          <div className="absolute left-[94%] top-[53%] -translate-x-1/2 -translate-y-1/2 z-20 animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-2.5 rounded-xl bg-white border border-slate-300 shadow-md text-xs min-w-[140px]">
+              <span className="text-[9px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                2ND ORDER
+              </span>
+              <div className="font-bold text-slate-900 mt-1">FII Debt Outflows</div>
+              <div className="font-extrabold text-red-600">-₹3,400 Cr</div>
             </div>
           </div>
         )}
@@ -405,9 +661,28 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
             onClick={() => onSelectNode(bLeftNode)}
             className={`absolute left-[23%] top-[86%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-all hover:scale-105 ${
               selectedNodeId === bLeftNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
-            }`}
+            } ${isNodeDimmed(bLeftNode) ? "opacity-35" : "opacity-100"}`}
           >
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-1.5 min-w-[190px]">
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-2 min-w-[205px]">
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-red-50 text-red-700 border border-red-200">
+                  {bLeftNode.priority || "P1 Critical"}
+                </span>
+                {bLeftNode.refLinks && bLeftNode.refLinks.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveRefNode(bLeftNode);
+                    }}
+                    className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-semibold flex items-center gap-1"
+                  >
+                    <ExternalLink className="w-2.5 h-2.5" />
+                    <span>Refs ({bLeftNode.refLinks.length})</span>
+                  </button>
+                )}
+              </div>
+
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
                   {renderIcon(bLeftNode.icon, bLeftNode.category)}
@@ -426,11 +701,41 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
                   </span>
                 </div>
               </div>
-              <div className="flex justify-start">
+
+              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
                 <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[10.5px] font-semibold">
                   {bLeftNode.badge}
                 </span>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleExtend(bLeftNode.id);
+                  }}
+                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
+                    extendedIds.includes(bLeftNode.id)
+                      ? "bg-blue-600 text-white shadow-xs"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  }`}
+                >
+                  <PlusCircle className="w-3 h-3" />
+                  {extendedIds.includes(bLeftNode.id) ? "Extended" : "+ Extend Node"}
+                </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Secondary Extended Sub-Nodes for BOTTOM-LEFT NODE */}
+        {bLeftNode && extendedIds.includes(bLeftNode.id) && (
+          <div className="absolute left-[10%] top-[93%] -translate-x-1/2 -translate-y-1/2 z-20 animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-2.5 rounded-xl bg-white border border-slate-300 shadow-md text-xs min-w-[145px]">
+              <span className="text-[9px] font-mono font-bold text-red-700 bg-red-50 px-1.5 py-0.5 rounded">
+                2ND ORDER
+              </span>
+              <div className="font-bold text-slate-900 mt-1">Domestic ATF Spot</div>
+              <div className="font-extrabold text-red-600">+₹14,200/kL</div>
             </div>
           </div>
         )}
@@ -441,9 +746,28 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
             onClick={() => onSelectNode(bRightNode)}
             className={`absolute left-[77%] top-[86%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-all hover:scale-105 ${
               selectedNodeId === bRightNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
-            }`}
+            } ${isNodeDimmed(bRightNode) ? "opacity-35" : "opacity-100"}`}
           >
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-1.5 min-w-[200px]">
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-2 min-w-[210px]">
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                  {bRightNode.priority || "P2 High"}
+                </span>
+                {bRightNode.refLinks && bRightNode.refLinks.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveRefNode(bRightNode);
+                    }}
+                    className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-semibold flex items-center gap-1"
+                  >
+                    <ExternalLink className="w-2.5 h-2.5" />
+                    <span>Refs ({bRightNode.refLinks.length})</span>
+                  </button>
+                )}
+              </div>
+
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0">
                   {renderIcon(bRightNode.icon, bRightNode.category)}
@@ -462,51 +786,112 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
                   </span>
                 </div>
               </div>
-              <div className="flex justify-start">
+
+              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
                 <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[10.5px] font-semibold">
                   {bRightNode.badge}
                 </span>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleExtend(bRightNode.id);
+                  }}
+                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
+                    extendedIds.includes(bRightNode.id)
+                      ? "bg-blue-600 text-white shadow-xs"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  }`}
+                >
+                  <PlusCircle className="w-3 h-3" />
+                  {extendedIds.includes(bRightNode.id) ? "Extended" : "+ Extend Node"}
+                </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Secondary Extended Sub-Nodes for BOTTOM-RIGHT NODE */}
+        {bRightNode && extendedIds.includes(bRightNode.id) && (
+          <div className="absolute left-[90%] top-[93%] -translate-x-1/2 -translate-y-1/2 z-20 animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-2.5 rounded-xl bg-white border border-slate-300 shadow-md text-xs min-w-[145px]">
+              <span className="text-[9px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                2ND ORDER
+              </span>
+              <div className="font-bold text-slate-900 mt-1">TiO2 Feedstock</div>
+              <div className="font-extrabold text-red-600">+$240/MT</div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Bottom-Left Canvas Legend */}
-      <div className="absolute bottom-3 left-3 z-20 bg-white/95 backdrop-blur-xs border border-slate-200/90 rounded-xl px-2.5 py-1.5 shadow-xs text-[10.5px] flex flex-col gap-0.5 select-none max-w-[210px]">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-slate-900 shrink-0" />
-            <span className="text-slate-600 font-medium">Commodity (Event)</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-red-500 font-bold leading-none">→</span>
-            <span className="text-slate-600 font-medium">Increases</span>
-          </div>
-        </div>
+      {/* ─── REFERENCE LINKS & CITATION POPOVER MODAL ─── */}
+      {activeRefNode && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2">
+                <Link className="w-4 h-4 text-blue-600" />
+                <h4 className="text-sm font-bold text-slate-900">
+                  Verified Reference Links: {activeRefNode.title}
+                </h4>
+              </div>
+              <button
+                onClick={() => setActiveRefNode(null)}
+                className="p-1 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-            <span className="text-slate-600 font-medium">Economic Variable</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-emerald-500 font-bold leading-none">→</span>
-            <span className="text-slate-600 font-medium">Negative</span>
-          </div>
-        </div>
+            <div className="p-4 flex flex-col gap-3">
+              {/* Causal Thesis Explainer */}
+              {activeRefNode.causalReason && (
+                <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs text-blue-900 leading-relaxed">
+                  <strong>Causal Thesis: </strong>
+                  {activeRefNode.causalReason}
+                </div>
+              )}
 
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
-            <span className="text-slate-600 font-medium">Sector / Stock</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-slate-400 font-bold leading-none">⇢</span>
-            <span className="text-slate-500">Indirect</span>
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                External Citations & Market Disclosures
+              </span>
+
+              <div className="flex flex-col gap-2">
+                {activeRefNode.refLinks?.map((ref, idx) => (
+                  <a
+                    key={idx}
+                    href={ref.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition-all flex items-start justify-between group"
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600 block leading-snug">
+                        {ref.title}
+                      </span>
+                      <span className="text-[10px] text-slate-500 mt-0.5 block font-medium">
+                        Publisher: <strong>{ref.publisher}</strong>
+                      </span>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 shrink-0 ml-2 mt-0.5" />
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-50 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => setActiveRefNode(null)}
+                className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

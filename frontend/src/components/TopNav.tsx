@@ -1,12 +1,23 @@
 import React, { useState } from "react";
+import { UserProfile } from "../types";
 
 interface TopNavProps {
   onAnalyze: (query: string) => void;
   onOpenAddStock?: () => void;
   isLoading?: boolean;
+  onOpenAuthModal?: () => void;
+  onOpenRbacModal?: () => void;
+  userProfile?: UserProfile | null;
 }
 
-export const TopNav: React.FC<TopNavProps> = ({ onAnalyze, onOpenAddStock, isLoading = false }) => {
+export const TopNav: React.FC<TopNavProps> = ({
+  onAnalyze,
+  onOpenAddStock,
+  isLoading = false,
+  onOpenAuthModal,
+  onOpenRbacModal,
+  userProfile,
+}) => {
   const [searchInput, setSearchInput] = useState<string>("");
   const [marketSelector, setMarketSelector] = useState<string>("India • All markets");
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
@@ -115,9 +126,26 @@ export const TopNav: React.FC<TopNavProps> = ({ onAnalyze, onOpenAddStock, isLoa
           )}
         </div>
 
-        {/* User Profile Avatar */}
-        <div className="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-white text-[12px] font-semibold tracking-wider select-none shadow-sm">
-          NG
+        {/* User Profile Avatar & RBAS Clearance Button */}
+        <div className="flex items-center gap-2">
+          {userProfile && (
+            <button
+              onClick={onOpenRbacModal}
+              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-[11px] font-semibold text-slate-700 transition-colors cursor-pointer"
+              title="Click to switch institutional clearance (RBAS)"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="truncate max-w-[120px]">{userProfile.roleLabel.split(" ")[0]}</span>
+            </button>
+          )}
+
+          <button
+            onClick={onOpenAuthModal}
+            className="w-9 h-9 rounded-full bg-slate-900 hover:bg-black flex items-center justify-center text-white text-[12px] font-semibold tracking-wider select-none shadow-sm cursor-pointer transition-transform active:scale-95 border border-slate-700"
+            title="Account & Login Gate"
+          >
+            {userProfile ? userProfile.name.split(" ").map(n => n[0]).join("").slice(0, 2) : "FD"}
+          </button>
         </div>
       </div>
     </header>

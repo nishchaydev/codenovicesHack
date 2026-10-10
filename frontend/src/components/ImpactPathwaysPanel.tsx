@@ -12,7 +12,22 @@ export const ImpactPathwaysPanel: React.FC<ImpactPathwaysPanelProps> = ({
   selectedHop,
   onSelectHop,
 }) => {
-  const [activeTab, setActiveTab] = useState<"pathways" | "evidence">("pathways");
+  const [activeTab, setActiveTab] = useState<"pathways" | "evidence" | "citations">("pathways");
+
+  // Aggregate all reference links from center node and radial nodes
+  const allReferences: Array<{ nodeTitle: string; link: { title: string; url: string; publisher: string; date?: string } }> = [];
+  if (scenario.centerNode?.refLinks) {
+    scenario.centerNode.refLinks.forEach((link) => {
+      allReferences.push({ nodeTitle: scenario.centerNode.title, link });
+    });
+  }
+  scenario.radialNodes?.forEach((node) => {
+    if (node.refLinks) {
+      node.refLinks.forEach((link) => {
+        allReferences.push({ nodeTitle: node.title, link });
+      });
+    }
+  });
 
   return (
     <aside className="w-96 shrink-0 bg-white border-l border-slate-200 h-full flex flex-col p-5 select-none z-10 overflow-y-auto">
@@ -63,8 +78,8 @@ export const ImpactPathwaysPanel: React.FC<ImpactPathwaysPanelProps> = ({
         </span>
       </div>
 
-      {/* Sub-Tabs: Pathways (Count) vs Evidence (Count) */}
-      <div className="flex items-center gap-6 border-b border-slate-200 mb-4 text-[13.5px] font-semibold">
+      {/* Sub-Tabs: Pathways vs Evidence vs Citations */}
+      <div className="flex items-center gap-4 border-b border-slate-200 mb-4 text-[13px] font-semibold">
         <button
           onClick={() => setActiveTab("pathways")}
           className={`pb-2 transition-colors relative ${
@@ -89,6 +104,20 @@ export const ImpactPathwaysPanel: React.FC<ImpactPathwaysPanelProps> = ({
         >
           <span>Evidence ({scenario.evidenceSources.length})</span>
           {activeTab === "evidence" && (
+            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab("citations")}
+          className={`pb-2 transition-colors relative flex items-center gap-1 ${
+            activeTab === "citations"
+              ? "text-blue-600"
+              : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          <span>Citations ({allReferences.length})</span>
+          {activeTab === "citations" && (
             <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />
           )}
         </button>
@@ -210,6 +239,60 @@ export const ImpactPathwaysPanel: React.FC<ImpactPathwaysPanelProps> = ({
                 <span className="text-blue-600 font-semibold font-mono">
                   Relevance: {Math.round(ev.relevanceScore > 1 ? ev.relevanceScore : ev.relevanceScore * 100)}%
                 </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Tab Content: Verified Citations & Regulatory References */}
+      {activeTab === "citations" && (
+        <div className="flex flex-col gap-3">
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
+            <span className="font-semibold text-slate-800">Verified Literature:</span> Official regulatory bulletins, exchange filings, and central bank econometric elasticity studies underpinning this scenario.
+          </div>
+          {allReferences.map((ref, idx) => (
+            <div
+              key={`${ref.link.title}-${idx}`}
+              className="p-3.5 rounded-2xl border border-slate-200/90 bg-white shadow-2xs flex flex-col gap-2 hover:border-blue-400 hover:shadow-xs transition-all"
+            >
+              <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium">
+                <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-semibold text-[10px]">
+                  {ref.link.publisher}
+                </span>
+                <span className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-medium">
+                  Node: {ref.nodeTitle}
+                </span>
+              </div>
+
+              <h4 className="text-[12.5px] font-bold text-slate-900 leading-snug">
+                {ref.link.url ? (
+                  <a
+                    href={ref.link.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-blue-600 hover:underline inline-flex items-center gap-1.5 group"
+                  >
+                    <span>{ref.link.title}</span>
+                    <span className="text-[11px] text-blue-500 group-hover:translate-x-0.5 transition-transform">↗</span>
+                  </a>
+                ) : (
+                  ref.link.title
+                )}
+              </h4>
+
+              <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
+                <span className="text-slate-400 font-mono truncate max-w-[200px]">
+                  {ref.link.url ? ref.link.url.replace(/^https?:\/\//, "").split("/")[0] : "Verified Citation"}
+                </span>
+                <a
+                  href={ref.link.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 font-semibold text-[11px] hover:underline"
+                >
+                  Open Filing →
+                </a>
               </div>
             </div>
           ))}
