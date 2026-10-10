@@ -1,6 +1,6 @@
 import React from "react";
 
-export type NavTab = "overview" | "event_explorer" | "impact_graph" | "historical_replay" | "saved_analyses";
+export type NavTab = "overview" | "event_explorer" | "impact_graph" | "ai_hub" | "historical_replay" | "saved_analyses";
 
 interface SidebarProps {
   activeTab: NavTab;
@@ -26,7 +26,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
               strokeLinejoin="round"
             >
               <circle cx="6" cy="6" r="3" fill="currentColor" />
-              <circle cx="18" cy="6" r="3" fill="currentColor" />
+              <circle cx="18" cy="8" r="3" fill="currentColor" />
               <circle cx="12" cy="18" r="3" fill="currentColor" />
               <path d="M8.5 7.5L15.5 7.5" stroke="white" strokeWidth="2" />
               <path d="M7.5 8.5L10.5 15.5" stroke="white" strokeWidth="2" />
@@ -88,6 +88,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
               <path d="M16.5 8.5L13.5 15.5" />
             </svg>
             <span>Impact Graph</span>
+          </button>
+
+          {/* AI Hub (AI Insights) */}
+          <button
+            onClick={() => onTabChange("ai_hub")}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors ${
+              activeTab === "ai_hub"
+                ? "bg-indigo-50 text-indigo-700 font-semibold"
+                : "hover:bg-slate-100 hover:text-slate-900"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <svg className="w-4 h-4 shrink-0 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>AI Hub</span>
+            </div>
+            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 border border-indigo-200">
+              INSIGHTS
+            </span>
           </button>
 
           {/* Historical Replay */}

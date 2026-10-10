@@ -6,6 +6,7 @@ import { RadialTransmissionCanvas } from "./components/RadialTransmissionCanvas"
 import { ImpactPathwaysPanel } from "./components/ImpactPathwaysPanel";
 import { CompanyDrilldownModal } from "./components/CompanyDrilldownModal";
 import { AddStockModal } from "./components/AddStockModal";
+import { AIHubInsightsView } from "./components/AIHubInsightsView";
 import { FINGRAPH_SCENARIOS } from "./data/fingraphData";
 import { FinGraphScenario, RadialCardNode, PathwayHop } from "./types";
 import { generateStockScenario } from "./api";
@@ -391,6 +392,21 @@ export const App: React.FC = () => {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* AI Hub (AI Insights) Tab */}
+            {activeNavTab === "ai_hub" && (
+              <AIHubInsightsView
+                scenarios={scenarios}
+                onSelectScenario={(sc) => {
+                  setActiveScenario(sc);
+                  setSelectedNode(null);
+                  setSelectedHop(null);
+                }}
+                onNavigateToGraph={() => {
+                  setActiveNavTab("impact_graph");
+                }}
+              />
             )}
 
             {/* Event Explorer Tab */}
