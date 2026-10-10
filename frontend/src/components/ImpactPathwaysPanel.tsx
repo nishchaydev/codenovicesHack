@@ -189,7 +189,14 @@ export const ImpactPathwaysPanel: React.FC<ImpactPathwaysPanelProps> = ({
               </div>
 
               <h4 className="text-[12.5px] font-bold text-slate-900 leading-snug">
-                {ev.title}
+                {ev.url && ev.url !== "#" ? (
+                  <a href={ev.url} target="_blank" rel="noreferrer" className="hover:text-blue-600 hover:underline inline-flex items-center gap-1">
+                    <span>{ev.title}</span>
+                    <span className="text-[10px] text-slate-400">↗</span>
+                  </a>
+                ) : (
+                  ev.title
+                )}
               </h4>
 
               <p className="text-[11.5px] text-slate-600 leading-relaxed">
@@ -200,8 +207,8 @@ export const ImpactPathwaysPanel: React.FC<ImpactPathwaysPanelProps> = ({
                 <span className="text-slate-500 font-medium">
                   Source: <strong className="text-slate-700">{ev.source}</strong>
                 </span>
-                <span className="text-blue-600 font-semibold">
-                  Relevance: {ev.relevanceScore}%
+                <span className="text-blue-600 font-semibold font-mono">
+                  Relevance: {Math.round(ev.relevanceScore > 1 ? ev.relevanceScore : ev.relevanceScore * 100)}%
                 </span>
               </div>
             </div>

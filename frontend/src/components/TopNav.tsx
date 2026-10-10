@@ -2,10 +2,11 @@ import React, { useState } from "react";
 
 interface TopNavProps {
   onAnalyze: (query: string) => void;
+  onOpenAddStock?: () => void;
   isLoading?: boolean;
 }
 
-export const TopNav: React.FC<TopNavProps> = ({ onAnalyze, isLoading = false }) => {
+export const TopNav: React.FC<TopNavProps> = ({ onAnalyze, onOpenAddStock, isLoading = false }) => {
   const [searchInput, setSearchInput] = useState<string>("");
   const [marketSelector, setMarketSelector] = useState<string>("India • All markets");
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
@@ -20,39 +21,53 @@ export const TopNav: React.FC<TopNavProps> = ({ onAnalyze, isLoading = false }) 
   return (
     <header className="h-16 w-full border-b border-slate-200 bg-white px-6 flex items-center justify-between gap-4 sticky top-0 z-20">
       {/* Search & Event Prompt Input */}
-      <form onSubmit={handleSubmit} className="flex-1 max-w-3xl flex items-center">
-        <div className="relative w-full flex items-center">
-          {/* Magnifier Icon */}
-          <div className="absolute left-3.5 pointer-events-none text-slate-400">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+      <div className="flex-1 max-w-3xl flex items-center gap-3">
+        <form onSubmit={handleSubmit} className="flex-1 flex items-center">
+          <div className="relative w-full flex items-center">
+            {/* Magnifier Icon */}
+            <div className="absolute left-3.5 pointer-events-none text-slate-400">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder='Enter a news event, e.g. "Tata Motors margin cut" or "Crude oil rises 12%"...'
+              className="w-full h-10 pl-10 pr-36 rounded-xl border border-slate-200 bg-slate-50/50 text-[13px] text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            />
+
+            {/* Analyze event Button Inside Input */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="absolute right-1.5 h-7.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-[12.5px] font-semibold flex items-center gap-1.5 shadow-sm shadow-blue-500/20 transition-all cursor-pointer disabled:opacity-60"
+            >
+              {isLoading ? (
+                <span className="animate-spin inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full" />
+              ) : null}
+              <span>Analyze event</span>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
           </div>
+        </form>
 
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder='Enter a news event, e.g. "Crude oil rises 12%" or paste a news article...'
-            className="w-full h-11 pl-10 pr-36 rounded-xl border border-slate-200 bg-slate-50/50 text-[13.5px] text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-          />
-
-          {/* Analyze event Button Inside Input */}
+        {/* Add Stock / News Action Button */}
+        {onOpenAddStock && (
           <button
-            type="submit"
-            disabled={isLoading}
-            className="absolute right-1.5 h-8 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-[13px] font-semibold flex items-center gap-1.5 shadow-sm shadow-blue-500/20 transition-all cursor-pointer disabled:opacity-60"
+            type="button"
+            onClick={onOpenAddStock}
+            className="h-10 px-3.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-[12.5px] font-semibold flex items-center gap-1.5 transition shadow-2xs whitespace-nowrap cursor-pointer active:scale-[0.98]"
           >
-            {isLoading ? (
-              <span className="animate-spin inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full" />
-            ) : null}
-            <span>Analyze event</span>
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
+            <span className="text-sm font-bold text-blue-600 leading-none">+</span>
+            <span>Add Stock / News</span>
           </button>
-        </div>
-      </form>
+        )}
+      </div>
 
       {/* Right Controls: Market Selector & User Avatar */}
       <div className="flex items-center gap-3">

@@ -40,3 +40,25 @@ export async function fetchStockHistory(ticker: string): Promise<StockHistory> {
   if (!res.ok) throw new Error(`Failed to fetch history for ${ticker}`);
   return res.json();
 }
+
+export async function searchStocks(query: string) {
+  const res = await fetch(`${API_BASE}/api/stocks/search?q=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error("Failed to search stocks");
+  return res.json();
+}
+
+export async function fetchStockProfile(ticker: string) {
+  const res = await fetch(`${API_BASE}/api/stocks/${encodeURIComponent(ticker)}/profile`);
+  if (!res.ok) throw new Error(`Failed to fetch profile for ${ticker}`);
+  return res.json();
+}
+
+export async function generateStockScenario(ticker: string, headline?: string) {
+  const res = await fetch(`${API_BASE}/api/stocks/scenario`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ticker, headline }),
+  });
+  if (!res.ok) throw new Error("Failed to generate stock scenario");
+  return res.json();
+}

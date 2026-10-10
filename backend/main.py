@@ -177,6 +177,29 @@ async def analyze_raw_text(payload: Dict[str, str]):
         raise HTTPException(status_code=400, detail="Missing text field")
     return await extract_event_with_llm(text)
 
+@app.get("/api/stocks/search")
+def search_stocks_endpoint(q: str = ""):
+    """Returns matching NSE/BSE and global equities with sector metadata."""
+    from data.stock_intelligence import search_equities
+    return search_equities(q)
+
+@app.get("/api/stocks/{ticker}/profile")
+def get_stock_profile_endpoint(ticker: str):
+    """Returns company fundamentals, supply chain graph mapping, and real breaking news."""
+    from data.stock_intelligence import get_stock_profile
+    return get_stock_profile(ticker)
+
+@app.post("/api/stocks/scenario")
+def generate_stock_scenario_endpoint(payload: Dict[str, Any]):
+    """
+    Transforms any stock and optional breaking news headline into a complete
+    institutional FinGraph radial scenario.
+    """
+    from data.stock_intelligence import generate_radial_scenario_for_stock
+    ticker = payload.get("ticker", "TATAMOTORS.NS")
+    headline = payload.get("headline")
+    return generate_radial_scenario_for_stock(ticker, headline)
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -152,3 +152,75 @@ export interface FinGraphScenario {
   pathways: PathwayHop[];
   evidenceSources: EvidenceSource[];
 }
+
+export interface StockSearchResult {
+  ticker: string;
+  symbol: string;
+  name: string;
+  sector: string;
+  industry: string;
+  exchange: string;
+  country: string;
+  currency: string;
+  market_cap: string;
+}
+
+export interface StockNewsItem {
+  id: string;
+  title: string;
+  source: string;
+  date: string;
+  link: string;
+  summary: string;
+  sentiment: "Bullish" | "Bearish" | "Neutral";
+}
+
+export interface StockSupplyChain {
+  sector_index: string;
+  upstream_inputs: Array<{
+    title: string;
+    metric: string;
+    metricColor: "red" | "green" | "blue";
+    category: string;
+    badge: string;
+    badgeType: "red" | "green" | "blue" | "amber";
+    icon: string;
+    horizon: string;
+  }>;
+  downstream_impacts: Array<{
+    title: string;
+    metric: string;
+    metricColor: "red" | "green" | "blue";
+    category: string;
+    badge: string;
+    badgeType: "red" | "green" | "blue" | "amber";
+    icon: string;
+    horizon: string;
+  }>;
+  competitors: Array<{
+    title: string;
+    metric: string;
+    metricColor: "red" | "green" | "blue";
+    category: string;
+    badge: string;
+    badgeType: "red" | "green" | "blue" | "amber";
+    icon: string;
+    horizon: string;
+    ticker?: string;
+  }>;
+}
+
+export interface StockProfileData {
+  ticker: string;
+  symbol: string;
+  name: string;
+  sector: string;
+  industry: string;
+  exchange: string;
+  currency: string;
+  current_price: number;
+  change_pct: number;
+  market_cap: string;
+  supply_chain: StockSupplyChain;
+  news: StockNewsItem[];
+}

@@ -5,24 +5,59 @@ import { ScenarioHeader } from "./components/ScenarioHeader";
 import { RadialTransmissionCanvas } from "./components/RadialTransmissionCanvas";
 import { ImpactPathwaysPanel } from "./components/ImpactPathwaysPanel";
 import { CompanyDrilldownModal } from "./components/CompanyDrilldownModal";
+import { AddStockModal } from "./components/AddStockModal";
 import { FINGRAPH_SCENARIOS } from "./data/fingraphData";
 import { FinGraphScenario, RadialCardNode, PathwayHop } from "./types";
+import { generateStockScenario } from "./api";
 
 export const App: React.FC = () => {
   const [activeNavTab, setActiveNavTab] = useState<NavTab>("impact_graph");
-  const [scenarios] = useState<FinGraphScenario[]>(FINGRAPH_SCENARIOS);
+  const [scenarios, setScenarios] = useState<FinGraphScenario[]>(FINGRAPH_SCENARIOS);
   const [activeScenario, setActiveScenario] = useState<FinGraphScenario>(FINGRAPH_SCENARIOS[0]);
   const [selectedNode, setSelectedNode] = useState<RadialCardNode | null>(null);
   const [selectedHop, setSelectedHop] = useState<PathwayHop | null>(null);
   const [isDrilldownOpen, setIsDrilldownOpen] = useState<boolean>(false);
+  const [isAddStockOpen, setIsAddStockOpen] = useState<boolean>(false);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
 
   // Handle Event Analysis from Search Bar
-  const handleAnalyzeEvent = (query: string) => {
+  const handleAnalyzeEvent = async (query: string) => {
     setIsAnalyzing(true);
-
-    // Check if query matches any known scenario keywords
     const lower = query.toLowerCase();
+
+    // 1. Check if query matches a known company or ticker
+    const isTickerOrCompany = 
+      lower.includes("tata") || lower.includes("reliance") || lower.includes("hdfc") || 
+      lower.includes("asian") || lower.includes("paint") || lower.includes("maruti") ||
+      lower.includes("tcs") || lower.includes("infy") || lower.includes(".ns") ||
+      lower.includes("icici") || lower.includes("airtel") || lower.includes("nvda") ||
+      lower.includes("apple") || lower.includes("stock");
+
+    if (isTickerOrCompany) {
+      try {
+        const stockTicker = lower.includes("tata") ? "TATAMOTORS.NS" :
+                            lower.includes("reliance") ? "RELIANCE.NS" :
+                            lower.includes("hdfc") ? "HDFCBANK.NS" :
+                            lower.includes("paint") || lower.includes("asian") ? "ASIANPAINT.NS" :
+                            lower.includes("tcs") ? "TCS.NS" :
+                            lower.includes("maruti") ? "MARUTI.NS" :
+                            lower.includes("infy") ? "INFY.NS" :
+                            query.trim().toUpperCase();
+
+        const generated = await generateStockScenario(stockTicker, query);
+        setScenarios((prev) => [generated, ...prev]);
+        setActiveScenario(generated);
+        setSelectedNode(null);
+        setSelectedHop(null);
+        setActiveNavTab("impact_graph");
+        setIsAnalyzing(false);
+        return;
+      } catch (err) {
+        console.warn("Backend stock scenario fallback to preloaded:", err);
+      }
+    }
+
+    // Check if query matches any known preloaded scenario keywords
     setTimeout(() => {
       let matched = scenarios.find(
         (s) =>
@@ -214,7 +249,11 @@ export const App: React.FC = () => {
       {/* 2. Main Workspace Layout */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         {/* Top Search Bar */}
-        <TopNav onAnalyze={handleAnalyzeEvent} isLoading={isAnalyzing} />
+        <TopNav 
+          onAnalyze={handleAnalyzeEvent} 
+          onOpenAddStock={() => setIsAddStockOpen(true)}
+          isLoading={isAnalyzing} 
+        />
 
         {/* Content Body Area */}
         <div className="flex-1 flex min-h-0 overflow-hidden">
@@ -444,6 +483,19 @@ export const App: React.FC = () => {
           onClose={() => setIsDrilldownOpen(false)}
         />
       )}
+
+      {/* 5. Add Stock & Transmission Profiler Modal */}
+      <AddStockModal
+        isOpen={isAddStockOpen}
+        onClose={() => setIsAddStockOpen(false)}
+        onApplyScenario={(newSc) => {
+          setScenarios((prev) => [newSc, ...prev]);
+          setActiveScenario(newSc);
+          setSelectedNode(null);
+          setSelectedHop(null);
+          setActiveNavTab("impact_graph");
+        }}
+      />
     </div>
   );
 };
