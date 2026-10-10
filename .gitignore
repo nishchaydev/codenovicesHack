@@ -38,3 +38,9 @@ npm-debug.log*
 # Testing
 coverage/
 .pytest_cache/
+.playwright-mcp/
+.reference/
+.claude/
+.codeartsdoer/
+skills-lock.json
+data/

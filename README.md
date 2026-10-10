@@ -10,10 +10,9 @@
 | Phase | Status | What We're Doing |
 |-------|:------:|-----------------|
 | ✅ **Research** | COMPLETE | Deep research across 6 dimensions — NLP, graphs, finance, architecture, competition, data |
-| ✅ **Documentation** | COMPLETE | Architecture, API spec, graph schema, dev guide — all written |
-| 🔄 **Planning** | IN PROGRESS | Implementation plan created, task assignments being finalized |
-| ⬜ **Implementation** | NEXT | Backend (FastAPI), Frontend (Next.js), Graph engine (NetworkX) |
-| ⬜ **Demo Prep** | LATER | Pre-computed scenarios, pitch deck, demo script |
+| ✅ **Documentation** | COMPLETE | Architecture, API spec, graph schema, dev guide, financial data bible |
+| ✅ **MVP Implementation** | COMPLETE | FastAPI backend (port 8000) + interactive 60 FPS Canvas frontend (port 3000) running! |
+| 🔄 **Demo & Pitch** | IN PROGRESS | Verified OPEC Crude Oil 12% cascade, semiconductor shock, and What-If simulator |
 
 ---
 
