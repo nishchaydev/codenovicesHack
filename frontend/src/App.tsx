@@ -7,6 +7,7 @@ import { ImpactPathwaysPanel } from "./components/ImpactPathwaysPanel";
 import { CompanyDrilldownModal } from "./components/CompanyDrilldownModal";
 import { AddStockModal } from "./components/AddStockModal";
 import { AIHubInsightsView } from "./components/AIHubInsightsView";
+import { SectorHeatmapView } from "./components/SectorHeatmapView";
 import { FINGRAPH_SCENARIOS } from "./data/fingraphData";
 import { FinGraphScenario, RadialCardNode, PathwayHop } from "./types";
 import { generateStockScenario } from "./api";
@@ -451,6 +452,19 @@ export const App: React.FC = () => {
                   ))}
                 </div>
               </div>
+            )}
+
+            {/* Contagion Matrix / Sector Heatmap Tab */}
+            {activeNavTab === "contagion_matrix" && (
+              <SectorHeatmapView
+                onSimulateSectorShock={(sectorName) => {
+                  handleAnalyzeEvent(`${sectorName} supply shock`);
+                  setActiveNavTab("impact_graph");
+                }}
+                onNavigateToGraph={() => {
+                  setActiveNavTab("impact_graph");
+                }}
+              />
             )}
 
             {/* Overview / Saved Analyses fallback */}

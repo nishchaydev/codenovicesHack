@@ -97,8 +97,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpen
     },
     { 
       id: "contagion_matrix", 
-      label: "Contagion Matrix", 
-      icon: <Grid className="w-4 h-4 flex-shrink-0 text-indigo-600" />, 
+      label: "Sector Heatmap", 
+      icon: <Grid className="w-4 h-4 flex-shrink-0 text-emerald-600" />, 
       badge: "HEATMAP" 
     },
     { 
