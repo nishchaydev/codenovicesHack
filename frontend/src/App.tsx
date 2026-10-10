@@ -80,7 +80,7 @@ export const App: React.FC = () => {
             dropdownLabel: query,
             narrative: `Autonomous event propagation model synthesized for: "${query}". Input shocks traced through supply chains, inflation indices, and market valuations.`,
             date: "Live Analysis",
-            source: "FinGraph AI Ingestion",
+            source: "Fin.D AI Ingestion",
             entitiesCount: 14,
             pathwaysCount: 6,
             evidenceCount: 3,

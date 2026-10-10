@@ -3,8 +3,11 @@ import {
   Network, 
   Sparkles, 
   Search, 
+  Building2,
   LayoutDashboard, 
   History, 
+  Grid,
+  FileText,
   Bookmark, 
   Pin, 
   PinOff, 
@@ -13,15 +16,28 @@ import {
   ShieldCheck, 
   Activity,
   Settings,
-  HelpCircle
+  HelpCircle,
+  FileSpreadsheet
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
-export type NavTab = "overview" | "event_explorer" | "impact_graph" | "ai_hub" | "historical_replay" | "saved_analyses";
+export type NavTab = 
+  | "impact_graph" 
+  | "ai_hub" 
+  | "event_explorer" 
+  | "asset_profiler" 
+  | "overview" 
+  | "historical_replay" 
+  | "contagion_matrix" 
+  | "audit_reports" 
+  | "saved_analyses" 
+  | "settings" 
+  | "help_docs";
 
 interface SidebarProps {
   activeTab: NavTab;
   onTabChange: (tab: NavTab) => void;
+  onOpenAddStock?: () => void;
 }
 
 interface NavItem {
@@ -32,11 +48,12 @@ interface NavItem {
   badgeColor?: string;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpenAddStock }) => {
   const [open, setOpen] = useState(true);
   const [isPinned, setIsPinned] = useState(true);
   const [isHidden, setIsHidden] = useState(false);
 
+  // Core Transmission Modules
   const transmissionModules: NavItem[] = [
     { 
       id: "impact_graph", 
@@ -53,16 +70,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     { 
       id: "event_explorer", 
       label: "Event Explorer", 
-      icon: <Search className="w-4 h-4 flex-shrink-0 text-[#626260]" />, 
+      icon: <Search className="w-4 h-4 flex-shrink-0 text-amber-500" />, 
       badge: "SHOCK" 
+    },
+    { 
+      id: "asset_profiler", 
+      label: "Asset Profiler", 
+      icon: <Building2 className="w-4 h-4 flex-shrink-0 text-emerald-500" />, 
+      badge: "STOCKS" 
     },
   ];
 
+  // Forensics, Analytics & Historical Verification
   const forensicTools: NavItem[] = [
     { 
       id: "overview", 
-      label: "Overview", 
-      icon: <LayoutDashboard className="w-4 h-4 flex-shrink-0 text-[#626260]" /> 
+      label: "Market Overview", 
+      icon: <LayoutDashboard className="w-4 h-4 flex-shrink-0 text-[#626260]" />,
+      badge: "INDEX"
     },
     { 
       id: "historical_replay", 
@@ -71,9 +96,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
       badge: "CRISIS" 
     },
     { 
+      id: "contagion_matrix", 
+      label: "Contagion Matrix", 
+      icon: <Grid className="w-4 h-4 flex-shrink-0 text-indigo-600" />, 
+      badge: "HEATMAP" 
+    },
+    { 
+      id: "audit_reports", 
+      label: "Audit Reports", 
+      icon: <FileText className="w-4 h-4 flex-shrink-0 text-[#626260]" />, 
+      badge: "LOGS" 
+    },
+    { 
       id: "saved_analyses", 
-      label: "Saved Analyses", 
+      label: "Saved Watchlists", 
       icon: <Bookmark className="w-4 h-4 flex-shrink-0 text-[#626260]" /> 
+    },
+  ];
+
+  // System & Methodology Settings
+  const systemSettings: NavItem[] = [
+    { 
+      id: "settings", 
+      label: "Engine Settings", 
+      icon: <Settings className="w-4 h-4 flex-shrink-0 text-[#626260]" /> 
+    },
+    { 
+      id: "help_docs", 
+      label: "Methodology & Docs", 
+      icon: <HelpCircle className="w-4 h-4 flex-shrink-0 text-[#626260]" /> 
     },
   ];
 
@@ -103,7 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
         <div className="bg-[#111111] p-1.5 rounded-lg text-white">
           <Activity className="w-3.5 h-3.5" />
         </div>
-        <span className="text-xs font-semibold tracking-tight">FinGraph</span>
+        <span className="text-xs font-semibold tracking-tight">Fin.D</span>
         <PanelLeftOpen className="w-3.5 h-3.5 text-blue-600 ml-0.5" />
       </button>
     );
@@ -111,7 +162,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
 
   return (
     <motion.aside
-      className="h-screen sticky top-0 px-3 py-4 hidden md:flex md:flex-col justify-between bg-white/85 backdrop-blur-md border-r border-[#d3cec6] flex-shrink-0 z-30 shadow-xs overflow-x-hidden select-none"
+      className="h-screen sticky top-0 px-3 py-4 hidden md:flex md:flex-col justify-between bg-white/90 backdrop-blur-md border-r border-[#d3cec6] flex-shrink-0 z-30 shadow-xs overflow-x-hidden select-none"
       animate={{
         width: open ? "260px" : "68px",
       }}
@@ -122,9 +173,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+      <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden space-y-4 pr-0.5">
         {/* Header Brand */}
-        <div className="flex items-center justify-between pb-3.5 border-b border-[#d3cec6]/60 mb-3.5 min-h-[44px]">
+        <div className="flex items-center justify-between pb-3.5 border-b border-[#d3cec6]/60 mb-1 min-h-[44px]">
           <div className="flex items-center gap-2.5 min-w-0">
             {/* Interactive Logo Mark */}
             <div
@@ -152,7 +203,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
               className="flex flex-col whitespace-nowrap overflow-hidden"
             >
               <div className="flex items-center gap-1.5">
-                <span className="text-[#111111] font-semibold text-sm tracking-tight font-sans">FinGraph</span>
+                <span className="text-[#111111] font-semibold text-sm tracking-tight font-sans">Fin.D</span>
                 <span className="text-[9px] bg-blue-100 text-blue-900 font-bold px-1.5 py-0.5 rounded tracking-wide font-mono">LIVE</span>
               </div>
               <span className="text-[10px] text-[#7b7b78] leading-tight">Market Transmission Suite</span>
@@ -195,7 +246,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
 
         {/* Toggle button when collapsed to rail */}
         {!open && (
-          <div className="flex flex-col items-center mb-3">
+          <div className="flex flex-col items-center mb-1">
             <button
               onClick={() => {
                 setIsPinned(true);
@@ -211,7 +262,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
 
         {/* Navigation Sections */}
         <div className="space-y-4">
-          {/* Transmission Engine Section */}
+          {/* Section 1: Transmission Engine */}
           <div>
             <motion.div
               animate={{
@@ -230,7 +281,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => onTabChange(item.id)}
+                    onClick={() => {
+                      if (item.id === "asset_profiler" && onOpenAddStock) {
+                        onOpenAddStock();
+                      } else {
+                        onTabChange(item.id);
+                      }
+                    }}
                     className={`w-full flex items-center justify-start gap-3 py-2 px-2.5 rounded-lg text-xs relative transition-colors duration-150 cursor-pointer ${
                       isActive 
                         ? "bg-[#111111] text-white font-medium shadow-xs" 
@@ -257,6 +314,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                             ? "bg-blue-100 text-blue-700" 
                             : item.badge === "INSIGHTS"
                             ? "bg-indigo-100 text-indigo-700"
+                            : item.badge === "STOCKS"
+                            ? "bg-emerald-100 text-emerald-700"
                             : "bg-neutral-200 text-neutral-700"
                         }`}>
                           {item.badge}
@@ -269,7 +328,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
             </div>
           </div>
 
-          {/* Forensics & Intelligence Section */}
+          {/* Section 2: Forensics & Intelligence */}
           <div>
             <motion.div
               animate={{
@@ -280,7 +339,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="px-2 text-[10px] font-semibold text-[#7b7b78] uppercase tracking-wider overflow-hidden whitespace-nowrap font-mono"
             >
-              Forensics & History
+              Forensics & Analytics
             </motion.div>
             <div className="space-y-0.5">
               {forensicTools.map((item) => {
@@ -311,11 +370,60 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                         <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold ml-2 ${
                           isActive 
                             ? "bg-white/20 text-white" 
-                            : "bg-amber-100 text-amber-800"
+                            : item.badge === "CRISIS"
+                            ? "bg-rose-100 text-rose-800"
+                            : item.badge === "HEATMAP"
+                            ? "bg-indigo-100 text-indigo-700"
+                            : "bg-neutral-200 text-neutral-700"
                         }`}>
                           {item.badge}
                         </span>
                       )}
+                    </motion.div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Section 3: System & Documentation */}
+          <div>
+            <motion.div
+              animate={{
+                opacity: open ? 1 : 0,
+                height: open ? "auto" : 0,
+                marginBottom: open ? 6 : 0,
+              }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="px-2 text-[10px] font-semibold text-[#7b7b78] uppercase tracking-wider overflow-hidden whitespace-nowrap font-mono"
+            >
+              System & Verification
+            </motion.div>
+            <div className="space-y-0.5">
+              {systemSettings.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onTabChange(item.id)}
+                    className={`w-full flex items-center justify-start gap-3 py-2 px-2.5 rounded-lg text-xs relative transition-colors duration-150 cursor-pointer ${
+                      isActive 
+                        ? "bg-[#111111] text-white font-medium shadow-xs" 
+                        : "text-[#626260] hover:text-[#111111] hover:bg-black/5"
+                    }`}
+                  >
+                    <div className="flex-shrink-0 flex items-center justify-center w-5 h-5">
+                      {item.icon}
+                    </div>
+                    <motion.div
+                      animate={{
+                        opacity: open ? 1 : 0,
+                        width: open ? "auto" : 0,
+                      }}
+                      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                      className="flex-1 flex items-center justify-between whitespace-nowrap overflow-hidden"
+                    >
+                      <span className="truncate">{item.label}</span>
                     </motion.div>
                   </button>
                 );
@@ -346,7 +454,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
             </div>
             <div className="flex items-center justify-between text-[#7b7b78] pt-1 border-t border-[#d3cec6]/40 mt-1 font-mono text-[9px]">
               <span>CFTT-MG</span>
-              <span>v1.2.0 • FinGraph</span>
+              <span>v1.2.0 • Fin.D</span>
             </div>
           </motion.div>
 
@@ -358,7 +466,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
             }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className={`w-full flex justify-center py-1 absolute inset-0 pointer-events-none ${open ? 'hidden' : 'flex'}`}
-            title="Causal Graph Active • FinGraph"
+            title="Causal Graph Active • Fin.D"
           >
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100" />
           </motion.div>

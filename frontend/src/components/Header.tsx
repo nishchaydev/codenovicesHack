@@ -40,15 +40,15 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
         <div className="flex items-center gap-2.5">
           {/* Logo icon pill */}
-          <div className="w-8 h-8 rounded-full bg-[#141414] text-white flex items-center justify-center font-bold text-xs tracking-tighter">
-            FG.
+          <div className="w-8 h-8 rounded-lg bg-[#111111] text-[#f5f1ec] flex items-center justify-center font-bold text-xs tracking-tight shadow-xs">
+            FD
           </div>
           <div>
-            <h1 className="font-sans font-bold text-base tracking-tight text-[#141414] leading-none">
-              FinGraph.
+            <h1 className="font-sans font-bold text-base tracking-tight text-[#111111] leading-none">
+              Fin.D
             </h1>
-            <span className="text-[11px] text-[#707070] font-sans font-normal">
-              Market Impact Graph
+            <span className="text-[11px] text-[#7b7b78] font-sans font-normal">
+              Market Impact & Transmission
             </span>
           </div>
         </div>

@@ -19,7 +19,7 @@ from graph.propagation import propagate_shock, enrich_graph_with_scores
 from llm.extractor import extract_event_with_llm
 
 app = FastAPI(
-    title="FinGraph API",
+    title="Fin.D API",
     description="Autonomous Financial Event Market Impact Graph Engine",
     version="1.0.0"
 )

@@ -124,7 +124,7 @@ async def extract_event_with_llm(headline: str, use_llm: bool = True) -> Dict[st
         "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
         "HTTP-Referer": "https://hackwave.finance",
-        "X-Title": "FinGraph Financial Market Impact Graph"
+        "X-Title": "Fin.D Financial Market Impact Graph"
     }
 
     payload = {
