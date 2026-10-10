@@ -43,4 +43,5 @@ coverage/
 .claude/
 .codeartsdoer/
 skills-lock.json
-data/
+/data/
+!frontend/src/data/

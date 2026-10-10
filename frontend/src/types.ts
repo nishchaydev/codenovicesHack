@@ -90,3 +90,65 @@ export interface StockHistory {
   prices: StockPricePoint[];
   data_source: string;
 }
+
+// FinGraph Institutional Radial Schemas
+export interface RadialCardNode {
+  id: string;
+  title: string;
+  metric: string;
+  metricColor: "red" | "green" | "blue" | "slate";
+  subtitle: string;
+  badge: string;
+  badgeType: "red" | "green" | "blue" | "amber";
+  category: "commodity" | "economic_variable" | "sector" | "company";
+  icon: "oil" | "chart" | "ship" | "currency" | "plane" | "factory" | "chip" | "bank" | "wheat";
+  position: "center" | "top" | "left" | "right" | "bottom-left" | "bottom-right";
+  timeHorizon?: string;
+  lineType?: "positive" | "negative" | "indirect";
+  tickers?: string[];
+}
+
+export interface PathwayHop {
+  hopNumber: number;
+  source: string;
+  target: string;
+  impactType: "Increases" | "Decreases" | "Neutral";
+  impactLabel: string;
+  timeframe: string;
+  explanation: string;
+  sector: string;
+  evidenceGrade: "Well established" | "Moderate evidence" | "Emerging evidence";
+  badgeGradeType: "green" | "yellow" | "blue";
+}
+
+export interface EvidenceSource {
+  id: string;
+  title: string;
+  source: string;
+  date: string;
+  url?: string;
+  summary: string;
+  relevanceScore: number;
+  category: string;
+}
+
+export interface FinGraphScenario {
+  id: string;
+  title: string;
+  dropdownLabel: string;
+  narrative: string;
+  date: string;
+  source: string;
+  sourceUrl?: string;
+  entitiesCount: number;
+  pathwaysCount: number;
+  evidenceCount: number;
+  transmissionRisk: string;
+  transmissionRiskDetail: string;
+  evidenceStrength: "High" | "Moderate" | "Low";
+  evidenceStrengthDetail: string;
+  centerNode: RadialCardNode;
+  radialNodes: RadialCardNode[];
+  pathways: PathwayHop[];
+  evidenceSources: EvidenceSource[];
+}
