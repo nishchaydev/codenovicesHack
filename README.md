@@ -393,7 +393,6 @@ Hackwave/
 │       └── tech-stack-constellation.svg # Tech stack constellation vector graphic
 └── README.md                     # Main documentation
 ```
-
 ---
 
 ## 🌐 Repository
