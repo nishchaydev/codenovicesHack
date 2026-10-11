@@ -62,6 +62,30 @@ export const CompanyDrilldownModal: React.FC<CompanyDrilldownModalProps> = ({ no
   if (!node) return null;
 
   const relevantTickers = node.tickers || [];
+  const [liveData, setLiveData] = React.useState<Record<string, { price: number; change: number; source: string }>>({});
+
+  React.useEffect(() => {
+    relevantTickers.forEach(async (ticker) => {
+      try {
+        const res = await fetch(`http://localhost:8000/api/stock/${ticker}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.current_price) {
+            setLiveData((prev) => ({
+              ...prev,
+              [ticker]: {
+                price: data.current_price,
+                change: data.change_pct,
+                source: data.data_source || "yfinance_live",
+              },
+            }));
+          }
+        }
+      } catch (err) {
+        // Fallback to static base
+      }
+    });
+  }, [node]);
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
@@ -113,7 +137,15 @@ export const CompanyDrilldownModal: React.FC<CompanyDrilldownModalProps> = ({ no
                 sensitivity: "Direct channel exposure to commodity input cost",
                 marketCap: "N/A",
               };
-              const isNegative = profile.delta.startsWith("-");
+              const live = liveData[ticker];
+              const displayPrice = live
+                ? `${ticker.endsWith(".NS") || ticker.endsWith(".BO") ? "₹" : "$"}${live.price.toLocaleString()}`
+                : profile.price;
+              const displayDelta = live
+                ? `${live.change > 0 ? "+" : ""}${live.change}%`
+                : profile.delta;
+              const isNegative = displayDelta.startsWith("-");
+
               return (
                 <div
                   key={ticker}
@@ -121,24 +153,31 @@ export const CompanyDrilldownModal: React.FC<CompanyDrilldownModalProps> = ({ no
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-[13.5px] font-bold text-slate-900">
-                        {profile.name}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[13.5px] font-bold text-slate-900">
+                          {profile.name}
+                        </span>
+                        {live && (
+                          <span className="px-1.5 py-0.2 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] font-mono font-bold">
+                            yfinance
+                          </span>
+                        )}
+                      </div>
                       <span className="text-[11px] font-mono text-slate-400">
                         {ticker} • {profile.marketCap}
                       </span>
                     </div>
 
                     <div className="flex flex-col items-end">
-                      <span className="text-[13.5px] font-bold text-slate-900">
-                        {profile.price}
+                      <span className="text-[13.5px] font-bold text-slate-900 font-mono">
+                        {displayPrice}
                       </span>
                       <span
-                        className={`text-[11px] font-bold ${
+                        className={`text-[11px] font-bold font-mono ${
                           isNegative ? "text-red-600" : "text-emerald-600"
                         }`}
                       >
-                        {profile.delta}
+                        {displayDelta}
                       </span>
                     </div>
                   </div>

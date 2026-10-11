@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FinGraphScenario, PathwayHop, EvidenceSource } from "../types";
+import { FinGraphScenario, PathwayHop, EvidenceSource, RadialCardNode } from "../types";
 import { 
   PanelRightClose, 
   PanelRightOpen, 
@@ -13,7 +13,8 @@ import {
   ChevronRight,
   ExternalLink,
   Flame,
-  Activity
+  Activity,
+  Building2
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -21,12 +22,14 @@ interface ImpactPathwaysPanelProps {
   scenario: FinGraphScenario;
   selectedHop: PathwayHop | null;
   onSelectHop: (hop: PathwayHop) => void;
+  onOpenStockDrilldown?: (node: RadialCardNode) => void;
 }
 
 export const ImpactPathwaysPanel: React.FC<ImpactPathwaysPanelProps> = ({
   scenario,
   selectedHop,
   onSelectHop,
+  onOpenStockDrilldown,
 }) => {
   const [open, setOpen] = useState(true);
   const [isPinned, setIsPinned] = useState(true);
@@ -257,6 +260,29 @@ export const ImpactPathwaysPanel: React.FC<ImpactPathwaysPanelProps> = ({
                     <p className="text-[11px] text-slate-600 leading-relaxed pt-1">
                       {hop.explanation}
                     </p>
+
+                    {(() => {
+                      const targetNode = scenario.radialNodes.find(
+                        (n) => n.title.toLowerCase() === hop.target.toLowerCase() || n.id === hop.target
+                      );
+                      if (targetNode?.tickers && targetNode.tickers.length > 0 && onOpenStockDrilldown) {
+                        return (
+                          <div className="pt-2 mt-1 border-t border-slate-100 flex items-center justify-between">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onOpenStockDrilldown(targetNode);
+                              }}
+                              className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                            >
+                              <Building2 className="w-3 h-3 text-blue-600" />
+                              <span>Inspect {targetNode.title} Equities (yfinance Live) →</span>
+                            </button>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
                 );
               })}

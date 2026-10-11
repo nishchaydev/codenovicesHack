@@ -21,9 +21,10 @@ import {
 import { motion } from "framer-motion";
 
 export type NavTab = 
+  | "landing"
+  | "event_explorer" 
   | "impact_graph" 
   | "ai_hub" 
-  | "event_explorer" 
   | "asset_profiler" 
   | "overview" 
   | "historical_replay" 
@@ -54,9 +55,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpen
 
   // Core Transmission Modules
   const transmissionModules: NavItem[] = [
+    { id: "landing", label: "Executive Pulse", icon: <LayoutDashboard className="w-4 h-4 flex-shrink-0 text-violet-500" />, badge: "PULSE" },
+    { id: "event_explorer", label: "Event Explorer", icon: <Search className="w-4 h-4 flex-shrink-0 text-amber-500" />, badge: "SHOCK" },
     { id: "impact_graph", label: "Impact Graph", icon: <Network className="w-4 h-4 flex-shrink-0 text-blue-500" />, badge: "LIVE" },
     { id: "ai_hub", label: "AI Hub", icon: <Sparkles className="w-4 h-4 flex-shrink-0 text-indigo-500" />, badge: "INSIGHTS" },
-    { id: "event_explorer", label: "Event Explorer", icon: <Search className="w-4 h-4 flex-shrink-0 text-amber-500" />, badge: "SHOCK" },
     { id: "asset_profiler", label: "Asset Profiler", icon: <Building2 className="w-4 h-4 flex-shrink-0 text-emerald-500" />, badge: "STOCKS" },
   ];
 

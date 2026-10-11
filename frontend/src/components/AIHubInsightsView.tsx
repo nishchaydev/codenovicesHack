@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { FinGraphScenario } from "../types";
+import { LiveMarketTicker } from "./LiveMarketTicker";
 import { 
   Activity, 
   Flame, 
@@ -13,6 +14,8 @@ import {
 
 interface AIHubInsightsViewProps {
   scenarios: FinGraphScenario[];
+  activeScenario?: FinGraphScenario;
+  hasUserSynthesized?: boolean;
   onSelectScenario: (scenario: FinGraphScenario) => void;
   onNavigateToGraph: () => void;
 }
@@ -111,6 +114,8 @@ const AI_INSIGHTS: AIInsightItem[] = [
 
 export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
   scenarios,
+  activeScenario,
+  hasUserSynthesized,
   onSelectScenario,
   onNavigateToGraph,
 }) => {
@@ -128,38 +133,81 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
     "Macro Shock",
   ];
 
-  const filteredInsights = AI_INSIGHTS.filter((ins) => {
+  // Dynamically synthesize a featured brief from the active synthesized shock
+  const dynamicInsights: AIInsightItem[] = useMemo(() => {
+    if (!hasUserSynthesized || !activeScenario) return [];
+
+    const affected = activeScenario.radialNodes.flatMap((n) => {
+      const tickers = n.tickers && n.tickers.length > 0 ? n.tickers : [n.title];
+      return tickers.map((t) => ({
+        ticker: t,
+        name: n.title,
+        impact: n.metric || "-1.9%",
+        isNegative: n.metricColor === "red" || n.metricColor === "green",
+      }));
+    }).slice(0, 5);
+
+    const chain = activeScenario.pathways.map((p) => `${p.source} → ${p.target}`);
+    if (chain.length === 0) {
+      chain.push(activeScenario.centerNode.title, "Primary Transmission", "Equity Revaluation");
+    }
+
+    return [
+      {
+        id: `synth-${activeScenario.id}`,
+        title: `${activeScenario.title}: Autonomous Multi-Hop Shock Audit`,
+        category: "Contagion Alert" as const,
+        urgency: "Critical" as const,
+        urgencyColor: "rose" as const,
+        date: "Just Synthesized • Live Knowledge Graph Synced",
+        summary: activeScenario.narrative || "Multi-hop propagation analyzed across macroeconomic and equity channels.",
+        causalChain: chain.slice(0, 4),
+        affectedTickers: affected.length > 0 ? affected : [
+          { ticker: "RELIANCE.NS", name: "Reliance Ind.", impact: "+$1.80 GRM", isNegative: false },
+          { ticker: "ASIANPAINT.NS", name: "Asian Paints", impact: "-2.4% Est.", isNegative: true },
+        ],
+        transmissionHorizon: activeScenario.radialNodes[0]?.timeHorizon || "1–3 Months",
+        scenarioId: activeScenario.id,
+        confidenceScore: 96,
+      },
+    ];
+  }, [hasUserSynthesized, activeScenario]);
+
+  const allInsights = [...dynamicInsights, ...AI_INSIGHTS];
+
+  const filteredInsights = allInsights.filter((ins) => {
     if (selectedFilter === "All") return true;
     return ins.category === selectedFilter;
   });
 
-  const handleRunAiQuery = (promptText?: string) => {
+  const handleRunAiQuery = async (promptText?: string) => {
     const q = promptText || userQuery;
     if (!q.trim()) return;
 
     setIsSynthesizing(true);
     setAiAnswer(null);
 
-    setTimeout(() => {
-      if (q.toLowerCase().includes("tata") || q.toLowerCase().includes("steel")) {
-        setAiAnswer(
-          "Autonomous Synthesis: A 10% surge in hot-rolled steel prices directly inflates raw material costs for Tata Motors by ~1.2% of net revenues. Commercial vehicle margins absorb this with an approximate 60-day lag due to fixed-price fleet supply contracts, whereas passenger vehicle pricing can be adjusted within 30 days."
-        );
-      } else if (q.toLowerCase().includes("crude") || q.toLowerCase().includes("paint")) {
-        setAiAnswer(
-          "Autonomous Synthesis: Solvents and derivatives derived from crude oil represent approximately 50% of the cost of goods sold for decorative paint manufacturers. The empirical correlation is 0.88 with a 45–60 day pass-through lag. Asian Paints and Berger historically experience 140–180 bps EBITDA margin dilution if crude remains above $82/bbl."
-        );
-      } else if (q.toLowerCase().includes("rbi") || q.toLowerCase().includes("rate")) {
-        setAiAnswer(
-          "Autonomous Synthesis: A 25 bps RBI monetary shift influences short-term call money rates and commercial paper spreads within 48 hours. Retail home loans through HDFC Bank reprice automatically via the External Benchmark Lending Rate (EBLR), while CASA deposit rates adjust over 2–4 quarters."
-        );
-      } else {
-        setAiAnswer(
-          `Autonomous Synthesis for "${q}": Multi-hop causal transmission traces primary shock vectors through upstream procurement contracts, foreign exchange hedges, and benchmark sectoral index fund allocations. Systemic contagion probability is estimated at 74% with primary transmission observed across 3 hops.`
-        );
-      }
+    try {
+      const response = await fetch("http://localhost:8000/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q }),
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const data = await response.json();
+      const prefix = data.rag_powered
+        ? `AI Analyst (RAG · ${data.context_docs_used} event${data.context_docs_used !== 1 ? "s" : ""} retrieved): `
+        : "AI Analyst: ";
+      setAiAnswer(prefix + data.answer);
+    } catch {
+      setAiAnswer(
+        `AI Analyst: "${q}" — multi-hop causal transmission traces primary shock vectors through upstream procurement contracts, FX hedges, and benchmark sectoral index allocations. Simulate an event first for richer RAG-powered context.`
+      );
+    } finally {
       setIsSynthesizing(false);
-    }, 400);
+    }
   };
 
   const handleLaunchInsightScenario = (scenarioId?: string) => {
@@ -174,6 +222,9 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
 
   return (
     <div className="flex flex-col gap-6 max-w-6xl mx-auto py-2">
+      {/* ─── LIVE REAL-TIME YFINANCE MARKET TICKER BAR ─── */}
+      <LiveMarketTicker />
+
       {/* 1. Header Hero Banner */}
       <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-[#0F172A] to-[#1E293B] border border-slate-800 text-white shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
@@ -193,7 +244,7 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
 
         <div className="flex items-center gap-2 bg-slate-800/80 px-3.5 py-2 rounded-xl border border-slate-700/80 text-xs font-mono text-slate-300">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>13 Active Causal Models • 120ms Latency</span>
+          <span>13 Active Causal Models • yfinance Live Synced</span>
         </div>
       </div>
 
@@ -272,19 +323,26 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
             <div className="flex items-center gap-2">
               <span className="text-amber-500 text-sm">⚠️</span>
               <h3 className="text-sm font-bold text-slate-900">
-                High Commodity-to-Equity Contagion
+                {hasUserSynthesized && activeScenario ? activeScenario.title : "High Commodity-to-Equity Contagion"}
               </h3>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Crude oil futures rally (+14.2%) is propagating through 3 downstream hops. Aviation and chemical solvency margins reflect immediate compression risk.
+              {hasUserSynthesized && activeScenario
+                ? activeScenario.narrative.slice(0, 240) + (activeScenario.narrative.length > 240 ? "..." : "")
+                : "Crude oil futures rally (+14.2%) is propagating through 3 downstream hops. Aviation and chemical solvency margins reflect immediate compression risk."}
             </p>
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex items-center gap-2 pt-1 flex-wrap">
               <span className="px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-100 text-xs font-semibold">
-                • 5 Exposed Stocks
+                • {hasUserSynthesized && activeScenario ? activeScenario.radialNodes.length : 5} Exposed Assets
               </span>
               <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-xs font-semibold">
-                • 3 Domino Hops
+                • {hasUserSynthesized && activeScenario ? activeScenario.pathways.length : 3} Domino Hops
               </span>
+              {hasUserSynthesized && (
+                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+                  ✓ Active Synthesized Shock Synced
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -513,6 +571,18 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
         {/* Quick Suggestion Chips */}
         <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] pt-0.5">
           <span className="text-slate-400 font-mono text-[10px]">Try:</span>
+          {hasUserSynthesized && activeScenario && (
+            <button
+              onClick={() => {
+                const q = `How does ${activeScenario.title} propagate across supply chains and affect equity valuations?`;
+                setUserQuery(q);
+                handleRunAiQuery(q);
+              }}
+              className="px-2.5 py-1 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold border border-blue-300 whitespace-nowrap flex items-center gap-1 cursor-pointer"
+            >
+              <span>⚡ Audit Synthesized Shock: {activeScenario.centerNode.title || activeScenario.title.slice(0, 20)}</span>
+            </button>
+          )}
           <button
             onClick={() => {
               setUserQuery("How does a 10% surge in steel affect Tata Motors?");
@@ -550,8 +620,13 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
                 <span>✦</span> Generative Transmission Projection
               </span>
               <button
-                onClick={() => handleLaunchInsightScenario("scenario_tatamotors")}
-                className="text-[11px] text-blue-700 font-semibold hover:underline"
+                onClick={() => {
+                  if (activeScenario) {
+                    onSelectScenario(activeScenario);
+                  }
+                  onNavigateToGraph();
+                }}
+                className="text-[11px] text-blue-700 font-semibold hover:underline cursor-pointer"
               >
                 Inspect on Graph →
               </button>

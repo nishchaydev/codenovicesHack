@@ -14,6 +14,7 @@ import { AuditReportsView } from "./components/AuditReportsView";
 import { MethodologyDocsView } from "./components/MethodologyDocsView";
 import { MarketOverviewView } from "./components/MarketOverviewView";
 import { EventExplorerView } from "./components/EventExplorerView";
+import { LandingPage } from "./components/LandingPage";
 import AuthSectionOne from "@/components/ui/auth-section-1";
 import { RbacLoginModal, PRESET_ROLES } from "./components/RbacLoginModal";
 import { EventRegressionModal } from "./components/EventRegressionModal";
@@ -22,7 +23,7 @@ import { FinGraphScenario, RadialCardNode, PathwayHop, UserProfile, RegressionCa
 import { generateStockScenario } from "./api";
 
 export const App: React.FC = () => {
-  const [activeNavTab, setActiveNavTab] = useState<NavTab>("impact_graph");
+  const [activeNavTab, setActiveNavTab] = useState<NavTab>("landing");
   const [scenarios, setScenarios] = useState<FinGraphScenario[]>(FINGRAPH_SCENARIOS);
   const [activeScenario, setActiveScenario] = useState<FinGraphScenario>(FINGRAPH_SCENARIOS[0]);
   const [selectedNode, setSelectedNode] = useState<RadialCardNode | null>(null);
@@ -37,6 +38,14 @@ export const App: React.FC = () => {
   const [isRbacModalOpen, setIsRbacModalOpen] = useState<boolean>(false);
   const [isRegressionModalOpen, setIsRegressionModalOpen] = useState<boolean>(false);
   const [extendedNodeIds, setExtendedNodeIds] = useState<string[]>([]);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "info" } | null>(null);
+  const [historicalEra, setHistoricalEra] = useState<"All" | "1970s" | "2000s" | "2020s">("All");
+  const [hasUserSynthesized, setHasUserSynthesized] = useState<boolean>(false);
+
+  const showToast = (message: string, type: "success" | "info" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const handleToggleExtendNode = (nodeId: string) => {
     setExtendedNodeIds((prev) =>
@@ -73,7 +82,9 @@ export const App: React.FC = () => {
         setActiveScenario(generated);
         setSelectedNode(null);
         setSelectedHop(null);
+        setHasUserSynthesized(true);
         setActiveNavTab("impact_graph");
+        showToast(`✅ Impact graph synthesized for ${stockTicker}`);
         setIsAnalyzing(false);
         return;
       } catch (err) {
@@ -253,7 +264,9 @@ export const App: React.FC = () => {
       setActiveScenario(matched);
       setSelectedNode(null);
       setSelectedHop(null);
+      setHasUserSynthesized(true);
       setIsAnalyzing(false);
+      showToast('✅ Event analysis complete — propagation paths traced');
     }, 350);
   };
 
@@ -283,32 +296,85 @@ export const App: React.FC = () => {
         <div className="flex-1 flex min-h-0 overflow-hidden">
           {/* Main Stage View */}
           <main className={`flex-1 flex flex-col ${activeNavTab === "impact_graph" ? "h-full min-h-0 overflow-hidden p-3 sm:p-4 gap-2.5" : "overflow-y-auto p-6 gap-5"}`}>
+            {/* Executive Pulse / Landing Page Tab */}
+            {activeNavTab === "landing" && (
+              <LandingPage 
+                onEnter={() => setActiveNavTab("event_explorer")} 
+                onSelectScenario={(scenarioId) => {
+                  const target = scenarios.find((s) => s.id === scenarioId) || scenarios[0];
+                  setActiveScenario(target);
+                  setHasUserSynthesized(true);
+                  showToast(`✅ Loaded scenario: ${target.title}`);
+                  setActiveNavTab("impact_graph");
+                }}
+              />
+            )}
+
             {activeNavTab === "impact_graph" && (
               <>
-                {/* Header with Title, Switcher, and 3 KPI Cards */}
-                <ScenarioHeader
-                  scenario={activeScenario}
-                  scenariosList={scenarios}
-                  onSelectScenario={(sc) => {
-                    setActiveScenario(sc);
-                    setSelectedNode(null);
-                    setSelectedHop(null);
-                  }}
-                />
+                {!hasUserSynthesized ? (
+                  /* ── Empty State: no event selected yet ── */
+                  <div className="flex-1 flex flex-col items-center justify-center gap-6 text-center px-6">
+                    <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center mb-2">
+                      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="18" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="4 3"/>
+                        <circle cx="20" cy="20" r="5" fill="#94A3B8"/>
+                        <circle cx="8" cy="14" r="3" fill="#CBD5E1"/>
+                        <circle cx="32" cy="14" r="3" fill="#CBD5E1"/>
+                        <circle cx="12" cy="30" r="3" fill="#CBD5E1"/>
+                        <circle cx="28" cy="30" r="3" fill="#CBD5E1"/>
+                        <line x1="20" y1="20" x2="8" y2="14" stroke="#E2E8F0" strokeWidth="1.5"/>
+                        <line x1="20" y1="20" x2="32" y2="14" stroke="#E2E8F0" strokeWidth="1.5"/>
+                        <line x1="20" y1="20" x2="12" y2="30" stroke="#E2E8F0" strokeWidth="1.5"/>
+                        <line x1="20" y1="20" x2="28" y2="30" stroke="#E2E8F0" strokeWidth="1.5"/>
+                      </svg>
+                    </div>
+                    <div className="flex flex-col gap-2 max-w-sm">
+                      <h2 className="text-xl font-bold text-slate-800">No Event Selected</h2>
+                      <p className="text-sm text-slate-500 leading-relaxed">
+                        Select a financial news event from the <strong>Event Explorer</strong> and click
+                        {" "}<strong>Synthesize Collision Graph</strong> to build the impact propagation graph.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setActiveNavTab("event_explorer")}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-700 transition-colors"
+                    >
+                      <span>Go to Event Explorer</span>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </button>
+                    <p className="text-xs text-slate-400 font-mono">
+                      BFS propagation engine ready · {">"}25 nodes · 30+ edges pre-wired
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Header with Title, Switcher, and 3 KPI Cards */}
+                    <ScenarioHeader
+                      scenario={activeScenario}
+                      scenariosList={scenarios}
+                      onSelectScenario={(sc) => {
+                        setActiveScenario(sc);
+                        setSelectedNode(null);
+                        setSelectedHop(null);
+                      }}
+                    />
 
-                {/* The Radial Transmission Canvas */}
-                <RadialTransmissionCanvas
-                  scenario={activeScenario}
-                  selectedNodeId={selectedNode?.id || null}
-                  onSelectNode={handleSelectNode}
-                  onOpenRegressionModal={() => setIsRegressionModalOpen(true)}
-                  onOpenStockDrilldown={(node) => {
-                    setSelectedNode(node);
-                    setIsDrilldownOpen(true);
-                  }}
-                  extendedNodeIds={extendedNodeIds}
-                  onToggleExtendNode={handleToggleExtendNode}
-                />
+                    {/* The Radial Transmission Canvas */}
+                    <RadialTransmissionCanvas
+                      scenario={activeScenario}
+                      selectedNodeId={selectedNode?.id || null}
+                      onSelectNode={handleSelectNode}
+                      onOpenRegressionModal={() => setIsRegressionModalOpen(true)}
+                      onOpenStockDrilldown={(node) => {
+                        setSelectedNode(node);
+                        setIsDrilldownOpen(true);
+                      }}
+                      extendedNodeIds={extendedNodeIds}
+                      onToggleExtendNode={handleToggleExtendNode}
+                    />
+                  </>
+                )}
               </>
             )}
 
@@ -324,8 +390,27 @@ export const App: React.FC = () => {
                   </p>
                 </div>
 
+                {/* Time Period Filter */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Filter by era:</span>
+                  {(['All', '1970s', '2000s', '2020s'] as const).map((era) => (
+                    <button
+                      key={era}
+                      onClick={() => setHistoricalEra(era)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                        historicalEra === era
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
+                      }`}
+                    >
+                      {era}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Crisis 1: 1973 OPEC Embargo */}
+                  {(historicalEra === 'All' || historicalEra === '1970s') && (
                   <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col gap-3">
                     <div className="flex items-center justify-between">
                       <span className="px-2.5 py-1 rounded-full bg-red-50 text-red-700 text-xs font-bold border border-red-200">
@@ -352,8 +437,10 @@ export const App: React.FC = () => {
                       </button>
                     </div>
                   </div>
+                  )}
 
                   {/* Crisis 2: 2008 Global Financial Crisis */}
+                  {(historicalEra === 'All' || historicalEra === '2000s') && (
                   <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col gap-3">
                     <div className="flex items-center justify-between">
                       <span className="px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200">
@@ -369,11 +456,21 @@ export const App: React.FC = () => {
                     </p>
                     <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                       <span>Transmission Lag: <strong>Immediate</strong></span>
-                      <span className="text-slate-400 font-medium">Contagion Depth: 4 Hops</span>
+                      <button
+                        onClick={() => {
+                          setActiveScenario(scenarios[2] || scenarios[0]);
+                          setActiveNavTab("impact_graph");
+                        }}
+                        className="text-blue-600 hover:underline font-semibold"
+                      >
+                        Load Graph Replay →
+                      </button>
                     </div>
                   </div>
+                  )}
 
                   {/* Crisis 3: 2020 COVID Supply Chain Freeze */}
+                  {(historicalEra === 'All' || historicalEra === '2020s') && (
                   <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col gap-3">
                     <div className="flex items-center justify-between">
                       <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200">
@@ -400,8 +497,10 @@ export const App: React.FC = () => {
                       </button>
                     </div>
                   </div>
+                  )}
 
                   {/* Crisis 4: 2023 SVB Run */}
+                  {(historicalEra === 'All' || historicalEra === '2020s') && (
                   <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col gap-3">
                     <div className="flex items-center justify-between">
                       <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-bold border border-amber-200">
@@ -417,9 +516,18 @@ export const App: React.FC = () => {
                     </p>
                     <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                       <span>Transmission Lag: <strong>24–48 hours</strong></span>
-                      <span className="text-slate-400 font-medium">Contagion Depth: 2 Hops</span>
+                      <button
+                        onClick={() => {
+                          setActiveScenario(scenarios[3] || scenarios[0]);
+                          setActiveNavTab("impact_graph");
+                        }}
+                        className="text-blue-600 hover:underline font-semibold"
+                      >
+                        Load Graph Replay →
+                      </button>
                     </div>
                   </div>
+                  )}
                 </div>
               </div>
             )}
@@ -428,6 +536,8 @@ export const App: React.FC = () => {
             {activeNavTab === "ai_hub" && (
               <AIHubInsightsView
                 scenarios={scenarios}
+                activeScenario={activeScenario}
+                hasUserSynthesized={hasUserSynthesized}
                 onSelectScenario={(sc) => {
                   setActiveScenario(sc);
                   setSelectedNode(null);
@@ -449,6 +559,8 @@ export const App: React.FC = () => {
                   setSelectedHop(null);
                 }}
                 onNavigateToGraph={() => {
+                  setHasUserSynthesized(true);
+                  showToast("✅ Graph synthesized — tracing impact propagation paths");
                   setActiveNavTab("impact_graph");
                 }}
               />
@@ -506,8 +618,8 @@ export const App: React.FC = () => {
             )}
           </main>
 
-          {/* 3. Right Impact Pathways Panel */}
-          {activeNavTab === "impact_graph" && (
+          {/* 3. Right Impact Pathways Panel — only when graph is synthesized */}
+          {activeNavTab === "impact_graph" && hasUserSynthesized && (
             <ImpactPathwaysPanel
               scenario={activeScenario}
               selectedHop={selectedHop}
@@ -517,6 +629,10 @@ export const App: React.FC = () => {
                 if (targetNode) {
                   setSelectedNode(targetNode);
                 }
+              }}
+              onOpenStockDrilldown={(node) => {
+                setSelectedNode(node);
+                setIsDrilldownOpen(true);
               }}
             />
           )}
@@ -580,6 +696,25 @@ export const App: React.FC = () => {
             }}
             onClose={() => setIsAuthModalOpen(false)}
           />
+        </div>
+      )}
+
+      {/* In-App Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border text-sm font-medium ${
+            toast.type === "success"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              : "bg-blue-50 border-blue-200 text-blue-800"
+          }`}
+        >
+          <span>{toast.message}</span>
+          <button
+            onClick={() => setToast(null)}
+            className="opacity-60 hover:opacity-100 ml-1 text-base leading-none"
+          >
+            ×
+          </button>
         </div>
       )}
     </div>

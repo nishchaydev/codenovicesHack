@@ -555,7 +555,10 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
           {/* Dismiss Active Relation Button */}
           {selectedNodeId && (
             <button
-              onClick={() => onSelectNode(null)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectNode(null);
+              }}
               className="px-3.5 py-1.5 rounded-2xl apple-glass hover:bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-300"
               title="Dismiss active relation and return to primary radial graph"
             >
@@ -563,6 +566,28 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
               <span>Dismiss Relation</span>
             </button>
           )}
+
+          {/* Inspect Exposed Equities Button */}
+          {(() => {
+            const selectedNodeData = scenario.radialNodes.find((n) => n.id === selectedNodeId) ||
+              (scenario.centerNode?.id === selectedNodeId ? scenario.centerNode : null);
+            if (selectedNodeData?.tickers && selectedNodeData.tickers.length > 0 && onOpenStockDrilldown) {
+              return (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenStockDrilldown(selectedNodeData);
+                  }}
+                  className="px-3.5 py-1.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white shadow-[0_4px_16px_rgba(37,99,235,0.25)] border border-blue-500 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="Inspect live company pricing and transmission sensitivity"
+                >
+                  <Building2 className="w-3.5 h-3.5 text-white" />
+                  <span>Inspect {selectedNodeData.title} Equities</span>
+                </button>
+              );
+            }
+            return null;
+          })()}
 
           {/* Calibrate Regression Modal Button */}
           {onOpenRegressionModal && (
