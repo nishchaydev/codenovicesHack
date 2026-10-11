@@ -257,12 +257,9 @@ export const App: React.FC = () => {
     }, 350);
   };
 
-  // Node Click: opens drilldown if it has companies
-  const handleSelectNode = (node: RadialCardNode) => {
+  // Node Click: sets selected node to dynamically branch out its relations on canvas
+  const handleSelectNode = (node: RadialCardNode | null) => {
     setSelectedNode(node);
-    if (node.tickers && node.tickers.length > 0) {
-      setIsDrilldownOpen(true);
-    }
   };
 
   return (
@@ -305,6 +302,10 @@ export const App: React.FC = () => {
                   selectedNodeId={selectedNode?.id || null}
                   onSelectNode={handleSelectNode}
                   onOpenRegressionModal={() => setIsRegressionModalOpen(true)}
+                  onOpenStockDrilldown={(node) => {
+                    setSelectedNode(node);
+                    setIsDrilldownOpen(true);
+                  }}
                   extendedNodeIds={extendedNodeIds}
                   onToggleExtendNode={handleToggleExtendNode}
                 />

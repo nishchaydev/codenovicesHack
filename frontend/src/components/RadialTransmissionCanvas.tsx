@@ -27,8 +27,9 @@ import {
 interface RadialTransmissionCanvasProps {
   scenario: FinGraphScenario;
   selectedNodeId: string | null;
-  onSelectNode: (node: RadialCardNode) => void;
+  onSelectNode: (node: RadialCardNode | null) => void;
   onOpenRegressionModal?: () => void;
+  onOpenStockDrilldown?: (node: RadialCardNode) => void;
   extendedNodeIds?: string[];
   onToggleExtendNode?: (nodeId: string) => void;
 }
@@ -63,6 +64,7 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
   selectedNodeId,
   onSelectNode,
   onOpenRegressionModal,
+  onOpenStockDrilldown,
   extendedNodeIds: externalExtendedIds,
   onToggleExtendNode: externalToggleExtend,
 }) => {
@@ -73,22 +75,24 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const dragDistanceRef = useRef<number>(0);
+  const pointerDownPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [priorityFilter, setPriorityFilter] = useState<"all" | "p1_critical">("all");
   const [hoveredNode, setHoveredNode] = useState<RadialCardNode | null>(null);
 
-  // Local extended nodes tracking if external isn't provided
-  const [localExtendedIds, setLocalExtendedIds] = useState<string[]>([]);
-  const extendedIds = externalExtendedIds || localExtendedIds;
-
+  // Dynamic relation toggle handler (switches or clears active relation)
   const handleToggleExtend = (nodeId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (externalToggleExtend) {
-      externalToggleExtend(nodeId);
+    if (selectedNodeId === nodeId) {
+      onSelectNode(null);
     } else {
-      setLocalExtendedIds((prev) =>
-        prev.includes(nodeId) ? prev.filter((id) => id !== nodeId) : [...prev, nodeId]
-      );
+      const targetNode =
+        scenario.radialNodes.find((n) => n.id === nodeId) ||
+        (scenario.centerNode.id === nodeId ? scenario.centerNode : null);
+      if (targetNode) {
+        onSelectNode(targetNode);
+      }
     }
   };
 
@@ -168,15 +172,20 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
     }
   };
 
-  // Background drag to pan
+  // Background drag to pan / click to dismiss
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     setIsDragging(true);
     setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+    pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
+    dragDistanceRef.current = 0;
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
+    const dx = e.clientX - pointerDownPosRef.current.x;
+    const dy = e.clientY - pointerDownPosRef.current.y;
+    dragDistanceRef.current = Math.sqrt(dx * dx + dy * dy);
     setPan({
       x: e.clientX - dragStart.x,
       y: e.clientY - dragStart.y,
@@ -185,6 +194,10 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
 
   const handleMouseUp = () => {
     setIsDragging(false);
+    // If pointer moved less than 5px, treat as intentional background click to dismiss relation
+    if (dragDistanceRef.current < 5) {
+      onSelectNode(null);
+    }
   };
 
   // Fallback extended child nodes generator for nodes lacking static children
@@ -259,6 +272,70 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
     };
     nodeList.push(rootNode);
 
+    // If root central node is selected, spawn its dynamic downstream relations!
+    if (selectedNodeId === rootNode.id) {
+      const rootChildren = rootNode.data.extendedChildren || [
+        {
+          id: "crude-brent-wti",
+          title: "Brent-WTI Arb",
+          metric: "+$5.20/bbl",
+          metricColor: "red",
+          subtitle: "Export route dislocation",
+          badge: "Secondary Hop",
+          badgeType: "red",
+          category: "commodity",
+          icon: "oil",
+          position: "custom",
+          priority: "P1 Critical",
+          causalReason: "Physical tanker rerouting widens prompt North Sea vs US Gulf Coast spreads.",
+        },
+        {
+          id: "tanker-rates",
+          title: "Tanker Day Rates",
+          metric: "+34.5%",
+          metricColor: "red",
+          subtitle: "Black Sea & Red Sea freight surge",
+          badge: "Secondary Hop",
+          badgeType: "amber",
+          category: "commodity",
+          icon: "ship",
+          position: "custom",
+          priority: "P1 Critical",
+          causalReason: "War insurance premiums and vessel re-flagging elevate VLCC day rates.",
+        },
+      ];
+
+      const rootR = isFullscreen ? 140 : 110;
+      rootChildren.forEach((child, idx) => {
+        const rootAngle = idx === 0 ? -Math.PI * 0.75 : -Math.PI * 0.25;
+        const rx = Math.round(rootR * Math.cos(rootAngle));
+        const ry = Math.round(rootR * Math.sin(rootAngle));
+
+        const rootChildTopo: TopologyNode = {
+          id: child.id,
+          data: child,
+          level: 2,
+          parentId: rootNode.id,
+          x: rx,
+          y: ry,
+          vx: 0,
+          vy: 0,
+          radius: isFullscreen ? 28 : 24,
+          color: child.priority === "P1 Critical" ? "#ef4444" : "#f59e0b",
+          edgeLabel: "Catalyst Link",
+        };
+        nodeList.push(rootChildTopo);
+
+        edgeList.push({
+          id: `edge-${rootNode.id}-${rootChildTopo.id}`,
+          source: rootNode,
+          target: rootChildTopo,
+          lineType: child.lineType || "indirect",
+          isExtendedEdge: true,
+        });
+      });
+    }
+
     // Filter radial nodes based on priority
     const visibleRadialNodes = scenario.radialNodes.filter((n) => {
       if (priorityFilter === "p1_critical") {
@@ -322,12 +399,16 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
           timeHorizon: node.timeHorizon,
         });
 
-        // 3. Extended Satellite Child Nodes (Level 2 - Clusters like Image 2)
-        const isExtended = extendedIds.includes(node.id);
-        if (isExtended) {
+        // 3. Dynamic Relation Child Nodes (Form ONLY for the active clicked node!)
+        // As soon as user clicks another node, previous relations vanish and newly clicked node's relations appear
+        const isSelectedOrChildSelected =
+          selectedNodeId === node.id ||
+          (node.extendedChildren && node.extendedChildren.some((c) => c.id === selectedNodeId));
+
+        if (isSelectedOrChildSelected) {
           const children = getExtendedChildren(node);
           const childCount = children.length;
-          const R2 = isFullscreen ? 160 : 130; // Distance of satellite cluster from parent
+          const R2 = isFullscreen ? 165 : 135; // Distance of satellite cluster from parent
           const spreadArc = Math.PI * 0.45; // Fan spread angle
 
           children.forEach((child, cIdx) => {
@@ -375,7 +456,7 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
     }
 
     return { nodes: nodeList, edges: edgeList };
-  }, [scenario, extendedIds, priorityFilter, isFullscreen]);
+  }, [scenario, selectedNodeId, priorityFilter, isFullscreen]);
 
   // Category Icon Renderer
   const renderNodeIcon = (node: RadialCardNode, size: "sm" | "md" | "lg" = "md") => {
@@ -471,31 +552,17 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
             </span>
           </div>
 
-          {/* Global Extend / Collapse All Button */}
-          <button
-            onClick={() => {
-              const allRadialIds = scenario.radialNodes.map((n) => n.id);
-              const isAllExtended = allRadialIds.every((id) => extendedIds.includes(id));
-              if (isAllExtended) {
-                allRadialIds.forEach((id) => {
-                  if (extendedIds.includes(id)) handleToggleExtend(id);
-                });
-              } else {
-                allRadialIds.forEach((id) => {
-                  if (!extendedIds.includes(id)) handleToggleExtend(id);
-                });
-              }
-            }}
-            className="px-3.5 py-1.5 rounded-2xl apple-glass hover:bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-300"
-            title="Toggle expanding all child relation clusters"
-          >
-            <Layers className="w-3.5 h-3.5 text-[#007AFF]" />
-            <span>
-              {scenario.radialNodes.every((n) => extendedIds.includes(n.id))
-                ? "Collapse Clusters"
-                : "Expand Clusters"}
-            </span>
-          </button>
+          {/* Dismiss Active Relation Button */}
+          {selectedNodeId && (
+            <button
+              onClick={() => onSelectNode(null)}
+              className="px-3.5 py-1.5 rounded-2xl apple-glass hover:bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-300"
+              title="Dismiss active relation and return to primary radial graph"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-blue-600" />
+              <span>Dismiss Relation</span>
+            </button>
+          )}
 
           {/* Calibrate Regression Modal Button */}
           {onOpenRegressionModal && (
@@ -568,12 +635,33 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
         </div>
       </div>
 
-      {/* Helper Banner in Bottom-Left */}
-      <div className="absolute bottom-4 left-4 z-20 pointer-events-none">
-        <div className="px-3 py-1.5 rounded-xl apple-glass border border-white/80 text-[11px] text-slate-500 flex items-center gap-2 shadow-xs">
-          <span className="w-2 h-2 rounded-full bg-[#007AFF] animate-pulse" />
-          <span>Drag background to pan • Scroll to zoom • Click <strong className="text-slate-800">+</strong> to extend node relations</span>
-        </div>
+      {/* Dynamic Interaction Status Pill in Bottom-Center */}
+      <div className="absolute bottom-4 inset-x-0 mx-auto w-fit z-20 flex items-center gap-2 pointer-events-auto">
+        {selectedNodeId ? (
+          <div className="px-3.5 py-1.5 rounded-2xl apple-glass border border-blue-200/90 shadow-[0_4px_16px_rgba(0,122,255,0.1)] text-xs text-slate-700 flex items-center gap-2.5 animate-in fade-in zoom-in-95 duration-200">
+            <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+            <span>
+              Relation active for{" "}
+              <strong className="text-blue-700">
+                {nodes.find((n) => n.id === selectedNodeId)?.data.title || "Selected Node"}
+              </strong>
+            </span>
+            <span className="text-slate-300">|</span>
+            <span className="text-[11px] text-slate-500 font-medium">Click another node to switch • Click canvas to dismiss</span>
+            <button
+              onClick={() => onSelectNode(null)}
+              className="p-1 rounded-full hover:bg-slate-200/80 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+              title="Dismiss relation"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div className="px-3.5 py-1.5 rounded-2xl apple-glass border border-white/80 text-[11px] text-slate-500 flex items-center gap-2 shadow-xs pointer-events-none">
+            <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+            <span>Click any node to form dynamic relations • Click canvas or another node to dismiss</span>
+          </div>
+        )}
       </div>
 
       {/* ─── SVG TOPOLOGY GRAPH CANVAS ─── */}
@@ -678,7 +766,12 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
               const isRoot = node.level === 0;
               const isRadial = node.level === 1;
               const isChild = node.level === 2;
-              const isNodeExtended = extendedIds.includes(node.id);
+              const isNodeExtended =
+                selectedNodeId === node.id ||
+                Boolean(
+                  node.data.extendedChildren &&
+                    node.data.extendedChildren.some((c) => c.id === selectedNodeId)
+                );
 
               return (
                 <g
@@ -687,7 +780,11 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
                   className="transition-transform duration-200 cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onSelectNode(node.data);
+                    if (selectedNodeId === node.id) {
+                      onSelectNode(null);
+                    } else {
+                      onSelectNode(node.data);
+                    }
                   }}
                   onMouseEnter={() => setHoveredNode(node.data)}
                   onMouseLeave={() => setHoveredNode(null)}
@@ -931,7 +1028,7 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
 
       {/* ─── HOVER INSPECTION CARD (Apple Glass Modal on node hover) ─── */}
       {hoveredNode && (
-        <div className="absolute bottom-4 right-4 z-30 max-w-sm p-4 rounded-3xl apple-glass-card border border-white/85 shadow-xl animate-in fade-in zoom-in-95 duration-150 pointer-events-none">
+        <div className="absolute bottom-4 right-4 z-30 max-w-sm p-4 rounded-3xl apple-glass-card border border-white/85 shadow-xl animate-in fade-in zoom-in-95 duration-150 pointer-events-auto">
           <div className="flex items-center justify-between gap-2 mb-1.5">
             <span className="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
               {hoveredNode.priority || "Causal Entity"}
@@ -952,6 +1049,16 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
             <p className="text-xs text-slate-600 mt-1.5 leading-relaxed bg-slate-50/80 p-2.5 rounded-xl border border-slate-200/70">
               {hoveredNode.causalReason}
             </p>
+          )}
+
+          {hoveredNode.tickers && hoveredNode.tickers.length > 0 && onOpenStockDrilldown && (
+            <button
+              onClick={() => onOpenStockDrilldown(hoveredNode)}
+              className="mt-2.5 w-full py-1.5 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold flex items-center justify-center gap-1.5 border border-blue-200 transition-colors cursor-pointer"
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Inspect {hoveredNode.tickers.length} Exposed Equities</span>
+            </button>
           )}
 
           {hoveredNode.refLinks && hoveredNode.refLinks.length > 0 && (
