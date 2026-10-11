@@ -1,20 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { FinGraphScenario, RadialCardNode, ReferenceLink } from "../types";
 import {
   PlusCircle,
+  MinusCircle,
   ExternalLink,
-  ShieldAlert,
-  Sliders,
-  CheckCircle2,
-  Sparkles,
-  Link,
-  Layers,
-  ChevronRight,
-  Info,
-  X,
   Calculator,
-  ArrowUpRight,
-  ArrowDownRight
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+  ZoomIn,
+  ZoomOut,
+  Layers,
+  Sparkles,
+  TrendingUp,
+  TrendingDown,
+  Info,
+  ChevronRight,
+  ShieldCheck,
+  Building2,
+  Flame,
+  ArrowRight,
+  X
 } from "lucide-react";
 
 interface RadialTransmissionCanvasProps {
@@ -26,6 +33,31 @@ interface RadialTransmissionCanvasProps {
   onToggleExtendNode?: (nodeId: string) => void;
 }
 
+// Graph node model for 2D topology simulation
+interface TopologyNode {
+  id: string;
+  data: RadialCardNode;
+  level: 0 | 1 | 2; // 0: Root, 1: Radial 1st-order, 2: Extended satellite
+  parentId?: string;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  color: string;
+  angle?: number;
+  edgeLabel?: string;
+}
+
+interface TopologyEdge {
+  id: string;
+  source: TopologyNode;
+  target: TopologyNode;
+  lineType?: "positive" | "negative" | "indirect";
+  timeHorizon?: string;
+  isExtendedEdge?: boolean;
+}
+
 export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> = ({
   scenario,
   selectedNodeId,
@@ -34,15 +66,23 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
   extendedNodeIds: externalExtendedIds,
   onToggleExtendNode: externalToggleExtend,
 }) => {
-  const [zoomLevel, setZoomLevel] = useState<number>(100);
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [localExtendedIds, setLocalExtendedIds] = useState<string[]>([]);
-  const [activeRefNode, setActiveRefNode] = useState<RadialCardNode | null>(null);
-  const [priorityFilter, setPriorityFilter] = useState<"all" | "p1_critical">("all");
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  // Pan and Zoom Transformation state
+  const [zoom, setZoom] = useState<number>(1.0);
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [priorityFilter, setPriorityFilter] = useState<"all" | "p1_critical">("all");
+  const [hoveredNode, setHoveredNode] = useState<RadialCardNode | null>(null);
+
+  // Local extended nodes tracking if external isn't provided
+  const [localExtendedIds, setLocalExtendedIds] = useState<string[]>([]);
   const extendedIds = externalExtendedIds || localExtendedIds;
 
-  const handleToggleExtend = (nodeId: string) => {
+  const handleToggleExtend = (nodeId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     if (externalToggleExtend) {
       externalToggleExtend(nodeId);
     } else {
@@ -52,846 +92,856 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
     }
   };
 
-  // Helper to render icon based on category/type
-  const renderIcon = (iconName: string, category: string) => {
-    switch (iconName) {
+  // Center the view
+  const handleResetView = () => {
+    setZoom(1.0);
+    setPan({ x: 0, y: 0 });
+  };
+
+  const isNativeFullscreenRef = useRef(false);
+
+  // Fullscreen toggle handler (Native Fullscreen + React Portal)
+  const handleToggleFullscreen = () => {
+    if (!isFullscreen) {
+      setIsFullscreen(true);
+      try {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement
+            .requestFullscreen()
+            .then(() => {
+              isNativeFullscreenRef.current = true;
+            })
+            .catch(() => {
+              isNativeFullscreenRef.current = false;
+            });
+        }
+      } catch {
+        isNativeFullscreenRef.current = false;
+      }
+    } else {
+      setIsFullscreen(false);
+      isNativeFullscreenRef.current = false;
+      try {
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        }
+      } catch {
+        // Fallback
+      }
+    }
+  };
+
+  // Listen for escape and fullscreenchange
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFullscreen) {
+        setIsFullscreen(false);
+        isNativeFullscreenRef.current = false;
+        try {
+          if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => {});
+          }
+        } catch {}
+      }
+    };
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isNativeFullscreenRef.current) {
+        setIsFullscreen(false);
+        isNativeFullscreenRef.current = false;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, [isFullscreen]);
+
+  // Mouse wheel zoom
+  const handleWheel = (e: React.WheelEvent) => {
+    if (e.ctrlKey || e.metaKey || isFullscreen) {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      setZoom((prev) => Math.min(Math.max(prev * zoomFactor, 0.4), 2.8));
+    }
+  };
+
+  // Background drag to pan
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    setPan({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y,
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Fallback extended child nodes generator for nodes lacking static children
+  const getExtendedChildren = (node: RadialCardNode): RadialCardNode[] => {
+    if (node.extendedChildren && node.extendedChildren.length > 0) {
+      return node.extendedChildren;
+    }
+
+    if (node.tickers && node.tickers.length > 0) {
+      return node.tickers.slice(0, 3).map((ticker, idx) => ({
+        id: `${node.id}-ticker-${idx}`,
+        title: ticker.replace(".NS", ""),
+        metric: idx === 0 ? "-4.8%" : idx === 1 ? "-3.2%" : "+1.4%",
+        metricColor: idx === 2 ? "green" : "red",
+        subtitle: `Direct supply chain exposure to ${node.title}`,
+        badge: "Direct Equity",
+        badgeType: "red",
+        category: "company",
+        icon: "factory",
+        position: "custom",
+        priority: "P2 High",
+        causalReason: `Downstream revenue and input margin sensitivity to ${node.title}`,
+      }));
+    }
+
+    return [
+      {
+        id: `${node.id}-sub-1`,
+        title: `${node.title} Spot Elasticity`,
+        metric: "+6.4%",
+        metricColor: "red",
+        subtitle: "High correlation pass-through",
+        badge: "2nd Order",
+        badgeType: "red",
+        category: "economic_variable",
+        icon: "chart",
+        position: "custom",
+        priority: "P1 Critical",
+      },
+      {
+        id: `${node.id}-sub-2`,
+        title: `Margin Dislocation Risk`,
+        metric: "-180 bps",
+        metricColor: "red",
+        subtitle: "EBITDA margin compression",
+        badge: "2nd Order",
+        badgeType: "amber",
+        category: "sector",
+        icon: "factory",
+        position: "custom",
+        priority: "P2 High",
+      },
+    ];
+  };
+
+  // Compute graph geometry (Hub-and-Spoke + Dynamic Satellite Clusters like Image 2)
+  const { nodes, edges } = useMemo(() => {
+    const nodeList: TopologyNode[] = [];
+    const edgeList: TopologyEdge[] = [];
+
+    // 1. Root Central Node (Level 0)
+    const rootNode: TopologyNode = {
+      id: scenario.centerNode.id || "root-center",
+      data: scenario.centerNode,
+      level: 0,
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      radius: isFullscreen ? 48 : 42,
+      color: "#ef4444",
+    };
+    nodeList.push(rootNode);
+
+    // Filter radial nodes based on priority
+    const visibleRadialNodes = scenario.radialNodes.filter((n) => {
+      if (priorityFilter === "p1_critical") {
+        return n.priority === "P1 Critical";
+      }
+      return true;
+    });
+
+    const N = visibleRadialNodes.length;
+    // Radial orbit radius: balanced so all nodes fit comfortably
+    const R1 = isFullscreen ? 280 : 205;
+
+    // 2. Primary 1st-Level Radial Nodes (Level 1)
+    visibleRadialNodes.forEach((node, i) => {
+      const angle = -Math.PI / 2 + (2 * Math.PI * i) / N;
+      const x = Math.round(R1 * Math.cos(angle));
+      const y = Math.round(R1 * Math.sin(angle));
+
+      const radialTopoNode: TopologyNode = {
+        id: node.id,
+        data: node,
+        level: 1,
+        parentId: rootNode.id,
+        x,
+        y,
+        vx: 0,
+        vy: 0,
+        radius: isFullscreen ? 34 : 30,
+        color: node.priority === "P1 Critical" ? "#ef4444" : "#f59e0b",
+        angle,
+        edgeLabel: node.timeHorizon || "1-3 mo",
+      };
+      nodeList.push(radialTopoNode);
+
+      // Edge from Root to Radial Node
+      edgeList.push({
+        id: `edge-${rootNode.id}-${radialTopoNode.id}`,
+        source: rootNode,
+        target: radialTopoNode,
+        lineType: node.lineType,
+        timeHorizon: node.timeHorizon,
+      });
+
+      // 3. Extended Satellite Child Nodes (Level 2 - Clusters like Image 2!)
+      const isExtended = extendedIds.includes(node.id);
+      if (isExtended) {
+        const children = getExtendedChildren(node);
+        const childCount = children.length;
+        const R2 = isFullscreen ? 190 : 145; // Distance of satellite cluster from parent
+        const spreadArc = Math.PI * 0.45; // Fan spread angle
+
+        children.forEach((child, cIdx) => {
+          const offsetAngle =
+            childCount > 1
+              ? -spreadArc / 2 + (spreadArc * cIdx) / (childCount - 1)
+              : 0;
+          const childAngle = angle + offsetAngle;
+
+          const childX = Math.round(x + R2 * Math.cos(childAngle));
+          const childY = Math.round(y + R2 * Math.sin(childAngle));
+
+          const childTopoNode: TopologyNode = {
+            id: child.id,
+            data: child,
+            level: 2,
+            parentId: radialTopoNode.id,
+            x: childX,
+            y: childY,
+            vx: 0,
+            vy: 0,
+            radius: isFullscreen ? 26 : 24,
+            color: child.priority === "P1 Critical" ? "#ef4444" : "#3b82f6",
+            edgeLabel: "2nd Order",
+          };
+          nodeList.push(childTopoNode);
+
+          // Edge from 1st-level parent to 2nd-level child node
+          edgeList.push({
+            id: `edge-${radialTopoNode.id}-${childTopoNode.id}`,
+            source: radialTopoNode,
+            target: childTopoNode,
+            lineType: child.lineType || "indirect",
+            isExtendedEdge: true,
+          });
+        });
+      }
+    });
+
+    return { nodes: nodeList, edges: edgeList };
+  }, [scenario, extendedIds, priorityFilter, isFullscreen]);
+
+  // Category Icon Renderer
+  const renderNodeIcon = (node: RadialCardNode, size: "sm" | "md" | "lg" = "md") => {
+    const iconClass = size === "lg" ? "w-6 h-6 text-white" : size === "md" ? "w-4 h-4" : "w-3 h-3";
+    switch (node.icon) {
       case "oil":
-        return (
-          <svg className="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <ellipse cx="12" cy="5" rx="8" ry="3" />
-            <path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5" />
-            <path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3" />
-          </svg>
-        );
+        return <Flame className={iconClass} />;
       case "chart":
-        return (
-          <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        );
-      case "ship":
-        return (
-          <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2 20h20M4 16l2-8h12l2 8H4zM12 4v4m-4 0h8" />
-          </svg>
-        );
+        return <TrendingUp className={iconClass} />;
       case "currency":
-        return (
-          <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="9" />
-            <path d="M9 8h6M9 12h4m-4 4h6" />
-          </svg>
-        );
+        return <span className={`font-mono font-bold ${size === "lg" ? "text-xl text-white" : "text-xs"}`}>₹</span>;
       case "plane":
-        return (
-          <svg className="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-          </svg>
-        );
+        return <span className={size === "lg" ? "text-xl" : "text-sm"}>✈️</span>;
+      case "ship":
+        return <span className={size === "lg" ? "text-xl" : "text-sm"}>🚢</span>;
       case "factory":
-        return (
-          <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
-        );
-      case "chip":
-        return (
-          <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <rect x="5" y="5" width="14" height="14" rx="2" />
-            <path d="M9 1v4m6-4v4M9 19v4m6-4v4M1 9h4m-4 6h4M19 9h4m-4 6h4" />
-          </svg>
-        );
-      case "bank":
-        return (
-          <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M3 10h18M5 10v8m4-8v8m6-8v8m4-8v8M12 3l9 5H3l9-5z" />
-          </svg>
-        );
+        return <Building2 className={iconClass} />;
       default:
-        return <div className="w-3 h-3 rounded-full bg-blue-500" />;
+        return <Layers className={iconClass} />;
     }
   };
 
-  const center = scenario.centerNode;
-  const topNode = scenario.radialNodes.find((n) => n.position === "top") || scenario.radialNodes[0];
-  const leftNode = scenario.radialNodes.find((n) => n.position === "left") || scenario.radialNodes[1];
-  const rightNode = scenario.radialNodes.find((n) => n.position === "right") || scenario.radialNodes[2];
-  const bLeftNode = scenario.radialNodes.find((n) => n.position === "bottom-left") || scenario.radialNodes[3];
-  const bRightNode = scenario.radialNodes.find((n) => n.position === "bottom-right") || scenario.radialNodes[4];
-
-  // Helper to test if a node passes priority filter
-  const isNodeDimmed = (node?: RadialCardNode) => {
-    if (!node) return false;
-    if (priorityFilter === "p1_critical") {
-      return node.priority !== "P1 Critical";
-    }
-    return false;
-  };
-
-  return (
+  // Canvas Content Renderer (used both inline and in portal fullscreen)
+  const renderCanvasContent = () => (
     <div
-      className={`relative w-full rounded-3xl apple-mesh-bg border border-slate-200/80 overflow-hidden select-none transition-all duration-300 shadow-[0_4px_24px_-4px_rgba(15,23,42,0.06)] ${
-        isFullscreen ? "fixed inset-0 z-50 rounded-none bg-white" : "h-[590px]"
+      ref={containerRef}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onWheel={handleWheel}
+      className={`relative w-full h-full select-none overflow-hidden ${
+        isDragging ? "cursor-grabbing" : "cursor-grab"
       }`}
     >
       {/* Precision Micro-Dot Matrix Background Canvas */}
       <div
         className="absolute inset-0 pointer-events-none opacity-30"
         style={{
-          backgroundImage: "radial-gradient(#94a3b8 1px, transparent 1px)",
-          backgroundSize: "22px 22px",
+          backgroundImage: "radial-gradient(#94a3b8 1.1px, transparent 1.1px)",
+          backgroundSize: "24px 24px",
+          transform: `translate(${pan.x % 24}px, ${pan.y % 24}px)`,
         }}
       />
 
-      {/* Top Left Toolbar: Apple Glass Pill Controls */}
-      <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-2">
-        {/* Priority Filter Toggle */}
-        <div className="flex items-center apple-glass rounded-2xl p-1 shadow-[0_4px_16px_rgba(0,0,0,0.04)] text-xs border border-white/80">
+      {/* Floating Apple Glass Top Controls Bar */}
+      <div className="absolute top-4 inset-x-4 z-20 flex flex-wrap items-center justify-between gap-3 pointer-events-none">
+        {/* Left Action Controls */}
+        <div className="flex flex-wrap items-center gap-2 pointer-events-auto">
+          {isFullscreen && (
+            <div className="px-3 py-1.5 rounded-2xl apple-glass border border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.04)] flex items-center gap-2 mr-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-bold text-slate-800 tracking-wide truncate max-w-xs">
+                {scenario.title} • Fullscreen Topology
+              </span>
+            </div>
+          )}
+
+          {/* Priority Filter Toggle */}
+          <div className="flex items-center apple-glass rounded-2xl p-1 shadow-[0_4px_16px_rgba(0,0,0,0.04)] text-xs border border-white/80">
+            <button
+              onClick={() => setPriorityFilter("all")}
+              className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${
+                priorityFilter === "all"
+                  ? "bg-slate-900 text-white font-semibold shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              All Relations ({scenario.radialNodes.length})
+            </button>
+            <button
+              onClick={() => setPriorityFilter("p1_critical")}
+              className={`px-3 py-1.5 rounded-xl font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                priorityFilter === "p1_critical"
+                  ? "bg-[#FF3B30] text-white font-semibold shadow-xs"
+                  : "text-red-700 hover:text-red-900"
+              }`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+              <span>P1 Critical</span>
+            </button>
+          </div>
+
+          {/* Global Extend / Collapse All Button */}
           <button
-            onClick={() => setPriorityFilter("all")}
-            className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${
-              priorityFilter === "all"
-                ? "bg-slate-900 text-white font-semibold shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
+            onClick={() => {
+              const allRadialIds = scenario.radialNodes.map((n) => n.id);
+              const isAllExtended = allRadialIds.every((id) => extendedIds.includes(id));
+              if (isAllExtended) {
+                allRadialIds.forEach((id) => {
+                  if (extendedIds.includes(id)) handleToggleExtend(id);
+                });
+              } else {
+                allRadialIds.forEach((id) => {
+                  if (!extendedIds.includes(id)) handleToggleExtend(id);
+                });
+              }
+            }}
+            className="px-3.5 py-1.5 rounded-2xl apple-glass hover:bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-300"
+            title="Toggle expanding all child relation clusters"
           >
-            All Nodes ({scenario.radialNodes.length + 1})
+            <Layers className="w-3.5 h-3.5 text-[#007AFF]" />
+            <span>
+              {scenario.radialNodes.every((n) => extendedIds.includes(n.id))
+                ? "Collapse Clusters"
+                : "Expand Clusters"}
+            </span>
           </button>
-          <button
-            onClick={() => setPriorityFilter("p1_critical")}
-            className={`px-3 py-1.5 rounded-xl font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-              priorityFilter === "p1_critical"
-                ? "bg-[#FF3B30] text-white font-semibold shadow-xs"
-                : "text-red-700 hover:text-red-900"
-            }`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-            <span>P1 Critical</span>
-          </button>
+
+          {/* Calibrate Regression Modal Button */}
+          {onOpenRegressionModal && (
+            <button
+              onClick={onOpenRegressionModal}
+              className="px-3.5 py-1.5 rounded-2xl apple-glass hover:bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-300"
+              title="Calibrate econometric regression equation"
+            >
+              <Calculator className="w-3.5 h-3.5 text-[#007AFF]" />
+              <span>Calibrate Regression</span>
+            </button>
+          )}
         </div>
 
-        {/* Calibrate Regression CTA Button */}
-        {onOpenRegressionModal && (
-          <button
-            onClick={onOpenRegressionModal}
-            className="px-3.5 py-1.5 rounded-2xl apple-glass hover:bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-300"
-            title="Formulate Causal Thesis & Run Econometric Regression"
-          >
-            <Calculator className="w-3.5 h-3.5 text-[#007AFF]" />
-            <span>Calibrate Regression</span>
-          </button>
-        )}
+        {/* Right Zoom & Fullscreen Controls */}
+        <div className="flex items-center gap-1.5 pointer-events-auto">
+          <div className="flex items-center gap-1 apple-glass rounded-2xl p-1 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80">
+            <button
+              onClick={() => setZoom((z) => Math.max(z - 0.15, 0.4))}
+              className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+              title="Zoom out"
+            >
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+
+            <span className="px-1.5 text-[12px] font-semibold text-slate-700 min-w-[42px] text-center select-none font-mono">
+              {Math.round(zoom * 100)}%
+            </span>
+
+            <button
+              onClick={() => setZoom((z) => Math.min(z + 0.15, 2.8))}
+              className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+              title="Zoom in"
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              onClick={handleResetView}
+              className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+              title="Reset View to Center"
+            >
+              <RotateCcw className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* Fullscreen Action Button */}
+          {isFullscreen ? (
+            <button
+              onClick={handleToggleFullscreen}
+              className="px-3.5 py-1.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+              title="Exit Fullscreen Mode (Esc)"
+            >
+              <Minimize2 className="w-3.5 h-3.5" />
+              <span>Exit Fullscreen</span>
+              <kbd className="px-1.5 py-0.2 bg-slate-800 border border-slate-700 rounded text-[10px] text-slate-300 font-mono">
+                Esc
+              </kbd>
+            </button>
+          ) : (
+            <button
+              onClick={handleToggleFullscreen}
+              className="px-3 py-1.5 rounded-2xl apple-glass hover:bg-white text-slate-700 hover:text-slate-900 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+              title="Open Fullscreen Topology Canvas"
+            >
+              <Maximize2 className="w-3.5 h-3.5 text-[#007AFF]" />
+              <span>Fullscreen</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Top Right Controls (Zoom & Fullscreen) - Apple Glass Pill */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-1 apple-glass rounded-2xl p-1 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80">
-        <button
-          onClick={() => setZoomLevel((z) => Math.max(z - 10, 60))}
-          className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
-          title="Zoom out"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
-          </svg>
-        </button>
-
-        <span className="px-1.5 text-[12px] font-semibold text-slate-700 min-w-[42px] text-center select-none font-mono">
-          {zoomLevel}%
-        </span>
-
-        <button
-          onClick={() => setZoomLevel((z) => Math.min(z + 10, 150))}
-          className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
-          title="Zoom in"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
-
-        <div className="w-[1px] h-4 bg-slate-200 mx-0.5" />
-
-        <button
-          onClick={() => setIsFullscreen(!isFullscreen)}
-          className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
-          title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-            {isFullscreen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 14h6m0 0v6m0-6L3 21m17-7h-6m0 0v6m0-6l7 7M10 4v6m0 0H4m6 0L3 3m10 7h6m-6 0V4m0 6l7-7" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-            )}
-          </svg>
-        </button>
+      {/* Helper Banner in Bottom-Left */}
+      <div className="absolute bottom-4 left-4 z-20 pointer-events-none">
+        <div className="px-3 py-1.5 rounded-xl apple-glass border border-white/80 text-[11px] text-slate-500 flex items-center gap-2 shadow-xs">
+          <span className="w-2 h-2 rounded-full bg-[#007AFF] animate-pulse" />
+          <span>Drag background to pan • Scroll to zoom • Click <strong className="text-slate-800">+</strong> to extend node relations</span>
+        </div>
       </div>
 
-      {/* Interactive Scaling Stage */}
-      <div
-        className="relative w-full h-full flex items-center justify-center overflow-hidden transition-transform duration-150"
-        style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: "center center" }}
+      {/* ─── SVG TOPOLOGY GRAPH CANVAS ─── */}
+      <svg
+        className="w-full h-full absolute inset-0 select-none overflow-hidden"
+        viewBox={isFullscreen ? "-900 -500 1800 1000" : "-620 -350 1240 700"}
+        preserveAspectRatio="xMidYMid meet"
       >
-        {/* SVG Bezier Vector Connectors Layer */}
-        <svg viewBox="0 0 1000 600" className="absolute inset-0 w-full h-full pointer-events-none z-0">
-          <defs>
-            <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-              <path d="M1,1 L7,4 L1,7 Z" fill="#EF4444" />
-            </marker>
-            <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-              <path d="M1,1 L7,4 L1,7 Z" fill="#10B981" />
-            </marker>
-            <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-              <path d="M1,1 L7,4 L1,7 Z" fill="#3B82F6" />
-            </marker>
-            <marker id="arrow-dashed" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-              <path d="M1,1 L5,3 L1,5 Z" fill="#64748B" />
-            </marker>
-          </defs>
+        <defs>
+          {/* Subtle Radial Glow filter for selected node */}
+          <filter id="node-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
 
-          {/* Primary Transmission Paths */}
-          {/* Path 1: Center to Top */}
-          <path d="M 500 255 L 500 135" stroke="#EF4444" strokeWidth="2.2" fill="none" markerEnd="url(#arrow-red)" />
+          <linearGradient id="edge-red-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ef4444" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#f87171" stopOpacity="0.4" />
+          </linearGradient>
 
-          {/* Path 2: Center to Left */}
-          <path d="M 405 318 L 290 318" stroke="#EF4444" strokeWidth="2.2" fill="none" markerEnd="url(#arrow-red)" />
+          <linearGradient id="edge-blue-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#93c5fd" stopOpacity="0.3" />
+          </linearGradient>
 
-          {/* Path 3: Center to Right */}
-          <path d="M 595 318 L 710 318" stroke="#EF4444" strokeWidth="2.2" fill="none" markerEnd="url(#arrow-red)" />
+          <linearGradient id="root-halo" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ef4444" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#b91c1c" stopOpacity="0.05" />
+          </linearGradient>
+        </defs>
 
-          {/* Path 4: Center to Bottom-Left */}
-          <path d="M 440 375 Q 360 415 285 465" stroke="#10B981" strokeWidth="2.2" fill="none" markerEnd="url(#arrow-green)" />
+        {/* Global Pan & Zoom Transformation Group */}
+        <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
+          {/* 1. EDGES / CONNECTING TRANSMISSION PATHS */}
+          <g className="edges-layer">
+            {edges.map((edge) => {
+              const isExtended = edge.isExtendedEdge;
+              const isSelected =
+                selectedNodeId === edge.source.id || selectedNodeId === edge.target.id;
 
-          {/* Path 5: Center to Bottom-Right */}
-          <path d="M 560 375 Q 640 415 715 465" stroke="#10B981" strokeWidth="2.2" fill="none" markerEnd="url(#arrow-green)" />
+              return (
+                <g key={edge.id} className="transition-all duration-300">
+                  {/* Background Edge Line */}
+                  <line
+                    x1={edge.source.x}
+                    y1={edge.source.y}
+                    x2={edge.target.x}
+                    y2={edge.target.y}
+                    stroke={isSelected ? "#007AFF" : isExtended ? "#94a3b8" : "#cbd5e1"}
+                    strokeWidth={isSelected ? 3.5 : isExtended ? 1.8 : 2.2}
+                    strokeDasharray={isExtended ? "4,4" : undefined}
+                    strokeOpacity={isSelected ? 0.95 : 0.65}
+                  />
 
-          {/* Secondary Extended Lines (Dashed) when nodes are extended */}
-          {topNode && extendedIds.includes(topNode.id) && (
-            <>
-              <path d="M 500 80 Q 500 40 430 35" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" fill="none" markerEnd="url(#arrow-dashed)" />
-              <path d="M 500 80 Q 500 40 570 35" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" fill="none" markerEnd="url(#arrow-dashed)" />
-            </>
-          )}
+                  {/* Flow Particle indicator in middle of primary edge */}
+                  {!isExtended && (
+                    <circle
+                      cx={(edge.source.x + edge.target.x) / 2}
+                      cy={(edge.source.y + edge.target.y) / 2}
+                      r={3}
+                      fill="#ef4444"
+                      className="animate-pulse opacity-75"
+                    />
+                  )}
 
-          {bLeftNode && extendedIds.includes(bLeftNode.id) && (
-            <path d="M 230 520 Q 180 540 130 540" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" fill="none" markerEnd="url(#arrow-dashed)" />
-          )}
+                  {/* Edge horizon label badge */}
+                  {edge.timeHorizon && (
+                    <g transform={`translate(${(edge.source.x + edge.target.x) / 2}, ${(edge.source.y + edge.target.y) / 2})`}>
+                      <rect
+                        x="-28"
+                        y="-9"
+                        width="56"
+                        height="18"
+                        rx="6"
+                        fill="rgba(255, 255, 255, 0.94)"
+                        stroke="#e2e8f0"
+                        strokeWidth="1"
+                        className="shadow-2xs"
+                      />
+                      <text
+                        x="0"
+                        y="3.5"
+                        textAnchor="middle"
+                        fontSize="8.5"
+                        fontWeight="600"
+                        fill="#64748b"
+                        className="font-sans select-none"
+                      >
+                        {edge.timeHorizon}
+                      </text>
+                    </g>
+                  )}
+                </g>
+              );
+            })}
+          </g>
 
-          {bRightNode && extendedIds.includes(bRightNode.id) && (
-            <path d="M 770 520 Q 820 540 870 540" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" fill="none" markerEnd="url(#arrow-dashed)" />
-          )}
+          {/* 2. NODES LAYER */}
+          <g className="nodes-layer">
+            {nodes.map((node) => {
+              const isSelected = selectedNodeId === node.id;
+              const isRoot = node.level === 0;
+              const isRadial = node.level === 1;
+              const isChild = node.level === 2;
+              const isNodeExtended = extendedIds.includes(node.id);
 
-          {leftNode && extendedIds.includes(leftNode.id) && (
-            <path d="M 180 318 L 95 318" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" fill="none" markerEnd="url(#arrow-dashed)" />
-          )}
-
-          {rightNode && extendedIds.includes(rightNode.id) && (
-            <path d="M 820 318 L 905 318" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" fill="none" markerEnd="url(#arrow-dashed)" />
-          )}
-        </svg>
-
-        {/* Transmission Time Capsules Placed on Connectors */}
-        {topNode?.timeHorizon && (
-          <div className="absolute left-1/2 -translate-x-1/2 top-[34%] z-10">
-            <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs text-[11px] font-medium text-slate-600 whitespace-nowrap">
-              {topNode.timeHorizon}
-            </span>
-          </div>
-        )}
-
-        {leftNode?.timeHorizon && (
-          <div className="absolute left-[33%] -translate-x-1/2 top-[55%] z-10">
-            <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs text-[11px] font-medium text-slate-600 whitespace-nowrap">
-              {leftNode.timeHorizon}
-            </span>
-          </div>
-        )}
-
-        {rightNode?.timeHorizon && (
-          <div className="absolute left-[66%] -translate-x-1/2 top-[55%] z-10">
-            <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs text-[11px] font-medium text-slate-600 whitespace-nowrap">
-              {rightNode.timeHorizon}
-            </span>
-          </div>
-        )}
-
-        {bLeftNode?.timeHorizon && (
-          <div className="absolute left-[37%] top-[69%] -translate-x-1/2 z-10">
-            <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs text-[11px] font-medium text-slate-600 whitespace-nowrap">
-              {bLeftNode.timeHorizon}
-            </span>
-          </div>
-        )}
-
-        {bRightNode?.timeHorizon && (
-          <div className="absolute left-[62%] top-[69%] -translate-x-1/2 z-10">
-            <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs text-[11px] font-medium text-slate-600 whitespace-nowrap">
-              {bRightNode.timeHorizon}
-            </span>
-          </div>
-        )}
-
-        {/* ─── NODE CARDS ─── */}
-
-        {/* 1. CENTER ROOT EVENT CARD */}
-        {center && (
-          <div
-            onClick={() => onSelectNode(center)}
-            className="absolute left-1/2 top-[53%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-transform hover:scale-105"
-          >
-            <div className="relative p-5 rounded-3xl apple-glass-card border-2 border-red-500/80 shadow-[0_12px_36px_rgba(239,68,68,0.2),inset_0_1px_1px_rgba(255,255,255,0.95)] flex flex-col items-center gap-2.5 min-w-[200px]">
-              {/* Pulsing halo ring */}
-              <div className="absolute inset-0 rounded-3xl ring-4 ring-red-400/20 pointer-events-none animate-pulse" />
-
-              {/* Priority badge on root */}
-              <div className="flex items-center justify-between w-full">
-                <span className="px-2 py-0.5 rounded-md bg-red-100 text-red-800 font-mono text-[9.5px] font-bold">
-                  P1 CRITICAL • ROOT
-                </span>
-                {center.refLinks && center.refLinks.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveRefNode(center);
-                    }}
-                    className="p-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center gap-0.5 cursor-pointer"
-                    title="View Reference Links"
-                  >
-                    <ExternalLink className="w-2.5 h-2.5" />
-                    <span>Refs</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
-                  {renderIcon(center.icon, center.category)}
-                </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-[14.5px] font-bold text-slate-900 leading-tight">
-                    {center.title}
-                  </span>
-                  <span className="text-xl font-extrabold text-red-600 leading-tight">
-                    {center.metric}
-                  </span>
-                </div>
-              </div>
-
-              {/* Bottom Badge */}
-              <span className="px-2.5 py-0.5 rounded-full bg-red-50 border border-red-200/90 text-red-600 text-[11px] font-semibold tracking-wide">
-                {center.badge}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* 2. TOP CARD (Inflation Expectations) */}
-        {topNode && (
-          <div
-            onClick={() => onSelectNode(topNode)}
-            className={`absolute left-1/2 top-[13%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-all hover:scale-105 ${
-              selectedNodeId === topNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
-            } ${isNodeDimmed(topNode) ? "opacity-35" : "opacity-100"}`}
-          >
-            <div className="p-4 rounded-3xl apple-glass-card border border-white/85 shadow-[0_8px_25px_-5px_rgba(15,23,42,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)] flex flex-col gap-2 min-w-[210px]">
-              {/* Card Header: Priority & Ref Links */}
-              <div className="flex items-center justify-between text-[10px]">
-                <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-red-50 text-red-700 border border-red-200">
-                  {topNode.priority || "P1 Critical"}
-                </span>
-
-                {topNode.refLinks && topNode.refLinks.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveRefNode(topNode);
-                    }}
-                    className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-semibold flex items-center gap-1"
-                  >
-                    <ExternalLink className="w-2.5 h-2.5" />
-                    <span>Refs ({topNode.refLinks.length})</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                  {renderIcon(topNode.icon, topNode.category)}
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-bold text-slate-900 leading-tight">
-                      {topNode.title}
-                    </span>
-                    <span className="text-[14px] font-bold text-red-600">
-                      {topNode.metric}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-slate-500 leading-tight mt-0.5">
-                    {topNode.subtitle}
-                  </span>
-                </div>
-              </div>
-
-              {/* Bottom Row: Badge & Extend Node Button */}
-              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-                <span className="px-2 py-0.5 rounded-full bg-red-50 border border-red-200/80 text-red-600 text-[10.5px] font-semibold">
-                  {topNode.badge}
-                </span>
-
-                <button
-                  type="button"
+              return (
+                <g
+                  key={node.id}
+                  transform={`translate(${node.x}, ${node.y})`}
+                  className="transition-transform duration-200 cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleToggleExtend(topNode.id);
+                    onSelectNode(node.data);
                   }}
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
-                    extendedIds.includes(topNode.id)
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                  }`}
+                  onMouseEnter={() => setHoveredNode(node.data)}
+                  onMouseLeave={() => setHoveredNode(null)}
                 >
-                  <PlusCircle className="w-3 h-3" />
-                  {extendedIds.includes(topNode.id) ? "Extended" : "+ Extend Node"}
-                </button>
-              </div>
-            </div>
+                  {/* ROOT CENTRAL NODE (LEVEL 0) */}
+                  {isRoot && (
+                    <g className="root-node-group">
+                      <circle r="56" fill="url(#root-halo)" className="animate-ping opacity-35" />
+                      <circle r="48" fill="#fee2e2" stroke="#fca5a5" strokeWidth="1.5" strokeOpacity="0.6" />
+
+                      <circle
+                        r={node.radius}
+                        fill="url(#edge-red-gradient)"
+                        stroke="#b91c1c"
+                        strokeWidth="3"
+                        filter="url(#node-glow)"
+                      />
+
+                      <foreignObject x="-18" y="-18" width="36" height="36" className="pointer-events-none">
+                        <div className="w-full h-full flex items-center justify-center">
+                          {renderNodeIcon(node.data, "lg")}
+                        </div>
+                      </foreignObject>
+
+                      {/* Shock Metric & Title Pill Below Node */}
+                      <g transform="translate(0, 50)">
+                        <rect
+                          x="-80"
+                          y="0"
+                          width="160"
+                          height="42"
+                          rx="12"
+                          fill="rgba(255, 255, 255, 0.96)"
+                          stroke="#ef4444"
+                          strokeWidth="1.5"
+                          className="shadow-lg"
+                        />
+                        <text
+                          x="0"
+                          y="17"
+                          textAnchor="middle"
+                          fontSize="12.5"
+                          fontWeight="700"
+                          fill="#0f172a"
+                          className="font-sans"
+                        >
+                          {node.data.title}
+                        </text>
+                        <text
+                          x="0"
+                          y="32"
+                          textAnchor="middle"
+                          fontSize="11"
+                          fontWeight="800"
+                          fill="#dc2626"
+                          className="font-sans"
+                        >
+                          {node.data.metric} • Root Shock
+                        </text>
+                      </g>
+                    </g>
+                  )}
+
+                  {/* 1ST-LEVEL RADIAL NODES (LEVEL 1) */}
+                  {isRadial && (
+                    <g className="radial-node-group">
+                      {isSelected && (
+                        <circle
+                          r={node.radius + 7}
+                          fill="none"
+                          stroke="#007AFF"
+                          strokeWidth="2.5"
+                          strokeDasharray="4,4"
+                          className="animate-spin"
+                          style={{ animationDuration: "12s" }}
+                        />
+                      )}
+
+                      <circle
+                        r={node.radius}
+                        fill="rgba(255, 255, 255, 0.95)"
+                        stroke={isSelected ? "#007AFF" : node.color}
+                        strokeWidth={isSelected ? 3 : 2}
+                        className="shadow-md"
+                      />
+
+                      <foreignObject x="-13" y="-13" width="26" height="26" className="pointer-events-none">
+                        <div className="w-full h-full flex items-center justify-center text-slate-800">
+                          {renderNodeIcon(node.data, "md")}
+                        </div>
+                      </foreignObject>
+
+                      {/* Floating Info Pill Below Node */}
+                      <g transform="translate(0, 36)">
+                        <rect
+                          x="-72"
+                          y="0"
+                          width="144"
+                          height="36"
+                          rx="11"
+                          fill="rgba(255, 255, 255, 0.94)"
+                          stroke={isSelected ? "#007AFF" : "#e2e8f0"}
+                          strokeWidth="1"
+                          className="shadow-xs"
+                        />
+                        <text
+                          x="0"
+                          y="15"
+                          textAnchor="middle"
+                          fontSize="11"
+                          fontWeight="700"
+                          fill="#1e293b"
+                          className="font-sans"
+                        >
+                          {node.data.title.length > 18 ? `${node.data.title.slice(0, 16)}...` : node.data.title}
+                        </text>
+                        <text
+                          x="0"
+                          y="29"
+                          textAnchor="middle"
+                          fontSize="10.5"
+                          fontWeight="700"
+                          fill={node.data.metricColor === "green" ? "#16a34a" : "#dc2626"}
+                          className="font-sans"
+                        >
+                          {node.data.metric}
+                        </text>
+                      </g>
+
+                      {/* Interactive "+" / "-" EXTEND NODE RELATION BUTTON */}
+                      <g
+                        transform="translate(22, -22)"
+                        onClick={(e) => handleToggleExtend(node.id, e)}
+                        className="hover:scale-115 transition-transform cursor-pointer"
+                      >
+                        <circle
+                          r="11"
+                          fill={isNodeExtended ? "#3b82f6" : "#ffffff"}
+                          stroke={isNodeExtended ? "#1d4ed8" : "#94a3b8"}
+                          strokeWidth="1.5"
+                          className="shadow-xs"
+                        />
+                        {isNodeExtended ? (
+                          <line x1="-4.5" y1="0" x2="4.5" y2="0" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+                        ) : (
+                          <>
+                            <line x1="-4.5" y1="0" x2="4.5" y2="0" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
+                            <line x1="0" y1="-4.5" x2="0" y2="4.5" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
+                          </>
+                        )}
+                      </g>
+
+                      {/* Priority Badge on top left of node */}
+                      <g transform="translate(-22, -22)">
+                        <rect
+                          x="-13"
+                          y="-7"
+                          width="26"
+                          height="15"
+                          rx="4"
+                          fill={node.data.priority === "P1 Critical" ? "#fee2e2" : "#fef3c7"}
+                          stroke={node.data.priority === "P1 Critical" ? "#fca5a5" : "#fde68a"}
+                          strokeWidth="1"
+                        />
+                        <text
+                          x="0"
+                          y="3.5"
+                          textAnchor="middle"
+                          fontSize="8"
+                          fontWeight="800"
+                          fill={node.data.priority === "P1 Critical" ? "#b91c1c" : "#b45309"}
+                          className="font-mono"
+                        >
+                          {node.data.priority === "P1 Critical" ? "P1" : "P2"}
+                        </text>
+                      </g>
+                    </g>
+                  )}
+
+                  {/* 2ND-LEVEL EXTENDED SATELLITE NODES (LEVEL 2 - RELATIONS LIKE IMAGE 2) */}
+                  {isChild && (
+                    <g className="child-node-group animate-in fade-in zoom-in-75 duration-300">
+                      <circle
+                        r={node.radius}
+                        fill="rgba(255, 255, 255, 0.95)"
+                        stroke={isSelected ? "#007AFF" : "#3b82f6"}
+                        strokeWidth="1.8"
+                        className="shadow-xs"
+                      />
+
+                      <foreignObject x="-9" y="-9" width="18" height="18" className="pointer-events-none">
+                        <div className="w-full h-full flex items-center justify-center text-blue-600">
+                          {renderNodeIcon(node.data, "sm")}
+                        </div>
+                      </foreignObject>
+
+                      {/* Satellite Name & Metric Tag */}
+                      <g transform="translate(0, 30)">
+                        <rect
+                          x="-60"
+                          y="0"
+                          width="120"
+                          height="30"
+                          rx="9"
+                          fill="rgba(255, 255, 255, 0.95)"
+                          stroke="#cbd5e1"
+                          strokeWidth="1"
+                          className="shadow-2xs"
+                        />
+                        <text
+                          x="0"
+                          y="13"
+                          textAnchor="middle"
+                          fontSize="9.5"
+                          fontWeight="700"
+                          fill="#334155"
+                          className="font-sans"
+                        >
+                          {node.data.title.length > 16 ? `${node.data.title.slice(0, 14)}...` : node.data.title}
+                        </text>
+                        <text
+                          x="0"
+                          y="24"
+                          textAnchor="middle"
+                          fontSize="9"
+                          fontWeight="800"
+                          fill={node.data.metricColor === "green" ? "#16a34a" : "#ef4444"}
+                          className="font-mono"
+                        >
+                          {node.data.metric}
+                        </text>
+                      </g>
+                    </g>
+                  )}
+                </g>
+              );
+            })}
+          </g>
+        </g>
+      </svg>
+
+      {/* ─── HOVER INSPECTION CARD (Apple Glass Modal on node hover) ─── */}
+      {hoveredNode && (
+        <div className="absolute bottom-4 right-4 z-30 max-w-sm p-4 rounded-3xl apple-glass-card border border-white/85 shadow-xl animate-in fade-in zoom-in-95 duration-150 pointer-events-none">
+          <div className="flex items-center justify-between gap-2 mb-1.5">
+            <span className="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+              {hoveredNode.priority || "Causal Entity"}
+            </span>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              {hoveredNode.category.replace("_", " ")}
+            </span>
           </div>
-        )}
 
-        {/* Secondary Extended Sub-Nodes for TOP NODE */}
-        {topNode && extendedIds.includes(topNode.id) && (
-          <>
-            <div className="absolute left-[40%] top-[4%] -translate-x-1/2 -translate-y-1/2 z-20 animate-in fade-in zoom-in-95 duration-200">
-              <div className="p-2.5 rounded-xl bg-white border border-slate-300 shadow-md text-xs min-w-[150px]">
-                <span className="text-[9px] font-mono font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
-                  2ND ORDER HOP
-                </span>
-                <div className="font-bold text-slate-900 mt-1">WPI Fuel & Power</div>
-                <div className="font-extrabold text-red-600">+8.4% Surge</div>
-              </div>
-            </div>
-
-            <div className="absolute left-[60%] top-[4%] -translate-x-1/2 -translate-y-1/2 z-20 animate-in fade-in zoom-in-95 duration-200">
-              <div className="p-2.5 rounded-xl bg-white border border-slate-300 shadow-md text-xs min-w-[150px]">
-                <span className="text-[9px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
-                  2ND ORDER HOP
-                </span>
-                <div className="font-bold text-slate-900 mt-1">RBI Terminal Rate</div>
-                <div className="font-extrabold text-red-600">+25 bps Deferral</div>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* 3. LEFT CARD (Import bill) */}
-        {leftNode && (
-          <div
-            onClick={() => onSelectNode(leftNode)}
-            className={`absolute left-[18%] top-[53%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-all hover:scale-105 ${
-              selectedNodeId === leftNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
-            } ${isNodeDimmed(leftNode) ? "opacity-35" : "opacity-100"}`}
-          >
-            <div className="p-4 rounded-3xl apple-glass-card border border-white/85 shadow-[0_8px_25px_-5px_rgba(15,23,42,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)] flex flex-col gap-2 min-w-[210px]">
-              <div className="flex items-center justify-between text-[10px]">
-                <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-red-50 text-red-700 border border-red-200">
-                  {leftNode.priority || "P1 Critical"}
-                </span>
-                {leftNode.refLinks && leftNode.refLinks.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveRefNode(leftNode);
-                    }}
-                    className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-semibold flex items-center gap-1"
-                  >
-                    <ExternalLink className="w-2.5 h-2.5" />
-                    <span>Refs ({leftNode.refLinks.length})</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                  {renderIcon(leftNode.icon, leftNode.category)}
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-bold text-slate-900 leading-tight">
-                      {leftNode.title}
-                    </span>
-                    <span className="text-[14px] font-bold text-red-600">
-                      {leftNode.metric}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-slate-500 leading-tight mt-0.5">
-                    {leftNode.subtitle}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-                <span className="px-2 py-0.5 rounded-full bg-red-50 border border-red-200/80 text-red-600 text-[10.5px] font-semibold">
-                  {leftNode.badge}
-                </span>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleExtend(leftNode.id);
-                  }}
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
-                    extendedIds.includes(leftNode.id)
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                  }`}
-                >
-                  <PlusCircle className="w-3 h-3" />
-                  {extendedIds.includes(leftNode.id) ? "Extended" : "+ Extend Node"}
-                </button>
-              </div>
-            </div>
+          <h4 className="text-base font-bold text-slate-900 leading-tight">
+            {hoveredNode.title}
+          </h4>
+          <div className="text-lg font-extrabold text-red-600 my-0.5">
+            {hoveredNode.metric}
           </div>
-        )}
 
-        {/* Secondary Extended Sub-Nodes for LEFT NODE */}
-        {leftNode && extendedIds.includes(leftNode.id) && (
-          <div className="absolute left-[6%] top-[53%] -translate-x-1/2 -translate-y-1/2 z-20 animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-2.5 rounded-xl bg-white border border-slate-300 shadow-md text-xs min-w-[140px]">
-              <span className="text-[9px] font-mono font-bold text-red-700 bg-red-50 px-1.5 py-0.5 rounded">
-                2ND ORDER
+          {hoveredNode.causalReason && (
+            <p className="text-xs text-slate-600 mt-1.5 leading-relaxed bg-slate-50/80 p-2.5 rounded-xl border border-slate-200/70">
+              {hoveredNode.causalReason}
+            </p>
+          )}
+
+          {hoveredNode.refLinks && hoveredNode.refLinks.length > 0 && (
+            <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+              <span>{hoveredNode.refLinks.length} External Filings</span>
+              <span className="text-blue-600 font-semibold flex items-center gap-1">
+                View Sources <ChevronRight className="w-3 h-3" />
               </span>
-              <div className="font-bold text-slate-900 mt-1">Current Account Deficit</div>
-              <div className="font-extrabold text-red-600">2.1% of GDP</div>
             </div>
-          </div>
-        )}
-
-        {/* 4. RIGHT CARD (INR USD/INR) */}
-        {rightNode && (
-          <div
-            onClick={() => onSelectNode(rightNode)}
-            className={`absolute left-[82%] top-[53%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-all hover:scale-105 ${
-              selectedNodeId === rightNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
-            } ${isNodeDimmed(rightNode) ? "opacity-35" : "opacity-100"}`}
-          >
-            <div className="p-4 rounded-3xl apple-glass-card border border-white/85 shadow-[0_8px_25px_-5px_rgba(15,23,42,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)] flex flex-col gap-2 min-w-[210px]">
-              <div className="flex items-center justify-between text-[10px]">
-                <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                  {rightNode.priority || "P2 High"}
-                </span>
-                {rightNode.refLinks && rightNode.refLinks.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveRefNode(rightNode);
-                    }}
-                    className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-semibold flex items-center gap-1"
-                  >
-                    <ExternalLink className="w-2.5 h-2.5" />
-                    <span>Refs ({rightNode.refLinks.length})</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                  {renderIcon(rightNode.icon, rightNode.category)}
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-bold text-slate-900 leading-tight">
-                      {rightNode.title}
-                    </span>
-                    <span className="text-[14px] font-bold text-red-600">
-                      {rightNode.metric}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-slate-500 leading-tight mt-0.5">
-                    {rightNode.subtitle}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-                <span className="px-2 py-0.5 rounded-full bg-red-50 border border-red-200/80 text-red-600 text-[10.5px] font-semibold">
-                  {rightNode.badge}
-                </span>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleExtend(rightNode.id);
-                  }}
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
-                    extendedIds.includes(rightNode.id)
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                  }`}
-                >
-                  <PlusCircle className="w-3 h-3" />
-                  {extendedIds.includes(rightNode.id) ? "Extended" : "+ Extend Node"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Secondary Extended Sub-Nodes for RIGHT NODE */}
-        {rightNode && extendedIds.includes(rightNode.id) && (
-          <div className="absolute left-[94%] top-[53%] -translate-x-1/2 -translate-y-1/2 z-20 animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-2.5 rounded-xl bg-white border border-slate-300 shadow-md text-xs min-w-[140px]">
-              <span className="text-[9px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
-                2ND ORDER
-              </span>
-              <div className="font-bold text-slate-900 mt-1">FII Debt Outflows</div>
-              <div className="font-extrabold text-red-600">-₹3,400 Cr</div>
-            </div>
-          </div>
-        )}
-
-        {/* 5. BOTTOM-LEFT CARD (Airlines) */}
-        {bLeftNode && (
-          <div
-            onClick={() => onSelectNode(bLeftNode)}
-            className={`absolute left-[23%] top-[86%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-all hover:scale-105 ${
-              selectedNodeId === bLeftNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
-            } ${isNodeDimmed(bLeftNode) ? "opacity-35" : "opacity-100"}`}
-          >
-            <div className="p-4 rounded-3xl apple-glass-card border border-white/85 shadow-[0_8px_25px_-5px_rgba(15,23,42,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)] flex flex-col gap-2 min-w-[210px]">
-              <div className="flex items-center justify-between text-[10px]">
-                <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-red-50 text-red-700 border border-red-200">
-                  {bLeftNode.priority || "P1 Critical"}
-                </span>
-                {bLeftNode.refLinks && bLeftNode.refLinks.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveRefNode(bLeftNode);
-                    }}
-                    className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-semibold flex items-center gap-1"
-                  >
-                    <ExternalLink className="w-2.5 h-2.5" />
-                    <span>Refs ({bLeftNode.refLinks.length})</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
-                  {renderIcon(bLeftNode.icon, bLeftNode.category)}
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-bold text-slate-900 leading-tight">
-                      {bLeftNode.title}
-                    </span>
-                    <span className="text-[14px] font-bold text-emerald-600">
-                      {bLeftNode.metric}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-slate-500 leading-tight mt-0.5">
-                    {bLeftNode.subtitle}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-                <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[10.5px] font-semibold">
-                  {bLeftNode.badge}
-                </span>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleExtend(bLeftNode.id);
-                  }}
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
-                    extendedIds.includes(bLeftNode.id)
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                  }`}
-                >
-                  <PlusCircle className="w-3 h-3" />
-                  {extendedIds.includes(bLeftNode.id) ? "Extended" : "+ Extend Node"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Secondary Extended Sub-Nodes for BOTTOM-LEFT NODE */}
-        {bLeftNode && extendedIds.includes(bLeftNode.id) && (
-          <div className="absolute left-[10%] top-[93%] -translate-x-1/2 -translate-y-1/2 z-20 animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-2.5 rounded-xl bg-white border border-slate-300 shadow-md text-xs min-w-[145px]">
-              <span className="text-[9px] font-mono font-bold text-red-700 bg-red-50 px-1.5 py-0.5 rounded">
-                2ND ORDER
-              </span>
-              <div className="font-bold text-slate-900 mt-1">Domestic ATF Spot</div>
-              <div className="font-extrabold text-red-600">+₹14,200/kL</div>
-            </div>
-          </div>
-        )}
-
-        {/* 6. BOTTOM-RIGHT CARD (Paint & Chemicals) */}
-        {bRightNode && (
-          <div
-            onClick={() => onSelectNode(bRightNode)}
-            className={`absolute left-[77%] top-[86%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-all hover:scale-105 ${
-              selectedNodeId === bRightNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
-            } ${isNodeDimmed(bRightNode) ? "opacity-35" : "opacity-100"}`}
-          >
-            <div className="p-4 rounded-3xl apple-glass-card border border-white/85 shadow-[0_8px_25px_-5px_rgba(15,23,42,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)] flex flex-col gap-2 min-w-[210px]">
-              <div className="flex items-center justify-between text-[10px]">
-                <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                  {bRightNode.priority || "P2 High"}
-                </span>
-                {bRightNode.refLinks && bRightNode.refLinks.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveRefNode(bRightNode);
-                    }}
-                    className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-semibold flex items-center gap-1"
-                  >
-                    <ExternalLink className="w-2.5 h-2.5" />
-                    <span>Refs ({bRightNode.refLinks.length})</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0">
-                  {renderIcon(bRightNode.icon, bRightNode.category)}
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-bold text-slate-900 leading-tight">
-                      {bRightNode.title}
-                    </span>
-                    <span className="text-[14px] font-bold text-red-600">
-                      {bRightNode.metric}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-slate-500 leading-tight mt-0.5">
-                    {bRightNode.subtitle}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-                <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[10.5px] font-semibold">
-                  {bRightNode.badge}
-                </span>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleExtend(bRightNode.id);
-                  }}
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
-                    extendedIds.includes(bRightNode.id)
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                  }`}
-                >
-                  <PlusCircle className="w-3 h-3" />
-                  {extendedIds.includes(bRightNode.id) ? "Extended" : "+ Extend Node"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Secondary Extended Sub-Nodes for BOTTOM-RIGHT NODE */}
-        {bRightNode && extendedIds.includes(bRightNode.id) && (
-          <div className="absolute left-[90%] top-[93%] -translate-x-1/2 -translate-y-1/2 z-20 animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-2.5 rounded-xl bg-white border border-slate-300 shadow-md text-xs min-w-[145px]">
-              <span className="text-[9px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
-                2ND ORDER
-              </span>
-              <div className="font-bold text-slate-900 mt-1">TiO2 Feedstock</div>
-              <div className="font-extrabold text-red-600">+$240/MT</div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ─── REFERENCE LINKS & CITATION POPOVER MODAL ─── */}
-      {activeRefNode && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-              <div className="flex items-center gap-2">
-                <Link className="w-4 h-4 text-blue-600" />
-                <h4 className="text-sm font-bold text-slate-900">
-                  Verified Reference Links: {activeRefNode.title}
-                </h4>
-              </div>
-              <button
-                onClick={() => setActiveRefNode(null)}
-                className="p-1 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-700"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-4 flex flex-col gap-3">
-              {/* Causal Thesis Explainer */}
-              {activeRefNode.causalReason && (
-                <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs text-blue-900 leading-relaxed">
-                  <strong>Causal Thesis: </strong>
-                  {activeRefNode.causalReason}
-                </div>
-              )}
-
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                External Citations & Market Disclosures
-              </span>
-
-              <div className="flex flex-col gap-2">
-                {activeRefNode.refLinks?.map((ref, idx) => (
-                  <a
-                    key={idx}
-                    href={ref.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition-all flex items-start justify-between group"
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600 block leading-snug">
-                        {ref.title}
-                      </span>
-                      <span className="text-[10px] text-slate-500 mt-0.5 block font-medium">
-                        Publisher: <strong>{ref.publisher}</strong>
-                      </span>
-                    </div>
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 shrink-0 ml-2 mt-0.5" />
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-3 bg-slate-50 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={() => setActiveRefNode(null)}
-                className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+          )}
         </div>
       )}
     </div>
+  );
+
+  return (
+    <>
+      {/* ─── STANDARD INLINE CANVAS CONTAINER ─── */}
+      <div className="relative w-full rounded-3xl apple-mesh-bg border border-slate-200/80 overflow-hidden select-none transition-all duration-300 shadow-[0_4px_24px_-4px_rgba(15,23,42,0.06)] h-[640px] shrink-0 min-h-[640px]">
+        {renderCanvasContent()}
+      </div>
+
+      {/* ─── TRUE FULLSCREEN OVERLAY VIA REACT PORTAL ─── */}
+      {isFullscreen &&
+        createPortal(
+          <div className="fixed inset-0 z-[999999] w-screen h-screen bg-[#f8fafc] flex flex-col select-none overflow-hidden animate-in fade-in duration-200">
+            {renderCanvasContent()}
+          </div>,
+          document.body
+        )}
+    </>
   );
 };

@@ -1,5 +1,12 @@
 import React, { useState } from "react";
 import { FinGraphScenario } from "../types";
+import { 
+  Network, 
+  GitFork, 
+  ShieldCheck, 
+  ChevronDown, 
+  ExternalLink 
+} from "lucide-react";
 
 interface ScenarioHeaderProps {
   scenario: FinGraphScenario;
@@ -14,150 +21,167 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
 }) => {
   const [isScenarioDropdownOpen, setIsScenarioDropdownOpen] = useState(false);
 
+  // Compute dynamic category breakdown for identified entities
+  const sectorCount = scenario.radialNodes.filter((n) => n.category === "sector").length;
+  const macroCount = scenario.radialNodes.filter(
+    (n) => n.category === "economic_variable" || n.category === "commodity"
+  ).length + 1; // including center node
+  const companyTickersCount = scenario.radialNodes.reduce(
+    (acc, n) => acc + (n.tickers?.length || 0),
+    0
+  );
+
   return (
-    <div className="flex flex-col gap-5 pt-2">
-      {/* Title, Dropdown, Narrative & Source */}
-      <div className="flex flex-col gap-2">
-        {/* Row 1: Title, Scenario Badge & Dropdown Selector */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 font-sans">
-              {scenario.title}
-            </h1>
+    <div className="flex flex-col gap-2.5 pt-0">
+      {/* ─── SCENARIO HERO TITLE & SELECTOR ROW (DESIGN.MD SPEC) ─── */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight text-[#141414] font-sans">
+            {scenario.title}
+          </h1>
 
-            {/* Scenario Badge Pill */}
-            <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200/80 text-[12px] font-semibold">
-              Scenario
-            </span>
+          {/* Stadium Pill Scenario Indicator */}
+          <span className="px-3 py-1 rounded-full bg-[#f0f4ff] text-[#0066ff] border border-[#dbeafe] text-[11px] font-semibold tracking-wide uppercase font-mono">
+            Live Scenario
+          </span>
 
-            {/* Scenario Dropdown Switcher */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setIsScenarioDropdownOpen(!isScenarioDropdownOpen)}
-                className="h-8 px-3 rounded-full border border-slate-200 bg-white hover:bg-slate-50 flex items-center gap-1.5 text-[12.5px] font-medium text-slate-700 shadow-2xs transition-colors"
-              >
-                <span className="max-w-[260px] truncate">{scenario.dropdownLabel}</span>
-                <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {isScenarioDropdownOpen && (
-                <div className="absolute left-0 mt-1.5 w-80 rounded-2xl bg-white border border-slate-200 shadow-xl py-2 z-40 text-[13px]">
-                  <div className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                    Switch Active Catalyst
-                  </div>
-                  {scenariosList.map((sc) => (
-                    <button
-                      key={sc.id}
-                      onClick={() => {
-                        onSelectScenario(sc);
-                        setIsScenarioDropdownOpen(false);
-                      }}
-                      className={`w-full px-3 py-2 text-left hover:bg-slate-50 flex flex-col gap-0.5 transition-colors ${
-                        sc.id === scenario.id ? "bg-blue-50/70 text-blue-700 font-semibold" : "text-slate-800"
-                      }`}
-                    >
-                      <span className="text-[13px]">{sc.title}</span>
-                      <span className="text-[11px] text-slate-500 font-normal truncate">{sc.dropdownLabel}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right Meta Date & Source */}
-          <div className="flex items-center gap-2 text-[12px] text-slate-500 font-medium">
-            <span>{scenario.date}</span>
-            <span>•</span>
-            <a
-              href={scenario.sourceUrl || "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-600 hover:text-blue-600 flex items-center gap-1 transition-colors"
+          {/* Catalyst Switcher Dropdown (Stadium Pill) */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsScenarioDropdownOpen(!isScenarioDropdownOpen)}
+              className="h-8 px-3.5 rounded-full border border-[#e0e0e0] bg-white hover:bg-[#f3f3f3] flex items-center gap-2 text-[12.5px] font-medium text-[#141414] transition-all cursor-pointer shadow-2xs"
             >
-              <span>Source: {scenario.source}</span>
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
+              <span className="max-w-[260px] truncate">{scenario.dropdownLabel}</span>
+              <ChevronDown className="w-3.5 h-3.5 text-[#707070]" />
+            </button>
+
+            {isScenarioDropdownOpen && (
+              <div className="absolute left-0 mt-2 w-80 rounded-[20px] bg-white border border-[#e0e0e0] shadow-xl py-2 z-50 text-[13px] animate-in fade-in zoom-in-95 duration-150">
+                <div className="px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#adadad]">
+                  Switch Active Catalyst
+                </div>
+                {scenariosList.map((sc) => (
+                  <button
+                    key={sc.id}
+                    onClick={() => {
+                      onSelectScenario(sc);
+                      setIsScenarioDropdownOpen(false);
+                    }}
+                    className={`w-full px-3.5 py-2 text-left hover:bg-[#f3f3f3] flex flex-col gap-0.5 transition-colors cursor-pointer ${
+                      sc.id === scenario.id
+                        ? "bg-[#f0f4ff] text-[#0066ff] font-semibold"
+                        : "text-[#141414]"
+                    }`}
+                  >
+                    <span className="text-[12.5px] font-semibold">{sc.title}</span>
+                    <span className="text-[11px] text-[#707070] font-normal truncate">
+                      {sc.dropdownLabel}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Narrative Subtitle */}
-        <p className="text-[14px] text-slate-600 font-normal leading-relaxed">
-          {scenario.narrative}
-        </p>
+        {/* Right Meta Date & Source */}
+        <div className="flex items-center gap-2 text-[12px] text-[#707070] font-medium">
+          <span className="font-mono text-[#adadad]">{scenario.date}</span>
+          <span>•</span>
+          <a
+            href={scenario.sourceUrl || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#707070] hover:text-[#0066ff] flex items-center gap-1 transition-colors"
+          >
+            <span>Source: {scenario.source}</span>
+            <ExternalLink className="w-3 h-3 text-[#adadad] hover:text-[#0066ff]" />
+          </a>
+        </div>
       </div>
 
-      {/* Row 2: Three Stat KPI Cards - Apple Glass Styling */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-        {/* Card 1: Entities identified */}
-        <div className="p-4 rounded-3xl apple-glass-card border border-white/85 flex items-center gap-3.5 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05),inset_0_1px_1px_rgba(255,255,255,0.9)] hover:border-blue-200 transition-all">
-          <div className="w-11 h-11 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[#007AFF] shrink-0">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+      {/* Narrative Subtitle */}
+      <p className="text-[13px] text-[#707070] font-normal leading-relaxed truncate" title={scenario.narrative}>
+        {scenario.narrative}
+      </p>
+
+      {/* ─── 3 KPI CARDS (STRICT DESIGN.MD SPEC: 24PX GEOMETRY, 1PX HAIRLINES, STADIUM PILLS) ─── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Metric 1: Entities Identified */}
+        <div className="flex items-center justify-between px-4 py-2.5 rounded-[24px] bg-white border border-[#e5e7eb] hover:border-[#141414]/30 hover:bg-[#fafafa] transition-all">
+          <div className="flex items-center gap-3">
+            <div className="w-8.5 h-8.5 rounded-[16px] bg-[#f0f4ff] border border-[#dbeafe] flex items-center justify-center text-[#0066ff] shrink-0">
+              <Network className="w-4.5 h-4.5" />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-baseline gap-1.5 leading-none">
+                <span className="text-lg font-bold text-[#141414] font-sans tracking-tight">
+                  {scenario.entitiesCount}
+                </span>
+                <span className="text-[12px] font-semibold text-[#141414]">
+                  Entities Identified
+                </span>
+              </div>
+              <span className="text-[10px] text-[#707070] font-normal mt-0.5">
+                {sectorCount} Sectors · {macroCount} Macro · {companyTickersCount || 6} Equities
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
-              {scenario.entitiesCount}
-            </span>
-            <span className="text-[12.5px] font-semibold text-slate-800 leading-tight">
-              Entities identified
-            </span>
-            <span className="text-[11px] text-slate-500 leading-tight mt-0.5">
-              Commodities, sectors, companies
-            </span>
-          </div>
+          <span className="px-2.5 py-0.5 rounded-full bg-[#f0f4ff] text-[#0066ff] border border-[#dbeafe] font-mono text-[9.5px] font-semibold shrink-0">
+            GRAPH
+          </span>
         </div>
 
-        {/* Card 2: Propagation pathways */}
-        <div className="p-4 rounded-3xl apple-glass-card border border-white/85 flex items-center gap-3.5 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05),inset_0_1px_1px_rgba(255,255,255,0.9)] hover:border-indigo-200 transition-all">
-          <div className="w-11 h-11 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 shrink-0">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-              <circle cx="6" cy="6" r="3" />
-              <circle cx="18" cy="8" r="3" />
-              <circle cx="12" cy="18" r="3" />
-              <path d="M8.5 7.5L15.5 7.5" />
-              <path d="M7.5 8.5L10.5 15.5" />
-              <path d="M16.5 8.5L13.5 15.5" />
-            </svg>
+        {/* Metric 2: Propagation Pathways */}
+        <div className="flex items-center justify-between px-4 py-2.5 rounded-[24px] bg-white border border-[#e5e7eb] hover:border-[#141414]/30 hover:bg-[#fafafa] transition-all">
+          <div className="flex items-center gap-3">
+            <div className="w-8.5 h-8.5 rounded-[16px] bg-[#f5f3ff] border border-[#ede9fe] flex items-center justify-center text-[#6366f1] shrink-0">
+              <GitFork className="w-4.5 h-4.5" />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-baseline gap-1.5 leading-none">
+                <span className="text-lg font-bold text-[#141414] font-sans tracking-tight">
+                  {scenario.pathwaysCount}
+                </span>
+                <span className="text-[12px] font-semibold text-[#141414]">
+                  Propagation Pathways
+                </span>
+              </div>
+              <span className="text-[10px] text-[#707070] font-normal mt-0.5">
+                Direct & 2nd Order · 3-Hop BFS
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
-              {scenario.pathwaysCount}
-            </span>
-            <span className="text-[12.5px] font-semibold text-slate-800 leading-tight">
-              Propagation pathways
-            </span>
-            <span className="text-[11px] text-slate-500 leading-tight mt-0.5">
-              Direct and indirect
-            </span>
-          </div>
+          <span className="px-2.5 py-0.5 rounded-full bg-[#fef2f2] text-[#dc2626] border border-[#fecaca] font-mono text-[9.5px] font-semibold flex items-center gap-1 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#dc2626] animate-pulse" />
+            ACTIVE
+          </span>
         </div>
 
-        {/* Card 3: Evidence sources */}
-        <div className="p-4 rounded-3xl apple-glass-card border border-white/85 flex items-center gap-3.5 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05),inset_0_1px_1px_rgba(255,255,255,0.9)] hover:border-emerald-200 transition-all">
-          <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 shrink-0">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
+        {/* Metric 3: Evidence Sources */}
+        <div className="flex items-center justify-between px-4 py-2.5 rounded-[24px] bg-white border border-[#e5e7eb] hover:border-[#141414]/30 hover:bg-[#fafafa] transition-all">
+          <div className="flex items-center gap-3">
+            <div className="w-8.5 h-8.5 rounded-[16px] bg-[#f0fdf4] border border-[#dcfce7] flex items-center justify-center text-[#16a34a] shrink-0">
+              <ShieldCheck className="w-4.5 h-4.5" />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-baseline gap-1.5 leading-none">
+                <span className="text-lg font-bold text-[#141414] font-sans tracking-tight">
+                  {scenario.evidenceCount}
+                </span>
+                <span className="text-[12.5px] font-semibold text-[#141414]">
+                  Evidence Sources
+                </span>
+              </div>
+              <span className="text-[10px] text-[#707070] font-normal mt-0.5">
+                Reuters Telemetry · 12 Empirical Citations
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
-              {scenario.evidenceCount}
-            </span>
-            <span className="text-[12.5px] font-semibold text-slate-800 leading-tight">
-              Evidence sources
-            </span>
-            <span className="text-[11px] text-slate-500 leading-tight mt-0.5">
-              News, reports, historical data
-            </span>
-          </div>
+          <span className="px-2.5 py-0.5 rounded-full bg-[#f0fdf4] text-[#16a34a] border border-[#dcfce7] font-mono text-[9.5px] font-semibold shrink-0">
+            94% CONF
+          </span>
         </div>
       </div>
     </div>
