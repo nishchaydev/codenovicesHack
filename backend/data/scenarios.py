@@ -60,5 +60,29 @@ PRELOADED_SCENARIOS: List[Dict[str, Any]] = [
         "badge": "India Focus",
         "description": "Credit expansion catalyst: Lower borrowing costs stimulate retail mortgages, passenger vehicle loans, and Bank Nifty momentum.",
         "expected_cascade": ["HDFCBANK.NS", "RELIANCE.NS", "TATAMOTORS.NS", "ASIANPAINT.NS"]
+    },
+    {
+        "id": "us-perm-visa-suspension",
+        "title": "US Suspends PERM Visas for Microsoft & Tech; Indian IT Stocks Rally",
+        "category": "Regulatory & Offshore Shift",
+        "headline": "US suspends PERM visa program for tech firms including Microsoft; Indian IT stocks rally as offshore hiring surges",
+        "primary_trigger": "TCS.NS",
+        "severity": 9,
+        "sentiment": "Bullish",
+        "badge": "Spotlight Catalyst",
+        "description": "US Department of Labor suspends permanent labor certifications (PERM) for Microsoft, Adobe, TCS, Infosys, Wipro, and HCL Tech. While US onshore hiring freezes, global enterprises accelerate offshore delivery to Indian GCCs, driving a +5.8% Nifty IT rally, +280 bps margin expansion, and a +40% surge in domestic Indian tech hiring.",
+        "expected_cascade": ["TCS.NS", "INFY.NS", "MSFT", "XLK", "DXY", "HDFCBANK.NS"]
+    },
+    {
+        "id": "indian-it-licensing-audit",
+        "title": "TCS & Infosys US Subcontracting & Work Authorization Audit",
+        "category": "IT Services & Trade",
+        "headline": "TCS and Infosys face severe US client-site visa scrutiny and subcontracting licensing audits",
+        "primary_trigger": "TCS.NS",
+        "severity": 8,
+        "sentiment": "Bearish",
+        "badge": "IT Export Risk",
+        "description": "Strict compliance probes target offshore IT billing models, H-1B third-party placements, and onshore work authorizations. Indian IT majors risk multi-billion dollar enterprise contract delivery delays and immediate Nifty IT re-rating.",
+        "expected_cascade": ["TCS.NS", "INFY.NS", "XLK", "MSFT", "DXY", "RELIANCE.NS"]
     }
 ]

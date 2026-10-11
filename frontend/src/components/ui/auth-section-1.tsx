@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ReactNode } from "react";
-import stockExchangeImg from "@/components/Stock Exchange Under Global Market Charts.png";
+import loginBg from "../../assets/login.jpeg";
 
 const formFields = [
   { label: "First Name", value: "Harshit", type: "text" },
@@ -34,15 +34,25 @@ export interface AuthSectionOneProps {
 }
 
 export default function AuthSectionOne({ onLogin, onClose }: AuthSectionOneProps = {}) {
-  const [email, setEmail] = useState("harshitlog@gmail.com");
-  const [password, setPassword] = useState("*************");
-  const [firstName, setFirstName] = useState("Harshit");
-  const [lastName, setLastName] = useState("Sharma");
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (onLogin) {
-      onLogin(email, `${firstName} ${lastName}`);
+      const displayName = isSignUp && (firstName || lastName)
+        ? `${firstName} ${lastName}`.trim()
+        : email ? email.split("@")[0] : "Institutional Analyst";
+      onLogin(email || "analyst@fingraph.institution", displayName);
+    }
+  };
+
+  const handleQuickDemo = () => {
+    if (onLogin) {
+      onLogin("demo.analyst@fingraph.institution", "Guest Quantitative Analyst");
     }
   };
 
@@ -52,57 +62,95 @@ export default function AuthSectionOne({ onLogin, onClose }: AuthSectionOneProps
         <button
           onClick={onClose}
           type="button"
-          className="absolute top-6 right-6 z-50 p-2.5 rounded-full bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-white transition-all cursor-pointer"
-          title="Return to Workspace"
+          className="absolute top-6 right-6 z-50 px-4 py-2 rounded-full bg-slate-900/75 hover:bg-slate-900/90 text-white backdrop-blur-md border border-white/20 shadow-md transition-all cursor-pointer flex items-center gap-2 text-sm font-medium"
+          title="Return to Landing Page"
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
+          <span>Back to Landing</span>
         </button>
       )}
 
       <div className="grid min-h-[calc(100vh-1.5rem)] gap-6 lg:grid-cols-[0.94fr_1.06fr]">
-        <div className="flex min-h-[760px] items-start rounded-md border border-black/20 bg-white px-6 py-12 sm:px-10 dark:border-white/10 dark:bg-[#0a0a0a] lg:min-h-0 lg:px-14 lg:py-28 xl:px-20">
+        <div className="flex min-h-[760px] items-start rounded-md border border-black/20 bg-white px-6 py-12 sm:px-10 dark:border-white/10 dark:bg-[#0a0a0a] lg:min-h-0 lg:px-14 lg:py-24 xl:px-20">
           <div className="mx-auto w-full max-w-[590px]">
             <div>
               <h1 className="whitespace-nowrap text-3xl font-medium tracking-[-0.04em] sm:text-4xl lg:text-[42px] lg:leading-[1.05] xl:text-[50px]">
-                Create an account
+                {isSignUp ? "Create an account" : "Sign in to account"}
               </h1>
               <p className="mt-3 whitespace-nowrap text-lg leading-snug text-black/60 dark:text-white/55 sm:text-xl lg:text-2xl xl:text-3xl">
-                Brainstorm in chat, build in cowork
+                {isSignUp ? "Brainstorm in chat, build in cowork" : "Autonomous Causal Market Intelligence"}
               </p>
             </div>
 
-            <div className="mt-12 grid gap-5 sm:grid-cols-2">
+            {/* Toggle between Log In and Sign Up */}
+            <div className="mt-8 flex items-center gap-6 border-b border-black/10 pb-3 dark:border-white/10">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(false)}
+                className={`text-lg font-medium transition-colors cursor-pointer ${
+                  !isSignUp
+                    ? "border-b-2 border-black pb-3 text-black dark:border-white dark:text-white"
+                    : "text-black/40 hover:text-black dark:text-white/40 dark:hover:text-white"
+                }`}
+              >
+                Log In
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSignUp(true)}
+                className={`text-lg font-medium transition-colors cursor-pointer ${
+                  isSignUp
+                    ? "border-b-2 border-black pb-3 text-black dark:border-white dark:text-white"
+                    : "text-black/40 hover:text-black dark:text-white/40 dark:hover:text-white"
+                }`}
+              >
+                Sign Up
+              </button>
+            </div>
+
+            {/* Quick Demo Login Option */}
+            <button
+              type="button"
+              onClick={handleQuickDemo}
+              className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-[10px] border border-emerald-500/40 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-500/40 dark:text-emerald-300 dark:hover:bg-emerald-900/50 text-base font-semibold transition-all cursor-pointer shadow-xs"
+            >
+              <span>⚡ Quick Demo Login (Skip directly to Dashboard)</span>
+            </button>
+
+            <div className="mt-6 grid gap-5 sm:grid-cols-2">
               <SocialButton
                 onClick={() => handleSubmit()}
                 icon={<GoogleIcon />}
-                label="Sign up with Google"
+                label={isSignUp ? "Sign up with Google" : "Sign in with Google"}
               />
               <SocialButton
                 onClick={() => handleSubmit()}
                 icon={<AppleIcon />}
-                label="Sign up with Apple"
+                label={isSignUp ? "Sign up with Apple" : "Sign in with Apple"}
               />
             </div>
 
-            <div className="my-10 text-center text-xl font-medium text-black/60 dark:text-white/50">
+            <div className="my-8 text-center text-xl font-medium text-black/60 dark:text-white/50">
               or
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="grid gap-5 sm:grid-cols-2">
-                <FieldBox
-                  label="First Name"
-                  value={firstName}
-                  onChangeVal={setFirstName}
-                />
-                <FieldBox
-                  label="Last Name"
-                  value={lastName}
-                  onChangeVal={setLastName}
-                />
-              </div>
+              {isSignUp && (
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <FieldBox
+                    label="First Name"
+                    value={firstName}
+                    onChangeVal={setFirstName}
+                  />
+                  <FieldBox
+                    label="Last Name"
+                    value={lastName}
+                    onChangeVal={setLastName}
+                  />
+                </div>
+              )}
 
               <FieldBox
                 label="Email"
@@ -128,41 +176,44 @@ export default function AuthSectionOne({ onLogin, onClose }: AuthSectionOneProps
                 type="submit"
                 className="mt-9 flex h-12 w-full items-center justify-center rounded-[10px] border border-black/40 bg-black text-xl font-medium text-white transition-colors hover:bg-black/85 dark:border-white/40 dark:bg-white dark:text-black dark:hover:bg-white/85 cursor-pointer"
               >
-                Submit
+                {isSignUp ? "Sign Up" : "Submit"}
               </button>
+
+              <div className="pt-3 text-center text-sm text-black/60 dark:text-white/60">
+                {isSignUp ? (
+                  <span>
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setIsSignUp(false)}
+                      className="font-medium underline underline-offset-2 text-black dark:text-white cursor-pointer"
+                    >
+                      Log in
+                    </button>
+                  </span>
+                ) : (
+                  <span>
+                    Don't have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setIsSignUp(true)}
+                      className="font-medium underline underline-offset-2 text-black dark:text-white cursor-pointer"
+                    >
+                      Sign up
+                    </button>
+                  </span>
+                )}
+              </div>
             </form>
           </div>
         </div>
 
-        <div className="relative flex min-h-[720px] overflow-hidden rounded-md bg-black p-8 text-white sm:p-12 lg:min-h-0">
+        <div className="relative flex min-h-[720px] overflow-hidden rounded-md bg-black text-white lg:min-h-0 border border-black/10 dark:border-white/10 shadow-xs">
           <img
-            src={stockExchangeImg}
-            alt="Stock Exchange Under Global Market Charts"
-            className="absolute inset-0 h-full w-full object-cover"
+            src={loginBg}
+            alt="Findy - Financial news, that helps you see the bigger picture."
+            className="h-full w-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-black/40" />
-
-          <div className="relative z-10 flex h-full w-full flex-col justify-between">
-            <h2 className="max-w-[620px] pt-0 text-5xl font-medium tracking-[-0.05em] text-white sm:text-6xl lg:pt-16 lg:text-[64px] lg:leading-[0.98] xl:text-[70px]">
-              Think fast,
-              <br />
-              Build faster
-            </h2>
-
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                handleSubmit();
-              }}
-              className="mb-0 inline-flex h-12 max-w-full items-center gap-3 rounded-[10px] border border-white/25 px-5 text-base font-medium text-white/85 backdrop-blur-sm transition-colors hover:border-white/45 hover:text-white xl:mb-32 xl:px-6 xl:text-2xl cursor-pointer"
-            >
-              <WindowsIcon className="size-5 shrink-0 xl:size-7" />
-              <span className="truncate whitespace-nowrap">
-                Download the windows app
-              </span>
-            </a>
-          </div>
         </div>
       </div>
     </section>

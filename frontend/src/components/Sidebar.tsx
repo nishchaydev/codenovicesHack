@@ -17,6 +17,7 @@ import {
   Activity,
   Settings,
   HelpCircle,
+  LogOut,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -38,6 +39,7 @@ interface SidebarProps {
   activeTab: NavTab;
   onTabChange: (tab: NavTab) => void;
   onOpenAddStock?: () => void;
+  onLogout?: () => void;
 }
 
 interface NavItem {
@@ -48,14 +50,13 @@ interface NavItem {
   badgeColor?: string;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpenAddStock }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpenAddStock, onLogout }) => {
   const [open, setOpen] = useState(true);
   const [isPinned, setIsPinned] = useState(true);
   const [isHidden, setIsHidden] = useState(false);
 
-  // Core Transmission Modules
+  // Core Transmission Modules (Dashboard navigation)
   const transmissionModules: NavItem[] = [
-    { id: "landing", label: "Executive Pulse", icon: <LayoutDashboard className="w-4 h-4 flex-shrink-0 text-violet-500" />, badge: "PULSE" },
     { id: "event_explorer", label: "Event Explorer", icon: <Search className="w-4 h-4 flex-shrink-0 text-amber-500" />, badge: "SHOCK" },
     { id: "impact_graph", label: "Impact Graph", icon: <Network className="w-4 h-4 flex-shrink-0 text-blue-500" />, badge: "LIVE" },
     { id: "ai_hub", label: "AI Hub", icon: <Sparkles className="w-4 h-4 flex-shrink-0 text-indigo-500" />, badge: "INSIGHTS" },
@@ -208,8 +209,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpen
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="pt-3 border-t border-[#d3cec6]/60 overflow-hidden">
+      {/* Footer & Logout */}
+      <div className="pt-3 border-t border-[#d3cec6]/60 space-y-2.5 overflow-hidden">
+        {/* Logout Button */}
+        <button
+          onClick={onLogout}
+          title="Log Out to Landing Portal"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-all cursor-pointer font-medium text-xs group"
+        >
+          <LogOut className="w-4 h-4 flex-shrink-0 group-hover:-translate-x-0.5 transition-transform" />
+          <motion.span
+            animate={{ opacity: open ? 1 : 0, width: open ? "auto" : 0 }}
+            className="overflow-hidden whitespace-nowrap text-xs font-semibold"
+          >
+            Log Out
+          </motion.span>
+        </button>
+
         <div className="relative min-h-[36px] flex items-center">
           <motion.div
             animate={{ opacity: open ? 1 : 0, width: open ? "100%" : 0 }}

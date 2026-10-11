@@ -136,13 +136,12 @@ export const TopNav: React.FC<TopNavProps> = ({
             </button>
           )}
 
-          <button
-            onClick={onOpenAuthModal}
-            className="w-9 h-9 rounded-full bg-slate-900 hover:bg-black flex items-center justify-center text-white text-[12px] font-semibold tracking-wider select-none shadow-[0_2px_8px_rgba(0,0,0,0.15)] cursor-pointer transition-transform active:scale-95 border border-slate-700"
-            title="Account & Login Gate"
+          <div
+            className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-white text-[12px] font-semibold tracking-wider select-none shadow-[0_2px_8px_rgba(0,0,0,0.15)] border border-slate-700"
+            title={userProfile ? `${userProfile.name} (${userProfile.roleLabel})` : "Active Analyst"}
           >
-            {userProfile ? userProfile.name.split(" ").map(n => n[0]).join("").slice(0, 2) : "FD"}
-          </button>
+            {userProfile ? userProfile.name.split(" ").map(n => n[0]).join("").slice(0, 2) : "DN"}
+          </div>
         </div>
       </div>
     </header>

@@ -384,7 +384,12 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
           vx: 0,
           vy: 0,
           radius: isFullscreen ? 34 : (node.priority === "P1 Critical" ? 32 : 28),
-          color: node.priority === "P1 Critical" ? "#ef4444" : "#f59e0b",
+          color:
+            node.badge === "Positive"
+              ? "#16a34a"
+              : node.priority === "P1 Critical"
+              ? "#ef4444"
+              : "#f59e0b",
           angle,
           edgeLabel: node.timeHorizon || "1-3 mo",
         };
@@ -746,9 +751,9 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
                     <circle
                       cx={(edge.source.x + edge.target.x) / 2}
                       cy={(edge.source.y + edge.target.y) / 2}
-                      r={3}
-                      fill="#ef4444"
-                      className="animate-pulse opacity-75"
+                      r={3.5}
+                      fill={edge.target.data.badge === "Positive" ? "#16a34a" : "#ef4444"}
+                      className="animate-pulse opacity-85"
                     />
                   )}
 
@@ -1066,7 +1071,15 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
           <h4 className="text-base font-bold text-slate-900 leading-tight">
             {hoveredNode.title}
           </h4>
-          <div className="text-lg font-extrabold text-red-600 my-0.5">
+          <div
+            className={`text-lg font-extrabold my-0.5 ${
+              hoveredNode.metricColor === "green"
+                ? "text-emerald-600"
+                : hoveredNode.metricColor === "blue"
+                ? "text-blue-600"
+                : "text-red-600"
+            }`}
+          >
             {hoveredNode.metric}
           </div>
 

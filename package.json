@@ -1,0 +1,7 @@
+{
+  "name": "fingraph-root",
+  "private": true,
+  "scripts": {
+    "tunnel": "cloudflared tunnel --config tunnel-config.yml run fingraph"
+  }
+}

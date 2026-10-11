@@ -188,7 +188,7 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
     setAiAnswer(null);
 
     try {
-      const response = await fetch("http://localhost:8000/api/chat", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q }),

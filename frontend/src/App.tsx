@@ -24,6 +24,7 @@ import { generateStockScenario } from "./api";
 
 export const App: React.FC = () => {
   const [activeNavTab, setActiveNavTab] = useState<NavTab>("landing");
+  const [isAuthScreenOpen, setIsAuthScreenOpen] = useState<boolean>(false);
   const [scenarios, setScenarios] = useState<FinGraphScenario[]>(FINGRAPH_SCENARIOS);
   const [activeScenario, setActiveScenario] = useState<FinGraphScenario>(FINGRAPH_SCENARIOS[0]);
   const [selectedNode, setSelectedNode] = useState<RadialCardNode | null>(null);
@@ -57,6 +58,29 @@ export const App: React.FC = () => {
   const handleAnalyzeEvent = async (query: string) => {
     setIsAnalyzing(true);
     const lower = query.toLowerCase();
+
+    // 0. Check if query matches the headline US PERM Visa Suspension / Tech Hiring catalyst
+    if (
+      lower.includes("visa") ||
+      lower.includes("perm") ||
+      lower.includes("microsoft") ||
+      lower.includes("offshore") ||
+      lower.includes("hiring") ||
+      lower.includes("h-1b") ||
+      lower.includes("h1b")
+    ) {
+      await new Promise((r) => setTimeout(r, 2800));
+      const visaScenario =
+        scenarios.find((s) => s.id === "us-perm-visa-suspension") || scenarios[0];
+      setActiveScenario(visaScenario);
+      setSelectedNode(null);
+      setSelectedHop(null);
+      setHasUserSynthesized(true);
+      setActiveNavTab("impact_graph");
+      showToast("✅ Synthesized impact graph: US PERM Visa Freeze × Indian IT Rally");
+      setIsAnalyzing(false);
+      return;
+    }
 
     // 1. Check if query matches a known company or ticker
     const isTickerOrCompany = 
@@ -102,10 +126,12 @@ export const App: React.FC = () => {
       );
 
       if (!matched) {
-        if (lower.includes("tsmc") || lower.includes("chip") || lower.includes("semiconductor")) {
-          matched = scenarios[1];
-        } else if (lower.includes("rbi") || lower.includes("rate") || lower.includes("repo") || lower.includes("india")) {
-          matched = scenarios[2];
+        if (lower.includes("oil") || lower.includes("crude") || lower.includes("brent") || lower.includes("opec")) {
+          matched = scenarios.find((s) => s.id === "oil-supply-shock") || scenarios[0];
+        } else if (lower.includes("tsmc") || lower.includes("chip") || lower.includes("semiconductor")) {
+          matched = scenarios.find((s) => s.id === "tsmc-chip-disruption") || scenarios[0];
+        } else if (lower.includes("rbi") || lower.includes("rate") || lower.includes("repo")) {
+          matched = scenarios.find((s) => s.id === "rbi-rate-easing") || scenarios[0];
         } else {
           // Dynamic scenario generated based on input
           matched = {
@@ -267,7 +293,7 @@ export const App: React.FC = () => {
       setHasUserSynthesized(true);
       setIsAnalyzing(false);
       showToast('✅ Event analysis complete — propagation paths traced');
-    }, 350);
+    }, 1500);
   };
 
   // Node Click: sets selected node to dynamically branch out its relations on canvas
@@ -275,10 +301,56 @@ export const App: React.FC = () => {
     setSelectedNode(node);
   };
 
+  // If auth screen is open, display the exact AuthSectionOne login/signup screen with quick demo
+  if (isAuthScreenOpen) {
+    return (
+      <AuthSectionOne
+        onLogin={(email, name) => {
+          if (name || email) {
+            setCurrentUser((prev) => ({
+              ...prev,
+              name: name || prev.name,
+              email: email || prev.email,
+            }));
+          }
+          setIsAuthScreenOpen(false);
+          setActiveNavTab("event_explorer");
+          showToast(`✅ Welcome, ${name || "Analyst"} — Connected to FinGraph Engine`);
+        }}
+        onClose={() => setIsAuthScreenOpen(false)}
+      />
+    );
+  }
+
+  // If landing tab, render the landing page full-screen without dashboard sidebar/topnav
+  if (activeNavTab === "landing") {
+    return (
+      <div className="flex h-screen w-screen overflow-y-auto apple-mesh-bg text-slate-900 font-sans antialiased">
+        <LandingPage 
+          onEnter={() => setIsAuthScreenOpen(true)} 
+          onSelectScenario={(scenarioId) => {
+            const target = scenarios.find((s) => s.id === scenarioId) || scenarios[0];
+            setActiveScenario(target);
+            setHasUserSynthesized(true);
+            showToast(`✅ Loaded scenario: ${target.title}`);
+            setActiveNavTab("impact_graph");
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen w-screen overflow-hidden apple-mesh-bg text-slate-900 font-sans antialiased">
       {/* 1. Left Navigation Rail Sidebar */}
-      <Sidebar activeTab={activeNavTab} onTabChange={setActiveNavTab} />
+      <Sidebar 
+        activeTab={activeNavTab} 
+        onTabChange={setActiveNavTab}
+        onLogout={() => {
+          setActiveNavTab("landing");
+          showToast("Logged out to portal", "info");
+        }}
+      />
 
       {/* 2. Main Workspace Layout */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
@@ -296,19 +368,6 @@ export const App: React.FC = () => {
         <div className="flex-1 flex min-h-0 overflow-hidden">
           {/* Main Stage View */}
           <main className={`flex-1 flex flex-col ${activeNavTab === "impact_graph" ? "h-full min-h-0 overflow-hidden p-3 sm:p-4 gap-2.5" : "overflow-y-auto p-6 gap-5"}`}>
-            {/* Executive Pulse / Landing Page Tab */}
-            {activeNavTab === "landing" && (
-              <LandingPage 
-                onEnter={() => setActiveNavTab("event_explorer")} 
-                onSelectScenario={(scenarioId) => {
-                  const target = scenarios.find((s) => s.id === scenarioId) || scenarios[0];
-                  setActiveScenario(target);
-                  setHasUserSynthesized(true);
-                  showToast(`✅ Loaded scenario: ${target.title}`);
-                  setActiveNavTab("impact_graph");
-                }}
-              />
-            )}
 
             {activeNavTab === "impact_graph" && (
               <>

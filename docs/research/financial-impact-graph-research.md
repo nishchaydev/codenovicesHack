@@ -526,5 +526,5 @@ Papers and datasets that validate our approach.
 
 ---
 
-*Research completed October 10, 2026 — Fin.D Research.*  
+*Research completed October 10, 2026 by Team codenovicesHack.*  
 *6 parallel research agents. 12 web searches. 4 academic papers reviewed. All data sources verified.*

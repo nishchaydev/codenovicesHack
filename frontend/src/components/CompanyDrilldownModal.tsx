@@ -67,7 +67,7 @@ export const CompanyDrilldownModal: React.FC<CompanyDrilldownModalProps> = ({ no
   React.useEffect(() => {
     relevantTickers.forEach(async (ticker) => {
       try {
-        const res = await fetch(`http://localhost:8000/api/stock/${ticker}`);
+        const res = await fetch(`/api/stock/${ticker}`);
         if (res.ok) {
           const data = await res.json();
           if (data && data.current_price) {
