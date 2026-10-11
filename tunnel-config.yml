@@ -1,0 +1,7 @@
+tunnel: 851dd9cf-c8f7-4594-a6a0-e0fa002473a4
+credentials-file: C:\Users\VICTUS\.cloudflared\851dd9cf-c8f7-4594-a6a0-e0fa002473a4.json
+
+ingress:
+  - hostname: fingraph.ttscheduler.com
+    service: http://localhost:3001
+  - service: http_status:404

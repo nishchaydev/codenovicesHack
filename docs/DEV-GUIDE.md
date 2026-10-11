@@ -28,8 +28,8 @@
 ### Clone & Setup
 
 ```bash
-git clone https://github.com/nishchaydev/codenovicesHack.git
-cd codenovicesHack
+git clone https://github.com/nishchaydev/finDlilly.git
+cd finDlilly
 ```
 
 ### Backend Setup

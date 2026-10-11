@@ -29,7 +29,7 @@ Build an AI system that converts unstructured financial news into a dynamic depe
 ## File Structure
 
 ```
-codenovicesHack/
+Fin.D/
 ├── backend/
 │   ├── main.py                  # FastAPI app + CORS + routes
 │   ├── config.py                # API keys, settings
