@@ -1,5 +1,15 @@
 import React, { useState } from "react";
 import { FinGraphScenario } from "../types";
+import { 
+  Activity, 
+  Flame, 
+  ArrowRight, 
+  ChevronRight, 
+  AlertTriangle, 
+  TrendingDown, 
+  Sparkles,
+  Zap
+} from "lucide-react";
 
 interface AIHubInsightsViewProps {
   scenarios: FinGraphScenario[];
@@ -105,6 +115,7 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
   onNavigateToGraph,
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<string>("All");
+  const [radarTab, setRadarTab] = useState<"stocks" | "vectors">("stocks");
   const [userQuery, setUserQuery] = useState<string>("");
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [isSynthesizing, setIsSynthesizing] = useState<boolean>(false);
@@ -186,46 +197,286 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
         </div>
       </div>
 
-      {/* 2. Three Metric KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-xs text-slate-500">
-            <span className="font-semibold">Systemic Contagion Risk</span>
-            <span className="text-rose-600 font-mono font-bold">78.4% • High</span>
+      {/* ─── 2. AI SYSTEMIC RISK & DOMINO RADAR WIDGET (EXACT DESIGN MATCH FROM IMAGE 3) ─── */}
+      <div className="p-5 sm:p-6 rounded-[24px] bg-white border border-[#e5e7eb] shadow-sm flex flex-col gap-5">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-orange-500 text-white flex items-center justify-center shadow-xs shrink-0">
+              <Activity className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 leading-tight">
+                AI Systemic Risk & Domino Radar
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Real-time cross-asset contagion velocity & institutional vulnerability
+              </p>
+            </div>
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden mt-1">
-            <div className="bg-rose-500 h-2 rounded-full" style={{ width: "78.4%" }}></div>
-          </div>
-          <p className="text-[11px] text-slate-500 pt-1">
-            Driven by energy import bills and currency pass-through to domestic manufacturers.
-          </p>
+
+          <span className="px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold tracking-wide flex items-center gap-1.5 shrink-0">
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            ELEVATED RISK
+          </span>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-xs text-slate-500">
-            <span className="font-semibold">Active Catalyst Clusters</span>
-            <span className="text-blue-600 font-mono font-bold">4 Systemic Clusters</span>
+        {/* Gauge & High Commodity-to-Equity Contagion Box */}
+        <div className="p-4 rounded-[20px] bg-white border border-slate-100 shadow-2xs grid grid-cols-1 md:grid-cols-[200px_1fr] items-center gap-5">
+          {/* Semicircular Risk Gauge */}
+          <div className="flex flex-col items-center justify-center">
+            <div className="relative w-48 h-26 flex items-center justify-center">
+              <svg viewBox="0 0 200 115" className="w-48 h-26 overflow-visible">
+                <defs>
+                  <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#10B981" />
+                    <stop offset="45%" stopColor="#F59E0B" />
+                    <stop offset="100%" stopColor="#EF4444" />
+                  </linearGradient>
+                </defs>
+                {/* Semicircular Track */}
+                <path
+                  d="M 20 100 A 80 80 0 0 1 180 100"
+                  fill="none"
+                  stroke="#f1f5f9"
+                  strokeWidth="15"
+                  strokeLinecap="round"
+                />
+                {/* Gradient Arc */}
+                <path
+                  d="M 20 100 A 80 80 0 0 1 180 100"
+                  fill="none"
+                  stroke="url(#gaugeGradient)"
+                  strokeWidth="15"
+                  strokeLinecap="round"
+                />
+                {/* Needle rotated to 74.2% */}
+                <g transform="translate(100, 100) rotate(133.56)">
+                  <line x1="0" y1="0" x2="-68" y2="0" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" />
+                  <polygon points="-68,0 -60,-3.5 -60,3.5" fill="#dc2626" />
+                  <circle cx="0" cy="0" r="7" fill="#0f172a" />
+                  <circle cx="0" cy="0" r="2.5" fill="#ffffff" />
+                </g>
+                <text x="100" y="82" textAnchor="middle" className="text-2xl font-black fill-slate-900 font-sans tracking-tight">
+                  74.2
+                </text>
+                <text x="100" y="96" textAnchor="middle" className="text-[9.5px] font-bold fill-slate-500 font-mono tracking-wider">
+                  RISK INDEX
+                </text>
+              </svg>
+            </div>
           </div>
-          <div className="text-lg font-bold font-mono text-slate-900">
-            Energy • Chips • FX • NBFC
+
+          {/* Right Summary Callout */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-amber-500 text-sm">⚠️</span>
+              <h3 className="text-sm font-bold text-slate-900">
+                High Commodity-to-Equity Contagion
+              </h3>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Crude oil futures rally (+14.2%) is propagating through 3 downstream hops. Aviation and chemical solvency margins reflect immediate compression risk.
+            </p>
+            <div className="flex items-center gap-2 pt-1">
+              <span className="px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-100 text-xs font-semibold">
+                • 5 Exposed Stocks
+              </span>
+              <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-xs font-semibold">
+                • 3 Domino Hops
+              </span>
+            </div>
           </div>
-          <p className="text-[11px] text-slate-500">
-            Cross-market propagation nodes actively monitored in real time.
-          </p>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-xs text-slate-500">
-            <span className="font-semibold">Model Validation Confidence</span>
-            <span className="text-emerald-600 font-mono font-bold">94.1% Backtested</span>
+        {/* Tab Switcher & Open Flow Diagram */}
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setRadarTab("stocks")}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                radarTab === "stocks"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              🔥 Top 5 Vulnerable Stocks
+            </button>
+            <button
+              onClick={() => setRadarTab("vectors")}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                radarTab === "vectors"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              ⚡ Active Contagion Vectors
+            </button>
           </div>
-          <div className="text-lg font-bold font-mono text-slate-900">
-            2,400+ Crisis Precedents
-          </div>
-          <p className="text-[11px] text-slate-500">
-            Calibrated against historical rate cycles, supply disruptions, and geopolitical shocks.
-          </p>
+
+          <button
+            onClick={onNavigateToGraph}
+            className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+          >
+            <span>Open Flow Diagram</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
         </div>
+
+        {/* List Content */}
+        {radarTab === "stocks" ? (
+          <div className="flex flex-col gap-2.5">
+            {/* Item 1 */}
+            <div className="p-3.5 rounded-[16px] bg-white border border-slate-100 hover:border-slate-300 transition-all flex items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono font-bold text-slate-400 w-5">#1</span>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+                    InterGlobe Aviation (IndiGo)
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    INDIGO.NS • Direct ATF Fuel Exposure
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <span className="text-xs sm:text-sm font-extrabold text-rose-600 flex items-center gap-0.5">
+                  <TrendingDown className="w-3.5 h-3.5" />
+                  -11.8%
+                </span>
+                <div className="w-20 bg-slate-100 rounded-full h-1 overflow-hidden">
+                  <div className="bg-rose-500 h-1 rounded-full w-[80%]" />
+                </div>
+              </div>
+            </div>
+
+            {/* Item 2 */}
+            <div className="p-3.5 rounded-[16px] bg-white border border-slate-100 hover:border-slate-300 transition-all flex items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono font-bold text-slate-400 w-5">#2</span>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+                    SpiceJet Airlines
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    SPICEJET • Cash Flow & Lease Strain
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <span className="text-xs sm:text-sm font-extrabold text-rose-600 flex items-center gap-0.5">
+                  <TrendingDown className="w-3.5 h-3.5" />
+                  -16.4%
+                </span>
+                <div className="w-20 bg-slate-100 rounded-full h-1 overflow-hidden">
+                  <div className="bg-rose-600 h-1 rounded-full w-[95%]" />
+                </div>
+              </div>
+            </div>
+
+            {/* Item 3 */}
+            <div className="p-3.5 rounded-[16px] bg-white border border-slate-100 hover:border-slate-300 transition-all flex items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono font-bold text-slate-400 w-5">#3</span>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+                    Asian Paints Ltd
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    ASIANPAINT • Solvent Feedstock Surge
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <span className="text-xs sm:text-sm font-extrabold text-amber-600 flex items-center gap-0.5">
+                  <TrendingDown className="w-3.5 h-3.5" />
+                  -8.5%
+                </span>
+                <div className="w-20 bg-slate-100 rounded-full h-1 overflow-hidden">
+                  <div className="bg-amber-500 h-1 rounded-full w-[65%]" />
+                </div>
+              </div>
+            </div>
+
+            {/* Item 4 */}
+            <div className="p-3.5 rounded-[16px] bg-white border border-slate-100 hover:border-slate-300 transition-all flex items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono font-bold text-slate-400 w-5">#4</span>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+                    Bharat Petroleum (BPCL)
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    BPCL.NS • Marketing Margin Cap
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <span className="text-xs sm:text-sm font-extrabold text-amber-600 flex items-center gap-0.5">
+                  <TrendingDown className="w-3.5 h-3.5" />
+                  -6.2%
+                </span>
+                <div className="w-20 bg-slate-100 rounded-full h-1 overflow-hidden">
+                  <div className="bg-amber-500 h-1 rounded-full w-[50%]" />
+                </div>
+              </div>
+            </div>
+
+            {/* Item 5 */}
+            <div className="p-3.5 rounded-[16px] bg-white border border-slate-100 hover:border-slate-300 transition-all flex items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono font-bold text-slate-400 w-5">#5</span>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+                    Pidilite Industries
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    PIDILITIND.NS • VAM Monomer Inflation
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <span className="text-xs sm:text-sm font-extrabold text-yellow-600 flex items-center gap-0.5">
+                  <TrendingDown className="w-3.5 h-3.5" />
+                  -5.8%
+                </span>
+                <div className="w-20 bg-slate-100 rounded-full h-1 overflow-hidden">
+                  <div className="bg-yellow-500 h-1 rounded-full w-[45%]" />
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2.5">
+            <div className="p-3.5 rounded-[16px] bg-slate-50 border border-slate-200/80 flex flex-col gap-1">
+              <span className="text-[11px] font-bold text-rose-700">Vector 1: Aviation Fuel Transmission</span>
+              <p className="text-xs text-slate-700 font-mono">
+                Crude Futures (+14.2%) ──▶ Domestic ATF (+₹14,200/kL) ──▶ Airline Operating Margin (-340 bps)
+              </p>
+            </div>
+            <div className="p-3.5 rounded-[16px] bg-slate-50 border border-slate-200/80 flex flex-col gap-1">
+              <span className="text-[11px] font-bold text-amber-700">Vector 2: Petrochemical Solvents</span>
+              <p className="text-xs text-slate-700 font-mono">
+                Secondary Refining Tariffs ──▶ Petrochemical Feedstock (+8.4%) ──▶ Decorative Paint Margins (-180 bps)
+              </p>
+            </div>
+            <div className="p-3.5 rounded-[16px] bg-slate-50 border border-slate-200/80 flex flex-col gap-1">
+              <span className="text-[11px] font-bold text-blue-700">Vector 3: Foreign Exchange Dollar Drain</span>
+              <p className="text-xs text-slate-700 font-mono">
+                Import Bill (+ $4.2B) ──▶ Interbank Dollar Bidding ──▶ USD/INR Depreciation (84.45)
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* CTA Button */}
+        <button
+          onClick={onNavigateToGraph}
+          className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+        >
+          <Zap className="w-4 h-4 fill-white" />
+          <span>Trace Domino Shock in Contagion Lab</span>
+        </button>
       </div>
 
       {/* 3. Interactive "Ask AI Market Analyst" Bar */}

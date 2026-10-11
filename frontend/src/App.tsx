@@ -13,6 +13,7 @@ import { SavedWatchlistsView } from "./components/SavedWatchlistsView";
 import { AuditReportsView } from "./components/AuditReportsView";
 import { MethodologyDocsView } from "./components/MethodologyDocsView";
 import { MarketOverviewView } from "./components/MarketOverviewView";
+import { EventExplorerView } from "./components/EventExplorerView";
 import AuthSectionOne from "@/components/ui/auth-section-1";
 import { RbacLoginModal, PRESET_ROLES } from "./components/RbacLoginModal";
 import { EventRegressionModal } from "./components/EventRegressionModal";
@@ -284,7 +285,7 @@ export const App: React.FC = () => {
         {/* Content Body Area */}
         <div className="flex-1 flex min-h-0 overflow-hidden">
           {/* Main Stage View */}
-          <main className="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
+          <main className={`flex-1 flex flex-col ${activeNavTab === "impact_graph" ? "h-full min-h-0 overflow-hidden p-3 sm:p-4 gap-2.5" : "overflow-y-auto p-6 gap-5"}`}>
             {activeNavTab === "impact_graph" && (
               <>
                 {/* Header with Title, Switcher, and 3 KPI Cards */}
@@ -439,46 +440,17 @@ export const App: React.FC = () => {
 
             {/* Event Explorer Tab */}
             {activeNavTab === "event_explorer" && (
-              <div className="flex flex-col gap-5 py-2">
-                <div className="flex flex-col gap-1">
-                  <h2 className="text-2xl font-bold text-slate-900">
-                    Live Event & Scenario Explorer
-                  </h2>
-                  <p className="text-sm text-slate-600">
-                    Select any pre-configured scenario or live catalyst to project multi-hop transmission.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {scenarios.map((sc) => (
-                    <div
-                      key={sc.id}
-                      onClick={() => {
-                        setActiveScenario(sc);
-                        setActiveNavTab("impact_graph");
-                      }}
-                      className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-4"
-                    >
-                      <div className="flex flex-col gap-2">
-                        <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-xs font-bold w-fit">
-                          {sc.dropdownLabel.split("(")[0]}
-                        </span>
-                        <h3 className="text-lg font-bold text-slate-900">
-                          {sc.title}
-                        </h3>
-                        <p className="text-xs text-slate-600 leading-relaxed">
-                          {sc.narrative}
-                        </p>
-                      </div>
-
-                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                        <span>{sc.entitiesCount} Entities • {sc.pathwaysCount} Pathways</span>
-                        <span className="text-blue-600 font-semibold">Inspect →</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <EventExplorerView
+                scenarios={scenarios}
+                onSelectScenario={(sc) => {
+                  setActiveScenario(sc);
+                  setSelectedNode(null);
+                  setSelectedHop(null);
+                }}
+                onNavigateToGraph={() => {
+                  setActiveNavTab("impact_graph");
+                }}
+              />
             )}
 
             {/* Contagion Matrix / Sector Heatmap Tab */}

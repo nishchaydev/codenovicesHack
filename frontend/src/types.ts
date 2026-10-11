@@ -178,6 +178,24 @@ export interface EvidenceSource {
   category: string;
 }
 
+export interface CollidingEvent {
+  catalystA: {
+    title: string;
+    flag: string;
+    source: string;
+    summary: string;
+  };
+  catalystB: {
+    title: string;
+    flag: string;
+    source: string;
+    summary: string;
+  };
+  collisionPoint: string;
+  collisionMechanism: string;
+  causalFlow: string[];
+}
+
 export interface FinGraphScenario {
   id: string;
   title: string;
@@ -197,6 +215,7 @@ export interface FinGraphScenario {
   radialNodes: RadialCardNode[];
   pathways: PathwayHop[];
   evidenceSources: EvidenceSource[];
+  collidingEvent?: CollidingEvent;
 }
 
 export interface StockSearchResult {

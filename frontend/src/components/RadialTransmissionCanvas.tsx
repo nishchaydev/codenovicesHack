@@ -267,85 +267,112 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
       return true;
     });
 
-    const N = visibleRadialNodes.length;
-    // Radial orbit radius: balanced so all nodes fit comfortably
-    const R1 = isFullscreen ? 280 : 205;
+    const R1 = isFullscreen ? 260 : 190; // Balanced radial orbit radius
 
-    // 2. Primary 1st-Level Radial Nodes (Level 1)
-    visibleRadialNodes.forEach((node, i) => {
-      const angle = -Math.PI / 2 + (2 * Math.PI * i) / N;
-      const x = Math.round(R1 * Math.cos(angle));
-      const y = Math.round(R1 * Math.sin(angle));
+    // Partition nodes into P1 Critical (Upper Arc) and P2 High (Lower Arc)
+    const p1Nodes = visibleRadialNodes.filter((n) => n.priority === "P1 Critical");
+    const p2Nodes = visibleRadialNodes.filter((n) => n.priority !== "P1 Critical");
 
-      const radialTopoNode: TopologyNode = {
-        id: node.id,
-        data: node,
-        level: 1,
-        parentId: rootNode.id,
-        x,
-        y,
-        vx: 0,
-        vy: 0,
-        radius: isFullscreen ? 34 : 30,
-        color: node.priority === "P1 Critical" ? "#ef4444" : "#f59e0b",
-        angle,
-        edgeLabel: node.timeHorizon || "1-3 mo",
-      };
-      nodeList.push(radialTopoNode);
+    // Helper to position a subset of nodes along an arc
+    const layoutNodeArc = (nodesToLayout: RadialCardNode[], isUpperArc: boolean) => {
+      const count = nodesToLayout.length;
+      if (count === 0) return;
 
-      // Edge from Root to Radial Node
-      edgeList.push({
-        id: `edge-${rootNode.id}-${radialTopoNode.id}`,
-        source: rootNode,
-        target: radialTopoNode,
-        lineType: node.lineType,
-        timeHorizon: node.timeHorizon,
-      });
+      nodesToLayout.forEach((node, idx) => {
+        let angle: number;
+        if (priorityFilter === "p1_critical" || p2Nodes.length === 0) {
+          // If only P1 is shown, distribute across full top semi-circle
+          const span = Math.PI * 0.75;
+          angle = count === 1 ? -Math.PI / 2 : -Math.PI / 2 - span / 2 + (span * idx) / (count - 1);
+        } else if (isUpperArc) {
+          // Upper Arc (centered around -PI/2) for P1 Critical Shocks
+          const span = Math.PI * 0.7;
+          angle = count === 1 ? -Math.PI / 2 : -Math.PI / 2 - span / 2 + (span * idx) / (count - 1);
+        } else {
+          // Lower Arc (centered around +PI/2) for P2 High / Secondary Shocks
+          const span = Math.PI * 0.65;
+          angle = count === 1 ? Math.PI / 2 : Math.PI / 2 - span / 2 + (span * idx) / (count - 1);
+        }
 
-      // 3. Extended Satellite Child Nodes (Level 2 - Clusters like Image 2!)
-      const isExtended = extendedIds.includes(node.id);
-      if (isExtended) {
-        const children = getExtendedChildren(node);
-        const childCount = children.length;
-        const R2 = isFullscreen ? 190 : 145; // Distance of satellite cluster from parent
-        const spreadArc = Math.PI * 0.45; // Fan spread angle
+        const x = Math.round(R1 * Math.cos(angle));
+        const y = Math.round(R1 * Math.sin(angle));
 
-        children.forEach((child, cIdx) => {
-          const offsetAngle =
-            childCount > 1
-              ? -spreadArc / 2 + (spreadArc * cIdx) / (childCount - 1)
-              : 0;
-          const childAngle = angle + offsetAngle;
+        const radialTopoNode: TopologyNode = {
+          id: node.id,
+          data: node,
+          level: 1,
+          parentId: rootNode.id,
+          x,
+          y,
+          vx: 0,
+          vy: 0,
+          radius: isFullscreen ? 34 : (node.priority === "P1 Critical" ? 32 : 28),
+          color: node.priority === "P1 Critical" ? "#ef4444" : "#f59e0b",
+          angle,
+          edgeLabel: node.timeHorizon || "1-3 mo",
+        };
+        nodeList.push(radialTopoNode);
 
-          const childX = Math.round(x + R2 * Math.cos(childAngle));
-          const childY = Math.round(y + R2 * Math.sin(childAngle));
-
-          const childTopoNode: TopologyNode = {
-            id: child.id,
-            data: child,
-            level: 2,
-            parentId: radialTopoNode.id,
-            x: childX,
-            y: childY,
-            vx: 0,
-            vy: 0,
-            radius: isFullscreen ? 26 : 24,
-            color: child.priority === "P1 Critical" ? "#ef4444" : "#3b82f6",
-            edgeLabel: "2nd Order",
-          };
-          nodeList.push(childTopoNode);
-
-          // Edge from 1st-level parent to 2nd-level child node
-          edgeList.push({
-            id: `edge-${radialTopoNode.id}-${childTopoNode.id}`,
-            source: radialTopoNode,
-            target: childTopoNode,
-            lineType: child.lineType || "indirect",
-            isExtendedEdge: true,
-          });
+        // Edge from Root Shock to Radial Node
+        edgeList.push({
+          id: `edge-${rootNode.id}-${radialTopoNode.id}`,
+          source: rootNode,
+          target: radialTopoNode,
+          lineType: node.lineType,
+          timeHorizon: node.timeHorizon,
         });
-      }
-    });
+
+        // 3. Extended Satellite Child Nodes (Level 2 - Clusters like Image 2)
+        const isExtended = extendedIds.includes(node.id);
+        if (isExtended) {
+          const children = getExtendedChildren(node);
+          const childCount = children.length;
+          const R2 = isFullscreen ? 160 : 130; // Distance of satellite cluster from parent
+          const spreadArc = Math.PI * 0.45; // Fan spread angle
+
+          children.forEach((child, cIdx) => {
+            const offsetAngle =
+              childCount > 1
+                ? -spreadArc / 2 + (spreadArc * cIdx) / (childCount - 1)
+                : 0;
+            const childAngle = angle + offsetAngle;
+
+            const childX = Math.round(x + R2 * Math.cos(childAngle));
+            const childY = Math.round(y + R2 * Math.sin(childAngle));
+
+            const childTopoNode: TopologyNode = {
+              id: child.id,
+              data: child,
+              level: 2,
+              parentId: radialTopoNode.id,
+              x: childX,
+              y: childY,
+              vx: 0,
+              vy: 0,
+              radius: isFullscreen ? 26 : 23,
+              color: child.priority === "P1 Critical" ? "#ef4444" : "#3b82f6",
+              edgeLabel: "2nd Order",
+            };
+            nodeList.push(childTopoNode);
+
+            // Edge from 1st-level parent to 2nd-level child node
+            edgeList.push({
+              id: `edge-${radialTopoNode.id}-${childTopoNode.id}`,
+              source: radialTopoNode,
+              target: childTopoNode,
+              lineType: child.lineType || "indirect",
+              isExtendedEdge: true,
+            });
+          });
+        }
+      });
+    };
+
+    // Layout P1 on Upper Arc and P2 on Lower Arc
+    layoutNodeArc(p1Nodes, true);
+    if (priorityFilter !== "p1_critical") {
+      layoutNodeArc(p2Nodes, false);
+    }
 
     return { nodes: nodeList, edges: edgeList };
   }, [scenario, extendedIds, priorityFilter, isFullscreen]);
@@ -429,6 +456,19 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
               <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
               <span>P1 Critical</span>
             </button>
+          </div>
+
+          {/* Priority Hierarchy Visual Indicator */}
+          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl apple-glass text-[11px] font-semibold text-slate-700 border border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+            <span className="flex items-center gap-1 text-red-600">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <span>P1 Critical (Top Arc)</span>
+            </span>
+            <span className="text-slate-300">•</span>
+            <span className="flex items-center gap-1 text-amber-700">
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              <span>P2 High (Bottom Arc)</span>
+            </span>
           </div>
 
           {/* Global Extend / Collapse All Button */}
@@ -930,7 +970,7 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
   return (
     <>
       {/* ─── STANDARD INLINE CANVAS CONTAINER ─── */}
-      <div className="relative w-full rounded-3xl apple-mesh-bg border border-slate-200/80 overflow-hidden select-none transition-all duration-300 shadow-[0_4px_24px_-4px_rgba(15,23,42,0.06)] h-[640px] shrink-0 min-h-[640px]">
+      <div className="relative w-full rounded-[24px] apple-mesh-bg border border-slate-200/80 overflow-hidden select-none transition-all duration-300 shadow-[0_4px_24px_-4px_rgba(15,23,42,0.06)] flex-1 min-h-[440px] h-full">
         {renderCanvasContent()}
       </div>
 
