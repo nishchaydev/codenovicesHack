@@ -38,6 +38,10 @@ import { RbacLoginModal, PRESET_ROLES } from '@/components/dashboard/teammate/Rb
 import { NodeDetailPanel } from '@/components/dashboard/teammate/NodeDetailPanel';
 import { LinkDetailPanel } from '@/components/dashboard/teammate/LinkDetailPanel';
 import { CascadeDrawer } from '@/components/dashboard/teammate/CascadeDrawer';
+import { EmpiricalEvidenceDrawer } from '@/components/dashboard/EmpiricalEvidenceDrawer';
+import SystemicGraphViewport from '@/components/graph/SystemicGraphViewport';
+import type { Node, Edge } from '@xyflow/react';
+import { GitBranch } from 'lucide-react';
 
 // Tab Auxiliary Views
 import { MarketOverviewView } from '@/components/dashboard/teammate/MarketOverviewView';
@@ -73,8 +77,10 @@ function DashboardContent() {
   // Active Navigation Tab
   const [activeTab, setActiveTab] = useState<NavTab>('impact_graph');
 
-  // Graph View Mode: Radial Transmission Canvas vs Force-directed Physics Canvas
-  const [graphMode, setGraphMode] = useState<'radial' | 'physics'>('radial');
+  // Graph View Mode: Radial Transmission Canvas vs Force-directed Physics Canvas vs Hierarchical DAG Flow
+  const [graphMode, setGraphMode] = useState<'radial' | 'physics' | 'hierarchical'>('radial');
+  const [timeOffsetDays, setTimeOffsetDays] = useState<number>(90);
+  const [isEvidenceDrawerOpen, setIsEvidenceDrawerOpen] = useState<boolean>(false);
 
   // Scenario & Simulation State
   const [scenariosList] = useState<FinGraphScenario[]>(FINGRAPH_SCENARIOS);
@@ -164,9 +170,17 @@ function DashboardContent() {
 
   const handleSelectRadialNode = useCallback((node: RadialCardNode) => {
     setSelectedRadialNode(node);
+    setSelectedHop(null);
+    setIsEvidenceDrawerOpen(true);
     if (node.tickers && node.tickers.length > 0) {
       setIsDrilldownOpen(true);
     }
+  }, []);
+
+  const handleSelectHopEvidence = useCallback((hop: PathwayHop) => {
+    setSelectedHop(hop);
+    setSelectedRadialNode(null);
+    setIsEvidenceDrawerOpen(true);
   }, []);
 
   const handleToggleExtendNode = useCallback((nodeId: string) => {
@@ -180,17 +194,107 @@ function DashboardContent() {
     handleAnalyzeQuery(calibration.catalyst);
   }, []);
 
-  const handleReset = async () => {
-    const data = await resetGraph();
-    setAllNodes(data.nodes);
-    setAllLinks(data.links);
-    setSimulationResponse(null);
-    setSelectedPhysicsNode(null);
-    setSelectedPhysicsLink(null);
-    setSelectedRadialNode(null);
-    setExtendedNodeIds([]);
-    setActiveScenario(FINGRAPH_SCENARIOS[0]);
-  };
+  // React Flow Nodes and Edges for Hierarchical DAG propagation mode
+  const { flowNodes, flowEdges } = useMemo(() => {
+    const rfNodes: Node[] = [];
+    const rfEdges: Edge[] = [];
+
+    // Map Center / Trigger Node (Tier 0)
+    if (activeScenario.centerNode) {
+      const cn = activeScenario.centerNode;
+      rfNodes.push({
+        id: cn.id,
+        type: 'clayNode',
+        position: { x: 50, y: 250 },
+        data: {
+          label: cn.title,
+          category: cn.category,
+          nodeType: cn.category === 'commodity' ? 'commodity' : cn.category === 'financial_asset' ? 'financial_asset' : 'geopolitical',
+          impactScore: cn.impactScore || 100,
+          systemicImportance: cn.systemicImportance || 'Chokepoint Hub',
+          description: cn.subtitle,
+          evidence: cn.causalReason,
+          factType: cn.factType || 'Verified Regulatory Filing / Fact',
+          confidence: cn.empiricalConfidence || 98,
+          sources: cn.refLinks?.map((r) => ({ name: r.publisher, url: r.url, excerpt: r.title })) || [],
+          timeLag: cn.timeHorizon || 'T+0 Days',
+          minTimeDays: cn.minTimeDays ?? 0,
+        },
+      });
+    }
+
+    // Map Radial Nodes (Tiers 1, 2, 3)
+    activeScenario.radialNodes.forEach((rn, idx) => {
+      let nType: 'commodity' | 'geopolitical' | 'macro' | 'supply_chain' | 'financial_asset' = 'macro';
+      if (rn.category === 'commodity') nType = 'commodity';
+      else if (rn.category === 'geopolitical') nType = 'geopolitical';
+      else if (rn.category === 'supply_chain' || rn.category === 'sector') nType = 'supply_chain';
+      else if (rn.category === 'financial_asset' || rn.category === 'company') nType = 'financial_asset';
+      else nType = 'macro';
+
+      rfNodes.push({
+        id: rn.id,
+        type: 'clayNode',
+        position: { x: 350 + (idx % 2) * 320, y: 100 + idx * 110 },
+        data: {
+          label: rn.title,
+          category: rn.category,
+          nodeType: nType,
+          ticker: rn.tickers?.[0],
+          impactScore: rn.impactScore || 80,
+          systemicImportance: rn.systemicImportance || 'Systemic Bellwether',
+          description: rn.subtitle,
+          evidence: rn.causalReason,
+          factType: rn.factType || 'Verified Regulatory Filing / Fact',
+          confidence: rn.empiricalConfidence || 92,
+          sources: rn.refLinks?.map((r) => ({ name: r.publisher, url: r.url, excerpt: r.title })) || [],
+          timeLag: rn.timeHorizon || 'T+15 Days',
+          minTimeDays: rn.minTimeDays ?? 15,
+        },
+      });
+    });
+
+    // Map Pathways to Edges
+    activeScenario.pathways.forEach((p, idx) => {
+      // Find matching source and target node IDs
+      const sNode = rfNodes.find((n) => (n.data as any).label.toLowerCase().includes(p.source.toLowerCase()) || p.source.toLowerCase().includes((n.data as any).label.toLowerCase())) || rfNodes[0];
+      const tNode = rfNodes.find((n) => (n.data as any).label.toLowerCase().includes(p.target.toLowerCase()) || p.target.toLowerCase().includes((n.data as any).label.toLowerCase())) || rfNodes[Math.min(idx + 1, rfNodes.length - 1)];
+
+      if (sNode && tNode && sNode.id !== tNode.id) {
+        rfEdges.push({
+          id: `edge-${idx}-${sNode.id}-${tNode.id}`,
+          source: sNode.id,
+          target: tNode.id,
+          animated: true,
+          data: {
+            weight: 0.9,
+            velocity: 'fast',
+            timeHorizonDays: p.timeHorizonDays ?? 15,
+            explanation: p.explanation,
+          },
+        });
+      }
+    });
+
+    // If edges count is empty, connect center to all radial nodes
+    if (rfEdges.length === 0 && rfNodes.length > 1) {
+      const rootId = rfNodes[0].id;
+      for (let i = 1; i < rfNodes.length; i++) {
+        rfEdges.push({
+          id: `edge-root-${i}`,
+          source: rootId,
+          target: rfNodes[i].id,
+          animated: true,
+          data: {
+            weight: 0.85,
+            timeHorizonDays: (rfNodes[i].data as any).minTimeDays ?? 15,
+          },
+        });
+      }
+    }
+
+    return { flowNodes: rfNodes, flowEdges: rfEdges };
+  }, [activeScenario]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--clay-bg)] text-[var(--text-primary)] relative select-none overflow-x-hidden font-sans">
@@ -237,30 +341,65 @@ function DashboardContent() {
                     </div>
                   </div>
 
-                  {/* Dual Mode Graph Canvas Switcher */}
-                  <div className="flex items-center gap-1.5 clay-inset p-1 rounded-2xl border border-[var(--clay-border)]">
-                    <button
-                      onClick={() => setGraphMode('radial')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
-                        graphMode === 'radial'
-                          ? 'clay-button-primary text-white shadow-sm'
-                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                      }`}
-                    >
-                      <Layers className="w-3.5 h-3.5" />
-                      <span>Radial Macro View</span>
-                    </button>
-                    <button
-                      onClick={() => setGraphMode('physics')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
-                        graphMode === 'physics'
-                          ? 'clay-button-primary text-white shadow-sm'
-                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                      }`}
-                    >
-                      <Activity className="w-3.5 h-3.5" />
-                      <span>Physics Force Graph</span>
-                    </button>
+                  {/* Tri-Mode Graph Canvas Switcher */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Time-Slider Control [T+0 Days | T+15 Days | T+45 Days | T+90 Days] */}
+                    <div className="flex items-center gap-1 clay-inset p-1 rounded-2xl border border-[var(--clay-border)]">
+                      <span className="px-2 text-[10px] font-mono text-amber-400 font-black">
+                        Contagion Timeline:
+                      </span>
+                      {[0, 15, 45, 90].map((days) => (
+                        <button
+                          key={days}
+                          type="button"
+                          onClick={() => setTimeOffsetDays(days)}
+                          className={`px-2.5 py-1 rounded-xl text-[11px] font-bold font-mono transition-all cursor-pointer ${
+                            timeOffsetDays === days
+                              ? 'clay-button-primary text-white shadow-sm'
+                              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                          }`}
+                        >
+                          T+{days}d
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Mode Buttons */}
+                    <div className="flex items-center gap-1.5 clay-inset p-1 rounded-2xl border border-[var(--clay-border)]">
+                      <button
+                        onClick={() => setGraphMode('radial')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+                          graphMode === 'radial'
+                            ? 'clay-button-primary text-white shadow-sm'
+                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                        }`}
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                        <span>Radial Macro</span>
+                      </button>
+                      <button
+                        onClick={() => setGraphMode('hierarchical')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+                          graphMode === 'hierarchical'
+                            ? 'clay-button-primary text-white shadow-sm'
+                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                        }`}
+                      >
+                        <GitBranch className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Propagation DAG</span>
+                      </button>
+                      <button
+                        onClick={() => setGraphMode('physics')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+                          graphMode === 'physics'
+                            ? 'clay-button-primary text-white shadow-sm'
+                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                        }`}
+                      >
+                        <Activity className="w-3.5 h-3.5" />
+                        <span>Physics Force</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -287,6 +426,31 @@ function DashboardContent() {
                       onOpenRegressionModal={() => setIsRegressionOpen(true)}
                       extendedNodeIds={extendedNodeIds}
                       onToggleExtendNode={handleToggleExtendNode}
+                      currentDayOffset={timeOffsetDays}
+                      onTimeOffsetChange={setTimeOffsetDays}
+                    />
+                  ) : graphMode === 'hierarchical' ? (
+                    <SystemicGraphViewport
+                      nodes={flowNodes}
+                      edges={flowEdges}
+                      currentDayOffset={timeOffsetDays}
+                      onNodeClick={(_, node) => {
+                        const targetNode =
+                          activeScenario.centerNode.id === node.id
+                            ? activeScenario.centerNode
+                            : activeScenario.radialNodes.find((rn) => rn.id === node.id) || null;
+                        if (targetNode) {
+                          handleSelectRadialNode(targetNode);
+                        }
+                      }}
+                      onEdgeClick={(_, edge) => {
+                        const pathwayHop = activeScenario.pathways.find(
+                          (p) => edge.id.includes(p.source) || edge.id.includes(p.target)
+                        );
+                        if (pathwayHop) {
+                          handleSelectHopEvidence(pathwayHop);
+                        }
+                      }}
                     />
                   ) : (
                     <div className="relative w-full h-full min-h-[620px] clay-surface rounded-3xl overflow-hidden border border-[var(--clay-border)] shadow-xl">
@@ -339,6 +503,7 @@ function DashboardContent() {
                         scenario={activeScenario}
                         selectedHop={selectedHop}
                         onSelectHop={setSelectedHop}
+                        onOpenEvidence={handleSelectHopEvidence}
                       />
                     </div>
                   )}
@@ -543,6 +708,15 @@ function DashboardContent() {
           onClose={() => setIsRbacOpen(false)}
         />
       )}
+
+      {/* Empirical Ground-Truth Evidence Verification Drawer */}
+      <EmpiricalEvidenceDrawer
+        isOpen={isEvidenceDrawerOpen}
+        onClose={() => setIsEvidenceDrawerOpen(false)}
+        selectedNode={selectedRadialNode}
+        selectedHop={selectedHop}
+        evidenceSources={activeScenario.evidenceSources}
+      />
     </div>
   );
 }

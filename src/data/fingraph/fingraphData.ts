@@ -1,6 +1,8 @@
 import { FinGraphScenario } from "../../types/fingraph/types";
+import { HISTORICAL_SCENARIOS } from "./historicalScenarios";
+export { HISTORICAL_SCENARIOS };
 
-export const FINGRAPH_SCENARIOS: FinGraphScenario[] = [
+const BASE_FINGRAPH_SCENARIOS: FinGraphScenario[] = [
   {
     id: "oil-supply-shock",
     title: "Oil supply shock",
@@ -752,3 +754,9 @@ export const FINGRAPH_SCENARIOS: FinGraphScenario[] = [
     ],
   },
 ];
+
+export const FINGRAPH_SCENARIOS: FinGraphScenario[] = [
+  ...HISTORICAL_SCENARIOS,
+  ...BASE_FINGRAPH_SCENARIOS,
+];
+

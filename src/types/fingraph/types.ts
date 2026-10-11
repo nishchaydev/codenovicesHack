@@ -99,31 +99,44 @@ export interface ReferenceLink {
 }
 
 // FinGraph / Fin.D Institutional Radial Schemas
+export type EntityCategory =
+  | "commodity" // 🚢 Physical Chokepoints / Commodities (Amber)
+  | "geopolitical" // 🏛️ Regulatory / Geopolitical Sanctions (Red)
+  | "economic_variable" // 📊 Macro Indicators & FX (Cyan)
+  | "supply_chain" // 🏭 Critical Supply Chain Nodes (Violet)
+  | "financial_asset" // 🏦 Credit, Sovereign Bonds & Liquid Assets (Emerald)
+  | "sector"
+  | "company";
+
 export interface RadialCardNode {
   id: string;
   title: string;
   metric: string;
-  metricColor: "red" | "green" | "blue" | "slate";
+  metricColor: "red" | "green" | "blue" | "slate" | "amber" | "cyan" | "emerald" | "purple";
   subtitle: string;
   badge: string;
-  badgeType: "red" | "green" | "blue" | "amber";
-  category: "commodity" | "economic_variable" | "sector" | "company";
-  icon: "oil" | "chart" | "ship" | "currency" | "plane" | "factory" | "chip" | "bank" | "wheat";
+  badgeType: "red" | "green" | "blue" | "amber" | "cyan" | "emerald" | "purple";
+  category: EntityCategory;
+  icon: "oil" | "chart" | "ship" | "currency" | "plane" | "factory" | "chip" | "bank" | "wheat" | "building" | "shield" | "dock";
   position: "center" | "top" | "left" | "right" | "bottom-left" | "bottom-right" | "custom";
-  timeHorizon?: string;
+  timeHorizon?: string; // e.g. "T+0", "T+15", "T+45", "T+90"
+  minTimeDays?: number; // Days offset for time slider (0, 15, 45, 90)
   lineType?: "positive" | "negative" | "indirect";
   tickers?: string[];
-  // Priority based node importance
   priority?: "P1 Critical" | "P2 High" | "P3 Moderate";
   priorityRank?: number;
   impactScore?: number; // 0 to 100
-  // Causal rationale: WHY event is causing this
+  systemicImportance?: "Chokepoint Hub" | "Systemic Bellwether" | "Peripheral Asset";
   causalReason?: string;
-  // External reference links & citations
   refLinks?: ReferenceLink[];
-  // Dynamic 2nd-order node extension
   isExtended?: boolean;
   extendedChildren?: RadialCardNode[];
+  // Empirical Evidence Drawer Fields
+  factType?: "Verified Regulatory Filing / Fact" | "LLM Probabilistic Inference";
+  empiricalConfidence?: number; // 0 - 100%
+  primarySourceSnippet?: string;
+  sourceFilingCitation?: string;
+  sourceUrl?: string;
 }
 
 // Role-Based Access Control (RBAS / RBAC)
@@ -161,10 +174,16 @@ export interface PathwayHop {
   impactType: "Increases" | "Decreases" | "Neutral";
   impactLabel: string;
   timeframe: string;
+  timeHorizonDays?: number; // e.g. 0, 15, 45, 90
   explanation: string;
   sector: string;
   evidenceGrade: "Well established" | "Moderate evidence" | "Emerging evidence";
-  badgeGradeType: "green" | "yellow" | "blue";
+  badgeGradeType: "green" | "yellow" | "blue" | "red";
+  factType?: "Verified Regulatory Filing / Fact" | "LLM Probabilistic Inference";
+  confidenceScore?: number;
+  sourceDocument?: string;
+  sourceExcerpt?: string;
+  sourceUrl?: string;
 }
 
 export interface EvidenceSource {
@@ -176,6 +195,10 @@ export interface EvidenceSource {
   summary: string;
   relevanceScore: number;
   category: string;
+  factType?: "Verified Regulatory Filing / Fact" | "LLM Probabilistic Inference";
+  documentType?: "SEC 10-K" | "Central Bank Bulletin" | "Reuters Wire" | "EIA Monthly" | "Bloomberg Intelligence";
+  confidenceScore?: number;
+  directExcerpt?: string;
 }
 
 export interface FinGraphScenario {

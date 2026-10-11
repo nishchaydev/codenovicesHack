@@ -12,18 +12,20 @@
   [data-theme="porcelain"],
   .theme-porcelain {
     --bg-page: #F3F5F9;
+    /* 1. Default Ivory Ledger Clay (Warm off-white, crisp porcelain, refined 1px border) */
+    --bg-page: #F8FAFC;
     --clay-surface: #FFFFFF;
-    --clay-shadow-dark: rgba(160, 175, 200, 0.45);
-    --clay-shadow-light: rgba(255, 255, 255, 0.95);
-    --accent-primary: #3B82F6;
-    --text-primary: #1E293B;
-    --text-secondary: #64748B;
+    --clay-shadow-dark: rgba(148, 163, 184, 0.25);
+    --clay-shadow-light: rgba(255, 255, 255, 1);
+    --accent-primary: #2563EB;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
 
     --clay-bg: var(--bg-page);
     --clay-text: var(--text-primary);
     --clay-text-muted: var(--text-secondary);
     --clay-accent: var(--accent-primary);
-    --clay-border: rgba(160, 175, 200, 0.25);
+    --clay-border: #E2E8F0;
   }
 
   /* 2. Bubblegum / Neon Pink Clay (Vibrant High-Contrast Clay) */
@@ -31,7 +33,7 @@
   .theme-neon-pink {
     --bg-page: #FFF1F5;
     --clay-surface: #FFE4EC;
-    --clay-shadow-dark: rgba(244, 114, 182, 0.4);
+    --clay-shadow-dark: rgba(244, 114, 182, 0.3);
     --clay-shadow-light: rgba(255, 255, 255, 0.95);
     --accent-primary: #EC4899;
     --text-primary: #831843;
@@ -49,7 +51,7 @@
   .theme-electric-blue {
     --bg-page: #EFF6FF;
     --clay-surface: #DBEAFE;
-    --clay-shadow-dark: rgba(59, 130, 246, 0.35);
+    --clay-shadow-dark: rgba(59, 130, 246, 0.25);
     --clay-shadow-light: rgba(255, 255, 255, 0.9);
     --accent-primary: #1D4ED8;
     --text-primary: #1E3A8A;
@@ -59,26 +61,26 @@
     --clay-text: var(--text-primary);
     --clay-text-muted: var(--text-secondary);
     --clay-accent: var(--accent-primary);
-    --clay-border: rgba(59, 130, 246, 0.3);
+    --clay-border: rgba(59, 130, 246, 0.25);
   }
 
-  /* 4. Obsidian Clay (Stealth Dark Matte Clay) */
+  /* 4. Obsidian Terminal Clay (Institutional Deep Matte Navy-Slate #0C1017, #151C28) */
   [data-theme="obsidian"],
   .theme-obsidian,
   .dark {
-    --bg-page: #0E1117;
-    --clay-surface: #181D27;
-    --clay-shadow-dark: rgba(0, 0, 0, 0.7);
-    --clay-shadow-light: rgba(36, 44, 58, 0.3);
+    --bg-page: #0C1017;
+    --clay-surface: #151C28;
+    --clay-shadow-dark: rgba(0, 0, 0, 0.6);
+    --clay-shadow-light: rgba(30, 41, 59, 0.25);
     --accent-primary: #38BDF8;
-    --text-primary: #F8FAFC;
+    --text-primary: #F1F5F9;
     --text-secondary: #94A3B8;
 
     --clay-bg: var(--bg-page);
     --clay-text: var(--text-primary);
     --clay-text-muted: var(--text-secondary);
     --clay-accent: var(--accent-primary);
-    --clay-border: rgba(255, 255, 255, 0.08);
+    --clay-border: #1E293B;
   }
 
   *,

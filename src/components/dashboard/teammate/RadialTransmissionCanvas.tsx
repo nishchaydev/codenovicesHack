@@ -24,6 +24,8 @@ interface RadialTransmissionCanvasProps {
   onOpenRegressionModal?: () => void;
   extendedNodeIds?: string[];
   onToggleExtendNode?: (nodeId: string) => void;
+  currentDayOffset?: number;
+  onTimeOffsetChange?: (days: number) => void;
 }
 
 export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> = ({
@@ -33,6 +35,8 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
   onOpenRegressionModal,
   extendedNodeIds: externalExtendedIds,
   onToggleExtendNode: externalToggleExtend,
+  currentDayOffset = 90,
+  onTimeOffsetChange,
 }) => {
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -119,9 +123,12 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
   const bLeftNode = scenario.radialNodes.find((n) => n.position === "bottom-left") || scenario.radialNodes[3];
   const bRightNode = scenario.radialNodes.find((n) => n.position === "bottom-right") || scenario.radialNodes[4];
 
-  // Helper to test if a node passes priority filter
+  // Helper to test if a node passes priority filter & time slider filter
   const isNodeDimmed = (node?: RadialCardNode) => {
     if (!node) return false;
+    if ((node.minTimeDays ?? 0) > currentDayOffset) {
+      return true;
+    }
     if (priorityFilter === "p1_critical") {
       return node.priority !== "P1 Critical";
     }
@@ -168,6 +175,28 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
             <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
             <span>P1 Critical Priority First</span>
           </button>
+        </div>
+
+        {/* Time-Travel Replay Slider */}
+        <div className="flex items-center gap-1 clay-surface border border-[var(--clay-border)] rounded-2xl p-1 shadow-sm text-xs">
+          <div className="flex items-center gap-1 px-2 text-[10px] font-mono text-[var(--accent-primary)] font-bold">
+            <Sliders className="w-3 h-3" />
+            <span>Time-Travel:</span>
+          </div>
+          {[0, 15, 45, 90].map((days) => (
+            <button
+              key={days}
+              type="button"
+              onClick={() => onTimeOffsetChange && onTimeOffsetChange(days)}
+              className={`px-2.5 py-1 rounded-xl font-bold font-mono text-[11px] transition-all cursor-pointer ${
+                currentDayOffset === days
+                  ? "clay-button-primary text-white shadow-xs"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              T+{days}d
+            </button>
+          ))}
         </div>
 
         {/* Calibrate Regression CTA Button */}

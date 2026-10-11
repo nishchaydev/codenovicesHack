@@ -5,12 +5,14 @@ interface ImpactPathwaysPanelProps {
   scenario: FinGraphScenario;
   selectedHop: PathwayHop | null;
   onSelectHop: (hop: PathwayHop) => void;
+  onOpenEvidence?: (hop: PathwayHop) => void;
 }
 
 export const ImpactPathwaysPanel: React.FC<ImpactPathwaysPanelProps> = ({
   scenario,
   selectedHop,
   onSelectHop,
+  onOpenEvidence,
 }) => {
   const [activeTab, setActiveTab] = useState<"pathways" | "evidence" | "citations">("pathways");
 
@@ -195,6 +197,21 @@ export const ImpactPathwaysPanel: React.FC<ImpactPathwaysPanelProps> = ({
                   >
                     {hop.evidenceGrade}
                   </span>
+
+                  {onOpenEvidence && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectHop(hop);
+                        onOpenEvidence(hop);
+                      }}
+                      className="ml-auto text-[10px] font-bold text-[var(--accent-primary)] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>Verify Evidence</span>
+                      <span>→</span>
+                    </button>
+                  )}
                 </div>
               </div>
             );

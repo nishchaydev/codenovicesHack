@@ -44,27 +44,73 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
               </button>
 
               {isScenarioDropdownOpen && (
-                <div className="absolute left-0 mt-2 w-80 rounded-2xl clay-surface p-2 z-40 text-xs shadow-2xl border border-[var(--clay-border)]">
-                  <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-[var(--text-secondary)]">
-                    Switch Active Catalyst
+                <div className="absolute left-0 mt-2 w-96 rounded-2xl clay-surface p-2.5 z-40 text-xs shadow-2xl border border-[var(--clay-border)] max-h-[460px] overflow-y-auto">
+                  {/* Historical Event Archive Section */}
+                  <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5 border-b border-[var(--clay-border)] pb-2 mb-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                    <span>🏛️ Historical Event Archive (Judge Scenario Replays)</span>
                   </div>
-                  {scenariosList.map((sc) => (
-                    <button
-                      key={sc.id}
-                      onClick={() => {
-                        onSelectScenario(sc);
-                        setIsScenarioDropdownOpen(false);
-                      }}
-                      className={`w-full px-3 py-2.5 text-left rounded-xl flex flex-col gap-0.5 transition-all cursor-pointer ${
-                        sc.id === scenario.id ? "clay-button-primary text-white font-bold" : "text-[var(--text-primary)] hover:bg-[var(--clay-bg)]"
-                      }`}
-                    >
-                      <span className="text-xs font-bold">{sc.title}</span>
-                      <span className={`text-[10px] font-medium truncate ${sc.id === scenario.id ? "text-white/80" : "text-[var(--text-secondary)]"}`}>
-                        {sc.dropdownLabel}
-                      </span>
-                    </button>
-                  ))}
+                  {scenariosList
+                    .filter((sc) => sc.id.startsWith("historical-"))
+                    .map((sc) => (
+                      <button
+                        key={sc.id}
+                        onClick={() => {
+                          onSelectScenario(sc);
+                          setIsScenarioDropdownOpen(false);
+                        }}
+                        className={`w-full px-3 py-2 text-left rounded-xl flex flex-col gap-0.5 transition-all cursor-pointer mb-1 ${
+                          sc.id === scenario.id
+                            ? "clay-button-primary text-white font-bold"
+                            : "text-[var(--text-primary)] hover:bg-[var(--clay-bg)]"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold">{sc.title}</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300">
+                            HISTORICAL
+                          </span>
+                        </div>
+                        <span
+                          className={`text-[10px] font-medium truncate ${
+                            sc.id === scenario.id ? "text-white/80" : "text-[var(--text-secondary)]"
+                          }`}
+                        >
+                          {sc.dropdownLabel}
+                        </span>
+                      </button>
+                    ))}
+
+                  {/* Custom Shocks / Live Macro Shocks Section */}
+                  <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-[var(--accent-primary)] flex items-center gap-1.5 border-t border-[var(--clay-border)] pt-2.5 mt-2 mb-1">
+                    <span className="w-2 h-2 rounded-full bg-[var(--accent-primary)]" />
+                    <span>⚡ Live Geopolitical Shocks & Custom Catalysts</span>
+                  </div>
+                  {scenariosList
+                    .filter((sc) => !sc.id.startsWith("historical-"))
+                    .map((sc) => (
+                      <button
+                        key={sc.id}
+                        onClick={() => {
+                          onSelectScenario(sc);
+                          setIsScenarioDropdownOpen(false);
+                        }}
+                        className={`w-full px-3 py-2 text-left rounded-xl flex flex-col gap-0.5 transition-all cursor-pointer mb-1 ${
+                          sc.id === scenario.id
+                            ? "clay-button-primary text-white font-bold"
+                            : "text-[var(--text-primary)] hover:bg-[var(--clay-bg)]"
+                        }`}
+                      >
+                        <span className="text-xs font-bold">{sc.title}</span>
+                        <span
+                          className={`text-[10px] font-medium truncate ${
+                            sc.id === scenario.id ? "text-white/80" : "text-[var(--text-secondary)]"
+                          }`}
+                        >
+                          {sc.dropdownLabel}
+                        </span>
+                      </button>
+                    ))}
                 </div>
               )}
             </div>
