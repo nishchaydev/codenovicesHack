@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { UserProfile } from "../types";
-import { Sparkles, CheckCircle2, ChevronDown, Plus, Search } from "lucide-react";
+import { ChevronDown, Plus, Search } from "lucide-react";
 
 interface TopNavProps {
   onAnalyze: (query: string) => void;
@@ -9,7 +9,6 @@ interface TopNavProps {
   onOpenAuthModal?: () => void;
   onOpenRbacModal?: () => void;
   userProfile?: UserProfile | null;
-  onDoneForToday?: () => void;
 }
 
 export const TopNav: React.FC<TopNavProps> = ({
@@ -19,7 +18,6 @@ export const TopNav: React.FC<TopNavProps> = ({
   onOpenAuthModal,
   onOpenRbacModal,
   userProfile,
-  onDoneForToday,
 }) => {
   const [searchInput, setSearchInput] = useState<string>("");
   const [marketSelector, setMarketSelector] = useState<string>("India • All markets");
@@ -81,20 +79,8 @@ export const TopNav: React.FC<TopNavProps> = ({
         )}
       </div>
 
-      {/* Right Controls: Market Selector, Done For Today, & User Profile */}
+      {/* Right Controls: Market Selector & User Profile */}
       <div className="flex items-center gap-2.5">
-        {/* Done For Today Button - User Requested Special Celebration CTA */}
-        <button
-          type="button"
-          onClick={onDoneForToday}
-          className="h-9 px-3 rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-sky-500/10 hover:from-emerald-500/20 hover:to-sky-500/20 border border-emerald-400/40 text-emerald-800 text-[12px] font-semibold flex items-center gap-1.5 transition-all shadow-[0_1px_3px_rgba(16,185,129,0.12)] active:scale-95 cursor-pointer"
-          title="Mark today's research complete & sync telemetry"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
-          <span className="hidden sm:inline">Done for today</span>
-          <span className="sm:hidden">Done</span>
-        </button>
-
         {/* Country & Market Dropdown Pill */}
         <div className="relative">
           <button

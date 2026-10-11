@@ -16,7 +16,6 @@ import { MarketOverviewView } from "./components/MarketOverviewView";
 import AuthSectionOne from "@/components/ui/auth-section-1";
 import { RbacLoginModal, PRESET_ROLES } from "./components/RbacLoginModal";
 import { EventRegressionModal } from "./components/EventRegressionModal";
-import { DoneForTodayModal } from "./components/DoneForTodayModal";
 import { FINGRAPH_SCENARIOS } from "./data/fingraphData";
 import { FinGraphScenario, RadialCardNode, PathwayHop, UserProfile, RegressionCalibration } from "./types";
 import { generateStockScenario } from "./api";
@@ -36,7 +35,6 @@ export const App: React.FC = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [isRbacModalOpen, setIsRbacModalOpen] = useState<boolean>(false);
   const [isRegressionModalOpen, setIsRegressionModalOpen] = useState<boolean>(false);
-  const [isDoneForTodayOpen, setIsDoneForTodayOpen] = useState<boolean>(false);
   const [extendedNodeIds, setExtendedNodeIds] = useState<string[]>([]);
 
   const handleToggleExtendNode = (nodeId: string) => {
@@ -281,7 +279,6 @@ export const App: React.FC = () => {
           userProfile={currentUser}
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
           onOpenRbacModal={() => setIsRbacModalOpen(true)}
-          onDoneForToday={() => setIsDoneForTodayOpen(true)}
         />
 
         {/* Content Body Area */}
@@ -612,12 +609,6 @@ export const App: React.FC = () => {
           />
         </div>
       )}
-
-      {/* 9. Done For Today Celebration Modal */}
-      <DoneForTodayModal
-        isOpen={isDoneForTodayOpen}
-        onClose={() => setIsDoneForTodayOpen(false)}
-      />
     </div>
   );
 };
