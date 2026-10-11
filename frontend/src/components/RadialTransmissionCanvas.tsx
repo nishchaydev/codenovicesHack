@@ -130,28 +130,28 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
 
   return (
     <div
-      className={`relative w-full rounded-3xl bg-[#fafafa] border border-slate-200/90 overflow-hidden select-none transition-all duration-300 shadow-2xs ${
+      className={`relative w-full rounded-3xl apple-mesh-bg border border-slate-200/80 overflow-hidden select-none transition-all duration-300 shadow-[0_4px_24px_-4px_rgba(15,23,42,0.06)] ${
         isFullscreen ? "fixed inset-0 z-50 rounded-none bg-white" : "h-[590px]"
       }`}
     >
       {/* Precision Micro-Dot Matrix Background Canvas */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-40"
+        className="absolute inset-0 pointer-events-none opacity-30"
         style={{
-          backgroundImage: "radial-gradient(#94a3b8 1.1px, transparent 1.1px)",
-          backgroundSize: "24px 24px",
+          backgroundImage: "radial-gradient(#94a3b8 1px, transparent 1px)",
+          backgroundSize: "22px 22px",
         }}
       />
 
-      {/* Top Left Toolbar: Priority Filter & Econometric Regression Gate */}
+      {/* Top Left Toolbar: Apple Glass Pill Controls */}
       <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-2">
         {/* Priority Filter Toggle */}
-        <div className="flex items-center bg-white/95 backdrop-blur-xs border border-slate-200 rounded-xl p-1 shadow-xs text-xs">
+        <div className="flex items-center apple-glass rounded-2xl p-1 shadow-[0_4px_16px_rgba(0,0,0,0.04)] text-xs border border-white/80">
           <button
             onClick={() => setPriorityFilter("all")}
-            className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
+            className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${
               priorityFilter === "all"
-                ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                ? "bg-slate-900 text-white font-semibold shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
@@ -159,14 +159,14 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
           </button>
           <button
             onClick={() => setPriorityFilter("p1_critical")}
-            className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-xl font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
               priorityFilter === "p1_critical"
-                ? "bg-red-600 text-white font-semibold shadow-2xs"
+                ? "bg-[#FF3B30] text-white font-semibold shadow-xs"
                 : "text-red-700 hover:text-red-900"
             }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-            <span>P1 Critical Priority First</span>
+            <span>P1 Critical</span>
           </button>
         </div>
 
@@ -174,20 +174,20 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
         {onOpenRegressionModal && (
           <button
             onClick={onOpenRegressionModal}
-            className="px-3 py-1.5 rounded-xl bg-white/95 hover:bg-white text-slate-800 border border-slate-200 shadow-xs text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-400"
+            className="px-3.5 py-1.5 rounded-2xl apple-glass hover:bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-300"
             title="Formulate Causal Thesis & Run Econometric Regression"
           >
-            <Calculator className="w-3.5 h-3.5 text-blue-600" />
+            <Calculator className="w-3.5 h-3.5 text-[#007AFF]" />
             <span>Calibrate Regression</span>
           </button>
         )}
       </div>
 
-      {/* Top Right Controls (Zoom & Fullscreen) */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-1 bg-white/95 backdrop-blur-xs border border-slate-200 rounded-xl p-1 shadow-xs">
+      {/* Top Right Controls (Zoom & Fullscreen) - Apple Glass Pill */}
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-1 apple-glass rounded-2xl p-1 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80">
         <button
           onClick={() => setZoomLevel((z) => Math.max(z - 10, 60))}
-          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+          className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
           title="Zoom out"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -195,13 +195,13 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
           </svg>
         </button>
 
-        <span className="px-1.5 text-[12px] font-semibold text-slate-700 min-w-[42px] text-center select-none">
+        <span className="px-1.5 text-[12px] font-semibold text-slate-700 min-w-[42px] text-center select-none font-mono">
           {zoomLevel}%
         </span>
 
         <button
           onClick={() => setZoomLevel((z) => Math.min(z + 10, 150))}
-          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+          className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
           title="Zoom in"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -213,7 +213,7 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
 
         <button
           onClick={() => setIsFullscreen(!isFullscreen)}
-          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+          className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
           title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
@@ -338,9 +338,9 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
             onClick={() => onSelectNode(center)}
             className="absolute left-1/2 top-[53%] -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-transform hover:scale-105"
           >
-            <div className="relative p-4 rounded-2xl bg-white border-2 border-red-500 shadow-[0_0_28px_rgba(239,68,68,0.28)] flex flex-col items-center gap-2 min-w-[190px]">
+            <div className="relative p-5 rounded-3xl apple-glass-card border-2 border-red-500/80 shadow-[0_12px_36px_rgba(239,68,68,0.2),inset_0_1px_1px_rgba(255,255,255,0.95)] flex flex-col items-center gap-2.5 min-w-[200px]">
               {/* Pulsing halo ring */}
-              <div className="absolute inset-0 rounded-2xl ring-4 ring-red-400/20 pointer-events-none animate-pulse" />
+              <div className="absolute inset-0 rounded-3xl ring-4 ring-red-400/20 pointer-events-none animate-pulse" />
 
               {/* Priority badge on root */}
               <div className="flex items-center justify-between w-full">
@@ -354,7 +354,7 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
                       e.stopPropagation();
                       setActiveRefNode(center);
                     }}
-                    className="p-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center gap-0.5"
+                    className="p-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center gap-0.5 cursor-pointer"
                     title="View Reference Links"
                   >
                     <ExternalLink className="w-2.5 h-2.5" />
@@ -393,7 +393,7 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
               selectedNodeId === topNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
             } ${isNodeDimmed(topNode) ? "opacity-35" : "opacity-100"}`}
           >
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-2 min-w-[200px]">
+            <div className="p-4 rounded-3xl apple-glass-card border border-white/85 shadow-[0_8px_25px_-5px_rgba(15,23,42,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)] flex flex-col gap-2 min-w-[210px]">
               {/* Card Header: Priority & Ref Links */}
               <div className="flex items-center justify-between text-[10px]">
                 <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-red-50 text-red-700 border border-red-200">
@@ -493,7 +493,7 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
               selectedNodeId === leftNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
             } ${isNodeDimmed(leftNode) ? "opacity-35" : "opacity-100"}`}
           >
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-2 min-w-[200px]">
+            <div className="p-4 rounded-3xl apple-glass-card border border-white/85 shadow-[0_8px_25px_-5px_rgba(15,23,42,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)] flex flex-col gap-2 min-w-[210px]">
               <div className="flex items-center justify-between text-[10px]">
                 <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-red-50 text-red-700 border border-red-200">
                   {leftNode.priority || "P1 Critical"}
@@ -578,7 +578,7 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
               selectedNodeId === rightNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
             } ${isNodeDimmed(rightNode) ? "opacity-35" : "opacity-100"}`}
           >
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-2 min-w-[200px]">
+            <div className="p-4 rounded-3xl apple-glass-card border border-white/85 shadow-[0_8px_25px_-5px_rgba(15,23,42,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)] flex flex-col gap-2 min-w-[210px]">
               <div className="flex items-center justify-between text-[10px]">
                 <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
                   {rightNode.priority || "P2 High"}
@@ -663,7 +663,7 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
               selectedNodeId === bLeftNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
             } ${isNodeDimmed(bLeftNode) ? "opacity-35" : "opacity-100"}`}
           >
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-2 min-w-[205px]">
+            <div className="p-4 rounded-3xl apple-glass-card border border-white/85 shadow-[0_8px_25px_-5px_rgba(15,23,42,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)] flex flex-col gap-2 min-w-[210px]">
               <div className="flex items-center justify-between text-[10px]">
                 <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-red-50 text-red-700 border border-red-200">
                   {bLeftNode.priority || "P1 Critical"}
@@ -748,7 +748,7 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
               selectedNodeId === bRightNode.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
             } ${isNodeDimmed(bRightNode) ? "opacity-35" : "opacity-100"}`}
           >
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col gap-2 min-w-[210px]">
+            <div className="p-4 rounded-3xl apple-glass-card border border-white/85 shadow-[0_8px_25px_-5px_rgba(15,23,42,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)] flex flex-col gap-2 min-w-[210px]">
               <div className="flex items-center justify-between text-[10px]">
                 <span className="px-2 py-0.5 rounded-md font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
                   {bRightNode.priority || "P2 High"}

@@ -30,7 +30,7 @@ export const ImpactPathwaysPanel: React.FC<ImpactPathwaysPanelProps> = ({
   });
 
   return (
-    <aside className="w-96 shrink-0 bg-white border-l border-slate-200 h-full flex flex-col p-5 select-none z-10 overflow-y-auto">
+    <aside className="w-96 shrink-0 bg-white/75 backdrop-blur-2xl border-l border-slate-200/70 h-full flex flex-col p-5 select-none z-10 overflow-y-auto shadow-[-4px_0_24px_-4px_rgba(15,23,42,0.02)]">
       {/* Panel Header */}
       <div className="flex items-center justify-between pb-3">
         <h2 className="text-xl font-bold tracking-tight text-slate-900 font-sans">

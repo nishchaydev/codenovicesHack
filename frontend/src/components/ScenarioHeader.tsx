@@ -92,18 +92,18 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
         </p>
       </div>
 
-      {/* Row 2: Three Stat KPI Cards */}
+      {/* Row 2: Three Stat KPI Cards - Apple Glass Styling */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         {/* Card 1: Entities identified */}
-        <div className="p-3.5 rounded-2xl border border-slate-200/90 bg-white flex items-center gap-3.5 shadow-2xs hover:border-slate-300 transition-colors">
-          <div className="w-10 h-10 rounded-xl bg-blue-50/80 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+        <div className="p-4 rounded-3xl apple-glass-card border border-white/85 flex items-center gap-3.5 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05),inset_0_1px_1px_rgba(255,255,255,0.9)] hover:border-blue-200 transition-all">
+          <div className="w-11 h-11 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[#007AFF] shrink-0">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-bold tracking-tight text-slate-900 leading-tight">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
               {scenario.entitiesCount}
             </span>
             <span className="text-[12.5px] font-semibold text-slate-800 leading-tight">
@@ -116,8 +116,8 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
         </div>
 
         {/* Card 2: Propagation pathways */}
-        <div className="p-3.5 rounded-2xl border border-slate-200/90 bg-white flex items-center gap-3.5 shadow-2xs hover:border-slate-300 transition-colors">
-          <div className="w-10 h-10 rounded-xl bg-blue-50/80 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+        <div className="p-4 rounded-3xl apple-glass-card border border-white/85 flex items-center gap-3.5 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05),inset_0_1px_1px_rgba(255,255,255,0.9)] hover:border-indigo-200 transition-all">
+          <div className="w-11 h-11 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 shrink-0">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
               <circle cx="6" cy="6" r="3" />
               <circle cx="18" cy="8" r="3" />
@@ -128,7 +128,7 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-bold tracking-tight text-slate-900 leading-tight">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
               {scenario.pathwaysCount}
             </span>
             <span className="text-[12.5px] font-semibold text-slate-800 leading-tight">
@@ -141,14 +141,14 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
         </div>
 
         {/* Card 3: Evidence sources */}
-        <div className="p-3.5 rounded-2xl border border-slate-200/90 bg-white flex items-center gap-3.5 shadow-2xs hover:border-slate-300 transition-colors">
-          <div className="w-10 h-10 rounded-xl bg-blue-50/80 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+        <div className="p-4 rounded-3xl apple-glass-card border border-white/85 flex items-center gap-3.5 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05),inset_0_1px_1px_rgba(255,255,255,0.9)] hover:border-emerald-200 transition-all">
+          <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 shrink-0">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-bold tracking-tight text-slate-900 leading-tight">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
               {scenario.evidenceCount}
             </span>
             <span className="text-[12.5px] font-semibold text-slate-800 leading-tight">
