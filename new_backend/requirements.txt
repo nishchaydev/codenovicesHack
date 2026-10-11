@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+langchain
+faiss-cpu
+sentence-transformers
+scikit-learn
+yfinance
+networkx
+google-generativeai
+pydantic
+numpy
+pandas

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Financial Event Market Impact Graph — 3D MVP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- 3D Force Graph Library -->
+    <script src="https://unpkg.com/3d-force-graph"></script>
+    <script src="https://unpkg.com/three"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Top Glass Navigation -->
+        <header class="top-nav">
+            <div class="brand">
+                <div class="pulse-dot"></div>
+                <h1>IMPACT<span class="highlight">GRAPH.AI</span></h1>
+                <span class="badge">HACKWAVE 3.0 MVP</span>
+            </div>
+            <div class="status-ticker">
+                <span class="ticker-item"><span class="up">▲ OIL</span> $86.40 (+12.4%)</span>
+                <span class="ticker-item"><span class="down">▼ NIFTY</span> 22,140 (-0.8%)</span>
+                <span class="ticker-item"><span class="up">▲ USD/INR</span> 83.45 (+0.2%)</span>
+            </div>
+        </header>
+
+        <!-- Left Control Panel -->
+        <aside class="control-panel glass">
+            <div class="panel-header">
+                <h2>EVENT CONTROL CENTER</h2>
+                <p>Select a scenario or simulate a custom news headline.</p>
+            </div>
+
+            <div class="scenario-selector">
+                <label>PRE-BUILT FINANCIAL SCENARIOS</label>
+                <div class="scenario-buttons">
+                    <button class="scenario-btn active" data-scenario="oil">
+                        <span class="icon">🛢️</span>
+                        <div class="info">
+                            <strong>Crude Oil Spike (+12%)</strong>
+                            <small>Global supply shock</small>
+                        </div>
+                    </button>
+                    <button class="scenario-btn" data-scenario="rate">
+                        <span class="icon">🏦</span>
+                        <div class="info">
+                            <strong>RBI Rate Hike (+50bps)</strong>
+                            <small>Hawkish monetary policy</small>
+                        </div>
+                    </button>
+                    <button class="scenario-btn" data-scenario="semi">
+                        <span class="icon">💻</span>
+                        <div class="info">
+                            <strong>Semi Export Restriction</strong>
+                            <small>Tech supply chain halt</small>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="what-if-box">
+                <label for="whatIfInput">CUSTOM "WHAT-IF" PROMPT</label>
+                <div class="input-wrapper">
+                    <textarea id="whatIfInput" placeholder="e.g. Geopolitical conflict halts Red Sea shipping routes..."></textarea>
+                    <button id="runWhatIfBtn" class="btn-primary">
+                        <span>⚡ Run 3D Impact Simulation</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="legend-box">
+                <label>GRAPH LEGEND</label>
+                <div class="legend-items">
+                    <span class="legend-tag event">● Trigger Event</span>
+                    <span class="legend-tag indicator">● Macro Variable</span>
+                    <span class="legend-tag sector">● Sector</span>
+                    <span class="legend-tag asset">● Impacted Stock</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 3D Graph Container -->
+        <main class="graph-viewport">
+            <div id="3d-graph"></div>
+            <div class="graph-instructions">
+                <span>🖱️ Drag to Rotate | Scroll to Zoom | Click Node/Edge to Inspect</span>
+            </div>
+        </main>
+
+        <!-- Right Inspector Panel -->
+        <aside class="inspector-panel glass" id="inspectorPanel">
+            <div class="panel-header">
+                <h2>IMPACT INSPECTOR</h2>
+                <span class="node-badge" id="inspectType">SELECT NODE</span>
+            </div>
+
+            <div class="inspect-content">
+                <h3 id="inspectTitle">Click on any node or connection</h3>
+                <p id="inspectDescription" class="description">Select any entity in the 3D graph view to trace its cause-and-effect propagation chain and view LLM evidence.</p>
+
+                <div class="metrics-grid hidden" id="metricsGrid">
+                    <div class="metric-card">
+                        <small>Impact Score</small>
+                        <strong id="metricImpact" class="negative">-8.4%</strong>
+                    </div>
+                    <div class="metric-card">
+                        <small>Confidence</small>
+                        <strong id="metricConfidence">94%</strong>
+                    </div>
+                </div>
+
+                <div class="explanation-box hidden" id="explanationBox">
+                    <h4>🤖 LLM REASONING & EVIDENCE</h4>
+                    <p id="explanationText"></p>
+                </div>
+
+                <div class="sparkline-container hidden" id="sparklineBox">
+                    <h4>HISTORICAL STOCK DATA VALIDATION</h4>
+                    <div class="chart-mock" id="chartMock">
+                        <svg viewBox="0 0 300 100" class="sparkline-svg">
+                            <path d="M0,30 Q50,20 100,50 T200,80 T300,90" fill="none" stroke="#ef4444" stroke-width="3"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

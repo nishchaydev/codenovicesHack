@@ -1,0 +1,42 @@
+# Solution Approach: Autonomous Financial Event Market Impact Graph
+
+## 1. Core Architecture Overview
+To solve this problem, we need to build a system that combines Natural Language Processing (NLP) with Graph Databases. The system will read news, understand the connections, and visualize the "ripple effect" of that news on the market.
+
+## 2. Tech Stack Proposed
+*   **Backend & Data Processing:** Python (FastAPI or Flask)
+*   **NLP & Reasoning:** Large Language Models (Gemini, Claude, or OpenAI) for extracting entities and relationships. Optionally, FinBERT for financial sentiment analysis.
+*   **Graph Database:** Neo4j (highly recommended for Knowledge Graphs) or NetworkX (if building a simpler Python-based graph first).
+*   **Market Data APIs:** Yahoo Finance (yfinance), Alpha Vantage, or News APIs (for unstructured data).
+*   **Frontend & Visualization:** React.js or Next.js, along with Cytoscape.js, React Flow, or D3.js to render the interactive dependency graph.
+
+## 3. Step-by-Step Implementation Plan
+
+### Step A: Data Ingestion & NLP Extraction (The "Reader")
+*   **Input:** User provides a piece of unstructured text (e.g., "RBI increases repo rate by 50 basis points due to high inflation").
+*   **Process:** Pass this text to an LLM with a strict prompt to extract:
+    *   **Entities:** RBI (Central Bank), Repo Rate (Indicator), Inflation (Economic Variable).
+    *   **Events:** "Increase in repo rate".
+*   **Output:** Structured JSON data containing nodes and edges.
+
+### Step B: Knowledge Graph Construction (The "Brain")
+*   Store the extracted data in Neo4j.
+*   Nodes will have labels like `Company`, `Sector`, `Commodity`, `Economic Indicator`.
+*   Edges will have relationship types like `IMPACTS`, `INCREASES`, `DECREASES`, `DEPENDS_ON`.
+*   *Example Edge:* `(Crude Oil) -[INCREASES]-> (Aviation Fuel Cost) -[DECREASES]-> (Airline Profits)`
+
+### Step C: Impact Propagation & Graph Algorithms (The "Predictor")
+*   When a new event node is added, use Graph Traversal algorithms (like Breadth-First Search) to trace paths from the event node to downstream sectors and specific companies.
+*   Calculate an "Impact Score" based on the distance from the source event and historical correlation (using time-series data).
+
+### Step D: Time-Series Integration & Validation (The "Reality Check")
+*   Fetch real-time stock prices or index data to see if the predicted impact aligns with actual market movement. This helps distinguish "facts" from "inferred relationships".
+
+### Step E: Explainability (The "Why")
+*   For every connected path shown in the UI, use the LLM to generate a human-readable explanation (e.g., "Why did a change in crude oil affect a real estate company?").
+
+## 4. Demo Execution Plan
+1.  **UI Input:** A text box where judges can paste a breaking news headline.
+2.  **Processing State:** Show a loading animation stating "Extracting Entities...", "Building Graph...".
+3.  **Visualization:** Render a beautiful, dynamic network graph. The source event is in the center, branching out to sectors, then to specific stocks.
+4.  **Interaction:** When a judge clicks on a connecting line (edge), a sidebar pops up explaining the logical relationship and showing relevant time-series data to back up the claim.

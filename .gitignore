@@ -1,0 +1,28 @@
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Python Virtual Environments
+venv/
+**/venv/
+.venv/
+**/__pycache__/
+*.pyc
+
+# Production Builds
+dist/
+build/
+**/dist/
+
+# Environment Variables
+.env
+.env.local
+
+# IDE / System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Sub-repos
+codenovicesHack/

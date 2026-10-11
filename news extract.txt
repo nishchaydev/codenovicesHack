@@ -1,0 +1,21 @@
+Financial news frequently fetch karne ke liye (real-time data ingestion ke liye) aap in popular platforms aur APIs ka use kar sakte hain:
+
+1. Finnhub API (Best for Financial News)
+Kyu use karein: Yeh specially financial market ke liye bani API hai. Isme real-time market news, stock-specific news, aur economic events directly JSON format mein milte hain.
+Frequency: Real-time updates.
+Cost: Free Tier available hai (60 calls/minute).
+Website: finnhub.io
+2. NewsAPI.org (Easiest to Start)
+Kyu use karein: Sabse simple API hai global financial news headlines fetch karne ke liye (e.g., query: "Crude Oil", "RBI Interest Rate", "Inflation").
+Frequency: Updates every few minutes.
+Cost: Free for development/hackathons.
+Website: newsapi.org
+3. Alpha Vantage (News Sentiment API)
+Kyu use karein: Yeh news ke saath-saath sentiment scores bhi deti hai, jo aapke AI Knowledge Graph ko build karne mein help karega.
+Frequency: Real-time stream.
+Cost: Free Tier available.
+Website: alphavantage.co
+4. Google News RSS Feeds (Free & Unlimited)
+Kyu use karein: Agar aapko bina API key ke news fetch karni hai, toh aap Python mein feedparser library se Google News ke RSS feeds parse kar sakte hain.
+URL Format: https://news.google.com/rss/search?q=financial+market+india
+Cost: Completely Free.
