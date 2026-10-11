@@ -75,9 +75,10 @@ flowchart TD
 
     subgraph Act5["Act 5: AI Hub (Audit & Synthesize)"]
         E1["Systemic Risk Domino Radar & Top 5 Vulnerable Equities"]
-        E2["Chroma Cloud RAG AI Market Transmission Analyst"]
-        E3["Direct 'Inspect on Graph →' Navigation"]
-        E1 --> E2 --> E3
+        E2["ThinkBeforeBuy™ Intelligent Pre-Trade Guard Card"]
+        E3["Chroma Cloud RAG AI Market Transmission Analyst"]
+        E4["Direct 'Inspect on Graph →' Navigation"]
+        E1 --> E2 --> E3 --> E4
     end
 
     Act1 --> Act2 --> Act3 --> Act4 --> Act5
@@ -241,9 +242,17 @@ sequenceDiagram
 | **Telemetry Skeleton Overlay** | 4-stage animated modal pipeline | Transparent insight into entity extraction, graph propagation, and vector indexing |
 | **Radial Impact Canvas** | Apple Glass mesh UI with 2D force topology and P1 Critical / P2 High arcs | Intuitive navigation of multi-tier supply chains and macroeconomic dominoes |
 | **Live Equity Drilldown** | Multi-market symbol routing (`.BO` / `.NS` / US ADRs) with official `yfinance` badge | Inspects company-level gross margin sensitivity, market cap, and live price deltas |
+| **ThinkBeforeBuy™ Card (AI Hub)** | Multi-hop causal vulnerability scanner & pre-trade risk engine | Evaluates prospective stock buys against upstream shock exposures, margin compression lag, and regression beta to prevent buying into latent contagion |
 | **Hosted Chroma Cloud RAG** | High-performance embedding function querying hosted Chroma Cloud | Context-grounded conversational analyst answering supply chain and equity questions |
 | **Crisis Replay Engine** | Historical shock archive (1973 OPEC, 2008 Lehman, 2020 COVID, 2023 SVB) | Compares current market shock dynamics against empirical drawdown precedents |
 | **Sector Heatmap Matrix** | Constituent weighted sector grid | Real-time monitoring of Banking, IT, FMCG, Auto, and Energy performance |
+
+### 🛡️ ThinkBeforeBuy™ Feature — Pre-Trade Causal Intelligence
+Integrated directly into the **AI Hub**, the **ThinkBeforeBuy** card acts as an autonomous pre-trade risk guardrail before taking new equity or portfolio positions during active market shocks:
+- **Vulnerability Blast Radius:** Checks if a prospective stock sits directly in the path of active upstream shocks (e.g., Crude Oil rallies, semiconductor export curbs, or USD/INR depreciation).
+- **Asymmetric Margin Compression Lag:** Flags hidden input-cost inflation (e.g., raw material costs expanding 30–60 days before quarterly earnings, leading to delayed margin compression).
+- **Regression Beta ($\beta$) Sensitivity:** Quantitatively scores historical co-movement against root catalysts to prevent buying into false dips or bull traps.
+- **Institutional Pre-Trade Verdict:** Issues clear risk signals (`Avoid / Defer Buy`, `Hedge Downside`, or `Safe to Accumulate`) backed by deterministic graph evidence.
 
 ---
 
