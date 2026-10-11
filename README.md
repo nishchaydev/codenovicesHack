@@ -1,4 +1,4 @@
-# 🌐 Fin.D (FinGraph) — Autonomous Financial Event Market Impact Graph
+# 🌐 Fin.D (Finance-Dost) — Autonomous Financial Event Market Impact Graph
 
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/Frontend-React%2018%20%2B%20Vite-61DAFB?style=flat&logo=react)](https://react.dev/)
