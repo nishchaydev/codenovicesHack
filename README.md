@@ -1,230 +1,220 @@
-# 🌐 FinGraph — Autonomous Financial Event Market Impact Graph
+# <p align="center">FinancialGraph</p>
+<h3 align="center">Autonomous Market Impact & Systemic Contagion Engine</h3>
 
-> **Hackathon Project by Team codenovicesHack**
->
-> **Status:** 🔬 Research & Documentation Phase | 🚀 MVP Implemented | 🎯 Demo & Pitch in Progress
+<p align="center">
+  <em>High-throughput causal network visualizer, multi-hop transmission simulator, and econometric stress-testing engine for systemic risk modeling.</em>
+</p>
 
----
-
-## 📌 Project Status
-
-| Phase | Status | Description |
-|---|:---:|---|
-| 🔬 **Research** | ✅ Complete | Research across six dimensions: NLP, knowledge graphs, financial markets, system architecture, existing solutions, and data sources. |
-| 📚 **Documentation** | ✅ Complete | System architecture, API specifications, graph schema, developer guide, and financial data research. |
-| ⚙️ **MVP Implementation** | ✅ Complete | FastAPI backend on port `8000` and interactive Canvas-based frontend on port `3000`. |
-| 🧪 **Testing & Validation** | 🔄 In Progress | Testing financial event scenarios, impact propagation, graph relationships, and What-If simulations. |
-| 🎤 **Demo & Pitch** | 🔄 In Progress | Preparing demonstrations for crude oil price shocks, semiconductor supply disruptions, and scenario-based impact analysis. |
-
----
-
-## 📖 What Is FinGraph?
-
-FinGraph is an AI-powered financial intelligence platform that analyzes financial events and visualizes how their potential effects can spread across companies, commodities, economic indicators, industries, and financial markets.
-
-Instead of treating every news headline as an isolated event, FinGraph connects relevant information into an interactive **Financial Market Impact Graph**.
-
-### 🎯 The Problem
-
-Financial events rarely affect only one company or sector.
-
-For example, a significant increase in crude oil prices can raise fuel and transportation costs. These changes may affect airlines, logistics companies, manufacturing businesses, and consumer prices. Depending on the broader economic environment, they may also influence inflation expectations, interest-rate decisions, and interest-sensitive sectors such as real estate.
-
-However, financial news platforms often present these developments as separate headlines, making it difficult to understand the relationships between an initial event and its possible downstream effects.
-
-**The core challenge is understanding how financial events are connected, how their effects may propagate, and what evidence supports each relationship.**
-
-### 💡 Our Solution
-
-FinGraph transforms financial news into an interactive knowledge graph that helps users explore potential market-impact pathways.
-
-The platform focuses on four key questions:
-
-1. **WHO is affected?** Identify relevant companies, sectors, commodities, economic indicators, and financial instruments.
-2. **HOW might they be affected?** Analyze the direction and potential significance of each relationship.
-3. **WHY might the impact occur?** Provide understandable explanations and supporting evidence for graph connections.
-4. **HOW FAR could the impact spread?** Trace first-order, second-order, and further downstream relationships across the graph.
-
-By combining AI-based event extraction, relationship analysis, graph algorithms, and financial data, FinGraph aims to make complex financial relationships easier to explore and understand.
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15%2B%20%28Turbopack%29-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-5.3-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/TailwindCSS-v3.4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/GSAP-ScrollTrigger-88CE02?style=for-the-badge&logo=greensock" alt="GSAP" />
+  <img src="https://img.shields.io/badge/React%20Flow-%40xyflow%2Freact-FF0072?style=for-the-badge" alt="React Flow" />
+  <img src="https://img.shields.io/badge/Localization-8%20Languages%20(next--intl)-informational?style=for-the-badge" alt="i18n" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" />
+  <img src="https://img.shields.io/badge/System%20Status-Operational%20(Active)-success?style=for-the-badge" alt="Status" />
+</p>
 
 ---
 
-## 🔍 How FinGraph Works
+## 📌 Executive Summary & Problem Statement
 
-FinGraph follows a structured workflow to transform financial information into an explainable impact graph.
+Modern macroeconomic disruptions—from OPEC+ crude production quotas and maritime chokepoint closures to semiconductor foundry export curbs—do not affect markets in isolation. Traditional terminal architectures and tabular risk reports suffer from critical deficiencies:
+- **Delayed Discovery:** Multi-tiered supply chain dependencies hide indirect exposures until corporate quarterly earnings guidance is slashed.
+- **Opacity Across Transmission Latencies:** Upstream commodity price shocks transmit to primary producer costs within 48–72 hours, but pass-through into headline inflation and retail corporate margins occurs on a lagged 45–90 day timeline.
+- **Lack of Probabilistic Causal Reasoning:** Quantitative desks need clear empirical citations (e.g. 1973 OPEC Embargo, 2020 Supply Chain Gridlock) combined with real-time elasticity models to formulate actionable portfolio hedges.
 
-### System Workflow
+**FinancialGraph** bridges this gap. It ingest unstructured financial events, constructs deterministic and probabilistic causal networks across assets, and traces systemic contagion hops in real-time.
 
-1. **Financial Event Input** — The user provides a financial news article or event description.
-2. **Event & Entity Extraction** — The AI identifies the event, relevant entities, and important financial context.
-3. **Relationship Identification** — The system identifies potential relationships between extracted entities and evaluates their relevance.
-4. **Knowledge Graph Construction** — Entities become nodes, and their relationships become connected edges.
-5. **Impact Propagation** — Graph algorithms trace possible downstream pathways and identify connected entities.
-6. **Evidence & Explanation** — The platform presents explanations, supporting information, and confidence indicators for relationships.
-7. **Interactive Visualization** — Users explore the graph, inspect connections, and investigate alternative impact scenarios.
+---
 
-### Example: Crude Oil Price Shock
+## 🔄 Causal Architecture & Contagion Flow
 
-**Input event:**
+The engine maps the end-to-end lifecycle of a systemic catalyst from raw headline extraction to multi-asset portfolio drawdown projections:
 
-`Crude oil prices rise by 12% following an OPEC production cut.`
-
-**Illustrative impact pathways:**
-
-```text
-                    CRUDE OIL PRICE INCREASE
-                               |
-              +----------------+----------------+
-              |                |                |
-              v                v                v
-        Higher Fuel      Higher Input      Inflationary
-           Costs            Costs           Pressures
-              |                |                |
-              v                v                v
-          Airlines       Transportation    Interest-Rate
-              |           & Logistics       Expectations
-              v                |                |
-       Operating Costs         v                v
-              |          Goods Delivery      Real Estate
-              v             Costs             & Housing
-       Profitability
-              |
-              v
-       Potential Stock
-        Market Impact
+```
+[ Unstructured Financial News / Geopolitical Press Ingestion ]
+                            │
+                            ▼ (NER Entity Linking & Sentiment Parsing)
+        [ Causal Dependency Graph & Vector Feature Extraction ]
+                            │
+                            ▼ (Multi-Hop Propagation Engine & BFS Decay)
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Hop 1: Upstream Commodity Catalysts ($BRENT, $WTI, Natural Gas, Neon, Rare Earths) │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Hop 2: Macro Indicators (Core CPI, US 10Y Yields, USD/INR, Container Freight Index)│
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Hop 3: Sectoral Compression (Refining Margins, Automotive Supply, Air Freight OPEX) │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Hop 4: Listed Downstream Equities ($TSMC, Asian Paints, IndiGo, Tata Motors) │
+└─────────────────────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+    [ Empirical Ground Facts vs. Probabilistic Inferences with Confidence Scoring ]
+                            │
+      ┌─────────────────────┴──────────────────────┐
+      ▼                                            ▼
+[ Econometric Calibration ]               [ Deep-Dive Forensic Drawer ]
+  • OLS Factor Elasticity                   • Historical Case Study Precedent
+  • VAR Impulse Response                    • Verified SEC Disclosures
+  • Bayesian Causal Decay                   • Quantitative Risk Score (/10)
 ```
 
-This diagram illustrates possible economic relationships, not confirmed outcomes or guaranteed market predictions. Actual effects depend on market conditions, company characteristics, policy responses, and other factors.
+### Mermaid Sequence Pipeline
 
-In the FinGraph interface, users can explore these connections interactively, inspect individual relationships, and review the evidence and reasoning behind each proposed impact pathway.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Analyst as Quantitative Desk / PM
+    participant Ingestion as Event Ingestion & NLP
+    participant Engine as BFS Decay Propagation Engine
+    participant DualCanvas as Radial & Physics Viewport
+    participant Inspector as Forensic Rationale Drawer
 
----
-
-## ✨ Core Features
-
-| Feature | Description |
-|---|---|
-| 📰 **Financial Event Analysis** | Extract important events and financial context from unstructured news and text. |
-| 🧠 **AI-Powered Entity Extraction** | Identify companies, commodities, sectors, economic indicators, and financial instruments. |
-| 🕸️ **Dynamic Knowledge Graph** | Represent financial entities as nodes and their relationships as edges. |
-| 🔗 **Impact Path Analysis** | Trace first-order and downstream relationships using graph traversal algorithms. |
-| 📊 **Market Data Integration** | Incorporate available historical price data to provide additional market context. |
-| 🔎 **Explainable Relationships** | Explain why entities are connected and present available supporting evidence. |
-| 🎚️ **Confidence & Uncertainty Indicators** | Communicate uncertainty in inferred relationships instead of treating every AI-generated conclusion as fact. |
-| 🔮 **What-If Simulation** | Explore hypothetical scenarios and examine how changing an initial assumption could alter potential impact pathways. |
-| ⚡ **Interactive Visualization** | Explore connected entities, inspect relationships, and navigate the impact graph. |
-
-> **Note:** Feature descriptions represent the intended product capabilities. The availability and maturity of each feature should be verified against the current implementation.
-
----
-
-## 🛠️ Technology Stack
-
-| Layer | Technology | Purpose |
-|---|---|---|
-| **Backend** | Python + FastAPI | API development, event processing, and application logic. |
-| **AI / LLM** | OpenRouter (Claude / GPT-4o, depending on model availability) | Extracting entities, identifying candidate relationships, and generating explanations. |
-| **Graph Engine** | NetworkX | In-memory graph processing, traversal, and graph analysis. |
-| **Frontend** | Next.js + TypeScript | Building a responsive, component-based web application. |
-| **Graph Visualization** | `react-force-graph-3d` | Interactive 3D graph rendering and navigation. |
-| **Market Data** | `yfinance` | Accessing available historical market-price information for supported symbols. |
-
-### Why This Stack?
-
-- **FastAPI** provides a lightweight backend for exposing analysis and graph-processing endpoints.
-- **LLMs** help interpret unstructured financial text and propose relationships that can be validated.
-- **NetworkX** supports graph traversal and algorithms for exploring connected entities.
-- **Next.js and TypeScript** support a structured, maintainable frontend.
-- **3D graph visualization** helps users explore complex relationships interactively.
-- **Historical market data** provides context for examining financial events over time.
-
-The system should distinguish between observed data, established relationships, and AI-inferred connections. LLM-generated relationships should not automatically be treated as verified financial facts.
-
----
-
-## 📚 Documentation
-
-The following documents provide additional information about the project architecture, APIs, graph design, and development workflow.
-
-| Document | Description | Intended Audience |
-|---|---|---|
-| 📊 [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, data flow, and component responsibilities. | All team members |
-| 🔌 [API.md](docs/API.md) | API endpoints with request and response examples. | Backend and frontend developers |
-| 🕸️ [GRAPH-SCHEMA.md](docs/GRAPH-SCHEMA.md) | Graph node types, edge types, and propagation algorithms. | Data and algorithm developers |
-| 👩‍💻 [DEV-GUIDE.md](docs/DEV-GUIDE.md) | Setup instructions, Git workflow, coding conventions, and team responsibilities. | All team members |
-| 🔬 [Financial Impact Graph Research](docs/research/financial-impact-graph-research.md) | Research covering financial impact graphs, relevant data, and supporting technical concepts. | All team members |
-
-**Getting started:** Team members should read `DEV-GUIDE.md` first, followed by `ARCHITECTURE.md` and the documentation relevant to their assigned responsibilities.
-
----
-
-## 📁 Project Structure
-
-```text
-codenovicesHack/
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── API.md
-│   ├── GRAPH-SCHEMA.md
-│   ├── DEV-GUIDE.md
-│   └── research/
-│       └── financial-impact-graph-research.md
-├── backend/
-│   └── FastAPI application
-├── frontend/
-│   └── Next.js application
-├── financial-impact-graph.md
-├── .env.example
-├── .gitignore
-└── README.md
+    Analyst->>Ingestion: Submits shock (e.g. "Strait of Hormuz transit disruption")
+    Ingestion->>Engine: Parses entities, assigns base intensity (severity 1-10)
+    Engine->>Engine: Computes multi-hop transmission: impact × weight × (0.8 + 0.2 × conf)
+    Engine->>DualCanvas: Highlights active pathways & animates causal vector edges
+    DualCanvas->>Inspector: Emits selected node metadata, sparkline prices, and empirical facts
+    Inspector-->>Analyst: Displays causal reasoning steps, SEC 10-Q citations & elasticity beta
 ```
 
-> **Repository note:** This structure describes the intended organization. Update the tree to match the actual files and directories in the repository.
+---
+
+## ⚡ Key Capabilities & Technical Highlights
+
+### 1. Dual-Canvas Scrubbing Engine (60 FPS Performance)
+- **Ambient Frame Sequence:** High-efficiency HTML5 background canvas rendering optimized JPEG sequences (`/frames/dash/`) at 24–60 FPS with `ImageBitmap` memory reuse.
+- **Zero-Block Interactivity:** Structured with `pointer-events-none` so graph node dragging, panning, and modal interactions remain 100% fluid.
+
+### 2. Hybrid Claymorphic + Glassmorphic Design System
+- **100% Solid Claymorphic Cards:** High-contrast, tactile physical depth utilizing dual drop and inner shadows (`clay-surface`, `clay-inset`, `clay-button-primary`, `clay-badge`). Content cards feature zero acrylic blur bleed for crisp readability.
+- **Frosted Glass Navigation:** Top application header uses subtle frosted glass (`nav-glass`) with backdrop blur filters.
+
+### 3. 4-Theme Dynamic Architectural Palette
+Switch effortlessly between bespoke institutional design themes via CSS custom variables (`var(--clay-surface)`, `var(--text-primary)`, `var(--accent-primary)`, `var(--clay-border)`):
+- **Porcelain Matte:** Clinical, high-contrast light mode tailored for daylight equity trading floors.
+- **Neon Pink Clay:** Vibrant modern cyber-aesthetic with ultra-sharp contrast tokens.
+- **Royal Blue Clay:** Classic Wall Street & Bloomberg terminal deep navy aesthetic.
+- **Obsidian Stealth Clay:** OLED true-black dark mode optimized for multi-monitor nocturnal trading.
+
+### 4. 8-Language Offline Localization (`next-intl`)
+Full cross-border accessibility across 8 global financial jurisdictions with instant client-side switching:
+- **English (`en`)**
+- **Hindi (`hi`)**
+- **French (`fr`)**
+- **Spanish (`es`)**
+- **German (`de`)**
+- **Japanese (`ja`)**
+- **Mandarin (`zh`)**
+- **Arabic (`ar` - RTL Ready)**
+
+### 5. Multi-Mode Graph Viewports & Forensics
+- **Radial Macro Transmission Canvas:** Center-outward radial catalyst visualization with P1 Critical priority ordering, expandable 2nd-order hops, and reference citation popovers.
+- **Force-Directed Physics Graph:** HTML5 Canvas force simulation with live particle velocity, dynamic node repulsion, link elasticity, and ticker price sparklines.
+- **Econometric Regression Calibration:** Interactive parameters for OLS Multi-Factor Elasticity ($\Delta Y = \alpha + \beta \Delta X + \epsilon$), Vector Autoregression (VAR Impulse Response), and Bayesian Causal Networks.
+- **Institutional RBAC Gate:** Switch between clearance roles (Quant Analyst, Portfolio Manager, Chief Risk Officer, Macro Strategist) with audit-level permissions.
 
 ---
 
-## 👥 Team
+## 🛠️ Tech Stack & Dependencies
 
-**Team:** codenovicesHack
-
-**GitHub Repository:** [nishchaydev/codenovicesHack](https://github.com/nishchaydev/codenovicesHack)
-
-### Team Responsibilities
-
-| Role | Responsibilities |
+| Category | Technology |
 |---|---|
-| **Backend + LLM** | FastAPI services, LLM integration, event-processing workflows, and caching. |
-| **Frontend + Visualization** | Next.js interface, interactive graph components, visualization, and animations. |
-| **Data + Algorithms** | Financial data preparation, graph schema, relationship modeling, and impact propagation algorithms. |
-| **Integration + Demo** | Frontend-backend integration, end-to-end testing, demo scenarios, and presentation preparation. |
-
-Team responsibilities may overlap depending on implementation needs and individual contributions.
-
----
-
-## 🔬 Research & Validation Principles
-
-FinGraph is designed to make financial event analysis more transparent and useful.
-
-- **Evidence over unsupported claims:** Provide supporting information for important graph relationships whenever available.
-- **Facts versus inferences:** Distinguish observed events and data from AI-generated hypotheses.
-- **Uncertainty awareness:** Confidence scores should communicate uncertainty and must not be presented as guaranteed probabilities of market outcomes unless appropriately calibrated.
-- **Traceable impact pathways:** Make it possible to inspect the connections between an initial event and downstream entities.
-- **Responsible financial interpretation:** Present potential market effects as analytical scenarios, not guaranteed predictions or personalized investment advice.
-- **Validation:** Where historical data is available, compare relevant market movements with event timelines without assuming that an event alone caused the observed changes.
+| **Core Framework** | [Next.js 15+ (App Router, Turbopack)](https://nextjs.org/) |
+| **Language** | [TypeScript 5.3+](https://www.typescriptlang.org/) |
+| **Styling & System** | [Tailwind CSS v3.4](https://tailwindcss.com/) with Custom Claymorphic Design Tokens |
+| **Animation & Motion** | [GSAP ScrollTrigger](https://greensock.com/), [Framer Motion](https://www.framer.com/motion/) |
+| **Graph Visualization** | [@xyflow/react (React Flow)](https://reactflow.dev/) + Custom HTML5 Force Physics Canvas |
+| **Internationalization**| [next-intl](https://next-intl-docs.vercel.app/) (8 Active Locales) |
+| **Iconography** | [Lucide React](https://lucide.dev/) |
 
 ---
 
-## 🚀 Project Vision
+## 🚀 Quickstart & Installation
 
-Our vision is to make complex financial relationships easier to understand by connecting isolated events into an explainable, interactive network of potential market impacts.
+### Prerequisites
+- Node.js `v18.18.0` or higher
+- npm `v9.0.0` or higher
 
-FinGraph aims to help users move beyond the headline and explore the wider financial context behind an event.
+### 1. Clone & Install Dependencies
+```bash
+git clone https://github.com/your-org/financial-graph-systemic-risk.git
+cd financial-graph-systemic-risk
+npm install
+```
 
-**From financial news to connected insights. From isolated headlines to explainable impact pathways.**
+### 2. Run the Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) (or the next available port indicated in your console) to launch the landing page and interactive engine.
+
+### 3. Verify Codebase Integrity
+```bash
+# Type-check TypeScript codebase
+npm run type-check
+
+# Build optimized production bundle
+npm run build
+
+# Start production server
+npm run start
+```
 
 ---
 
-## 📄 License
+## 📂 Project Directory Structure
 
-This project is intended to be released under the [MIT License](LICENSE), subject to the presence of the corresponding license file in the repository.
+```plaintext
+financial-graph-systemic-risk/
+├── messages/                    # 8-Language Localization Dictionaries (en, hi, fr, es, de, ja, zh, ar)
+├── public/                      # Static assets, branding, and frame sequences
+│   └── frames/dash/             # Pre-rendered 60 FPS motion frame assets (0001-0120)
+├── src/
+│   ├── app/
+│   │   ├── [locale]/            # Localized Next.js App Router dynamic routes
+│   │   │   ├── page.tsx         # Landing Page with Hero and Parallax scrubbing
+│   │   │   └── dashboard/       # Institutional FinancialGraph Workspace
+│   │   │       ├── page.tsx     # Primary dual-canvas dashboard workspace
+│   │   │       ├── events/      # News NLP event extractor
+│   │   │       ├── paths/       # Affected assets roster & risk matrix
+│   │   │       ├── scenarios/   # Scenario stress-testing desk
+│   │   │       └── settings/    # API keys & model parameter configurations
+│   ├── components/
+│   │   ├── dashboard/
+│   │   │   ├── DashBackgroundCanvas.tsx    # Optimized background frame canvas
+│   │   │   ├── DashboardShell.tsx          # Shell layout with app rail & quick-search
+│   │   │   └── teammate/                   # Integrated institutional module views
+│   │   │       ├── RadialTransmissionCanvas.tsx # Center-outward radial catalyst canvas
+│   │   │       ├── InteractiveGraph.tsx         # Physics force-directed simulation canvas
+│   │   │       ├── ScenarioHeader.tsx           # Live KPI cards & catalyst switcher
+│   │   │       ├── ImpactPathwaysPanel.tsx      # Rationale, evidence & transmission drawer
+│   │   │       ├── EventRegressionModal.tsx     # Econometric OLS/VAR calibration modal
+│   │   │       ├── RbacLoginModal.tsx           # Institutional clearance & identity gate
+│   │   │       ├── CompanyDrilldownModal.tsx    # Listed equities margin sensitivity breakdown
+│   │   │       ├── AddStockModal.tsx            # Custom ticker ingestion modal
+│   │   │       ├── SparklineChart.tsx           # Mini price telemetry sparkline
+│   │   │       ├── TopNav.tsx                   # Glassmorphic header with themes & locales
+│   │   │       ├── Sidebar.tsx                  # Collapsible multi-module application dock
+│   │   │       ├── SectorHeatmapView.tsx        # Treemap & contagion matrix view
+│   │   │       ├── AIHubInsightsView.tsx        # Autonomous causal intelligence feed
+│   │   │       ├── MarketOverviewView.tsx       # Real-time multi-asset index monitoring
+│   │   │       ├── AuditReportsView.tsx         # Model risk compliance and verification audit
+│   │   │       └── EngineSettingsView.tsx       # BFS decay factors & API configurations
+│   ├── data/
+│   │   └── fingraph/            # Institutional scenario seeds & supply chain models
+│   ├── lib/
+│   │   ├── api/fingraphApi.ts   # Unified API client with automatic offline failover
+│   │   └── graph/engine.ts      # Deterministic BFS decay propagation calculation engine
+│   └── types/
+│       └── fingraph/types.ts    # Comprehensive TypeScript interfaces & domain models
+└── tailwind.config.js           # Theme color tokens, custom dual-shadow clay utilities
+```
+
+---
+
+## ⚖️ License & Intellectual Property
+
+Distributed under the **MIT License**. See `LICENSE` for details. Built for financial engineering hackathons, quantitative research groups, and systemic risk monitoring desks.

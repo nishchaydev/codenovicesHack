@@ -1,0 +1,88 @@
+{
+  "hero": {
+    "badge": "AI-Powered Financial Intelligence",
+    "title": "Systemic Risk Graph & Network Analytics",
+    "subtitle": "Trace financial shocks across sectors, commodities, and institutions.",
+    "ctaPrimary": "Explore Live Graph",
+    "ctaSecondary": "Watch Demo",
+    "stats": {
+      "nodes": "50,000+ Entities",
+      "edges": "200,000+ Relationships",
+      "latency": "< 12ms Graph Processing"
+    }
+  },
+  "problem": {
+    "title": "The Hidden Interconnectedness of Global Markets",
+    "description": "Trace financial shocks across sectors, commodities, and institutions.",
+    "cards": {
+      "contagion": {
+        "title": "Cascading Contagion",
+        "desc": "Single counterparty failures ripple through derivative layers before traditional risk engines detect movement."
+      },
+      "opacity": {
+        "title": "Cross-Sector Opacity",
+        "desc": "Opaque supply chain dependencies hide exposure across commodities, central banks, and sovereign debt."
+      },
+      "speed": {
+        "title": "Sub-Second Volatility",
+        "desc": "High-frequency systemic cascades demand real-time graph computation over static tabular reporting."
+      }
+    }
+  },
+  "auth": {
+    "signInTitle": "Welcome Back to Financial Graph",
+    "signUpTitle": "Request Enterprise API Access",
+    "emailLabel": "Institutional Email",
+    "passwordLabel": "Security Password",
+    "signInBtn": "Authenticate Session",
+    "signUpBtn": "Register Organization",
+    "oauthGoogle": "Continue with SSO",
+    "forgotPassword": "Reset Credentials"
+  },
+  "graph": {
+    "nodes": {
+      "bank": "Central / Commercial Bank",
+      "corporation": "Multinational Corporation",
+      "commodity": "Commodity / Energy Asset",
+      "sovereign": "Sovereign Bond / Treasury",
+      "fund": "Hedge Fund / Asset Manager"
+    },
+    "edges": {
+      "credit": "Credit Exposure",
+      "supply": "Supply Chain Link",
+      "equity": "Equity Stake",
+      "derivative": "Derivative Counterparty"
+    },
+    "metrics": {
+      "centrality": "Eigenvector Centrality",
+      "systemicRisk": "Systemic Risk Score",
+      "contagionPotential": "Contagion Index"
+    }
+  },
+  "themes": {
+    "clayLight": "Clay Light",
+    "clayDark": "Clay Dark",
+    "clayNordic": "Clay Nordic",
+    "clayAmber": "Clay Amber"
+  },
+  "locales": {
+    "en": "English",
+    "hi": "Hindi (à¤¹à¤¿à¤‚à¤¦à¥€)",
+    "fr": "French (FranÃ§ais)",
+    "es": "Spanish (EspaÃ±ol)",
+    "de": "German (Deutsch)",
+    "ja": "Japanese (æ—¥æœ¬èªž)",
+    "zh": "Mandarin (ä¸­æ–‡)",
+    "ar": "Arabic (Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©)"
+  },
+  "dashboard": {
+    "title": "Financial Shock & Contagion Transmission Engine",
+    "activeCatalyst": "Active Catalyst",
+    "propagate": "Propagate",
+    "simulatePrompt": "Enter financial event or supply shock...",
+    "impactPathways": "Impact Pathways",
+    "causalChain": "Causal Chain",
+    "evidenceSources": "Evidence Sources",
+    "liveTelemetry": "Live Telemetry"
+  }
+}

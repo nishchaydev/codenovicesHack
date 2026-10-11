@@ -1,0 +1,88 @@
+{
+  "hero": {
+    "badge": "Intelligence FinanciÃ¨re IA",
+    "title": "Graphe de Risque SystÃ©mique & Analyse de RÃ©seau",
+    "subtitle": "Traquez les chocs financiers Ã  travers les secteurs, matiÃ¨res premiÃ¨res et institutions.",
+    "ctaPrimary": "Explorer le Graphe en Direct",
+    "ctaSecondary": "Voir la DÃ©mo",
+    "stats": {
+      "nodes": "50 000+ EntitÃ©s",
+      "edges": "200 000+ Relations",
+      "latency": "< 12ms Traitement Graphe"
+    }
+  },
+  "problem": {
+    "title": "L'Interconnexion CachÃ©e des MarchÃ©s Mondiaux",
+    "description": "Traquez les chocs financiers Ã  travers les secteurs, matiÃ¨res premiÃ¨res et institutions.",
+    "cards": {
+      "contagion": {
+        "title": "Contagion en Cascade",
+        "desc": "Les dÃ©faillances de contrepartie se rÃ©percutent Ã  travers les dÃ©rivÃ©s avant la dÃ©tection par les moteurs de risque traditionnels."
+      },
+      "opacity": {
+        "title": "OpacitÃ© Intersectorielle",
+        "desc": "Les dÃ©pendances opaques de la chaÃ®ne d'approvisionnement masquent l'exposition sur les matiÃ¨res premiÃ¨res et les banques centrales."
+      },
+      "speed": {
+        "title": "VolatilitÃ© Inframilliseconde",
+        "desc": "Les cascades systÃ©miques haute frÃ©quence exigent un calcul de graphe en temps rÃ©el plutÃ´t qu'un rapport statique."
+      }
+    }
+  },
+  "auth": {
+    "signInTitle": "Bienvenue sur Financial Graph",
+    "signUpTitle": "Demander un AccÃ¨s API Entreprise",
+    "emailLabel": "E-mail Institutionnel",
+    "passwordLabel": "Mot de Passe de SÃ©curitÃ©",
+    "signInBtn": "Authentifier la Session",
+    "signUpBtn": "Enregistrer l'Organisation",
+    "oauthGoogle": "Continuer avec SSO",
+    "forgotPassword": "RÃ©initialiser les Identifiants"
+  },
+  "graph": {
+    "nodes": {
+      "bank": "Banque Centrale / Commerciale",
+      "corporation": "Multinationale",
+      "commodity": "MatiÃ¨re PremiÃ¨re / Ã‰nergie",
+      "sovereign": "Obligation Souveraine / TrÃ©sor",
+      "fund": "Fonds de Couverture / Gestionnaire"
+    },
+    "edges": {
+      "credit": "Exposition au CrÃ©dit",
+      "supply": "Lien ChaÃ®ne d'Approvisionnement",
+      "equity": "Participation au Capital",
+      "derivative": "Contrepartie DÃ©rivÃ©e"
+    },
+    "metrics": {
+      "centrality": "CentralitÃ© de Vecteur Propre",
+      "systemicRisk": "Score de Risque SystÃ©mique",
+      "contagionPotential": "Indice de Contagion"
+    }
+  },
+  "themes": {
+    "clayLight": "Clay Clair",
+    "clayDark": "Clay Sombre",
+    "clayNordic": "Clay Nordique",
+    "clayAmber": "Clay Ambre"
+  },
+  "locales": {
+    "en": "English",
+    "hi": "Hindi (à¤¹à¤¿à¤‚à¤¦à¥€)",
+    "fr": "French (FranÃ§ais)",
+    "es": "Spanish (EspaÃ±ol)",
+    "de": "German (Deutsch)",
+    "ja": "Japanese (æ—¥æœ¬èªž)",
+    "zh": "Mandarin (ä¸­æ–‡)",
+    "ar": "Arabic (Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©)"
+  },
+  "dashboard": {
+    "title": "Financial Shock & Contagion Transmission Engine",
+    "activeCatalyst": "Active Catalyst",
+    "propagate": "Propagate",
+    "simulatePrompt": "Enter financial event or supply shock...",
+    "impactPathways": "Impact Pathways",
+    "causalChain": "Causal Chain",
+    "evidenceSources": "Evidence Sources",
+    "liveTelemetry": "Live Telemetry"
+  }
+}

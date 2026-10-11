@@ -1,0 +1,88 @@
+{
+  "hero": {
+    "badge": "KI-gestÃ¼tzte Finanzinformationen",
+    "title": "Systemisches Risikodiagramm und Netzwerkanalyse",
+    "subtitle": "Verfolgen Sie finanzielle Schocks Ã¼ber Sektoren, Rohstoffe und Institutionen hinweg.",
+    "ctaPrimary": "Entdecken Sie Live Graph",
+    "ctaSecondary": "Demo ansehen",
+    "stats": {
+      "nodes": "Ãœber 50.000 Unternehmen",
+      "edges": "Ãœber 200.000 Beziehungen",
+      "latency": "< 12 ms Diagrammverarbeitung"
+    }
+  },
+  "problem": {
+    "title": "Die verborgene Vernetzung globaler MÃ¤rkte",
+    "description": "Verfolgen Sie finanzielle Schocks Ã¼ber Sektoren, Rohstoffe und Institutionen hinweg.",
+    "cards": {
+      "contagion": {
+        "title": "Kaskadierende Ansteckung",
+        "desc": "AusfÃ¤lle einzelner Kontrahenten breiten sich Ã¼ber die Derivatebenen aus, bevor herkÃ¶mmliche Risiko-Engines eine Bewegung erkennen."
+      },
+      "opacity": {
+        "title": "SektorÃ¼bergreifende Deckkraft",
+        "desc": "Undurchsichtige AbhÃ¤ngigkeiten in der Lieferkette verbergen das Risiko von Rohstoffen, Zentralbanken und Staatsschulden."
+      },
+      "speed": {
+        "title": "VolatilitÃ¤t unter einer Sekunde",
+        "desc": "Hochfrequente systemische Kaskaden erfordern eine Diagrammberechnung in Echtzeit anstelle einer statischen tabellarischen Berichterstattung."
+      }
+    }
+  },
+  "auth": {
+    "signInTitle": "Willkommen zurÃ¼ck bei Financial Graph",
+    "signUpTitle": "Fordern Sie Enterprise-API-Zugriff an",
+    "emailLabel": "Institutionelle E-Mail",
+    "passwordLabel": "Sicherheitspasswort",
+    "signInBtn": "Sitzung authentifizieren",
+    "signUpBtn": "Organisation registrieren",
+    "oauthGoogle": "Fahren Sie mit SSO fort",
+    "forgotPassword": "Anmeldeinformationen zurÃ¼cksetzen"
+  },
+  "graph": {
+    "nodes": {
+      "bank": "Zentralbank/GeschÃ¤ftsbank",
+      "corporation": "Multinationales Unternehmen",
+      "commodity": "Rohstoff-/Energieanlage",
+      "sovereign": "Staatsanleihe / Schatzamt",
+      "fund": "Hedgefonds / VermÃ¶gensverwalter"
+    },
+    "edges": {
+      "credit": "Kreditrisiko",
+      "supply": "Lieferkettenglied",
+      "equity": "Kapitalanteil",
+      "derivative": "Derivative Gegenpartei"
+    },
+    "metrics": {
+      "centrality": "EigenvektorzentralitÃ¤t",
+      "systemicRisk": "Systemischer Risiko-Score",
+      "contagionPotential": "Ansteckungsindex"
+    }
+  },
+  "themes": {
+    "clayLight": "Tonlicht",
+    "clayDark": "Ton dunkel",
+    "clayNordic": "Lehm Nordic",
+    "clayAmber": "Ton-Bernstein"
+  },
+  "locales": {
+    "en": "Englisch",
+    "hi": "Hindi",
+    "fr": "FranzÃ¶sisch",
+    "es": "Spanisch (EspaÃ±ol)",
+    "de": "German (Deutsch)",
+    "ja": "japanisch",
+    "zh": "Mandarin (Chinesisch)",
+    "ar": "Arabisch"
+  },
+  "dashboard": {
+    "title": "Financial Shock & Contagion Transmission Engine",
+    "activeCatalyst": "Active Catalyst",
+    "propagate": "Propagate",
+    "simulatePrompt": "Enter financial event or supply shock...",
+    "impactPathways": "Impact Pathways",
+    "causalChain": "Causal Chain",
+    "evidenceSources": "Evidence Sources",
+    "liveTelemetry": "Live Telemetry"
+  }
+}

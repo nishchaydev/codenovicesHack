@@ -1,0 +1,88 @@
+{
+  "hero": {
+    "badge": "Inteligencia financiera impulsada por IA",
+    "title": "GrÃ¡fico de riesgo sistÃ©mico y anÃ¡lisis de red",
+    "subtitle": "Rastree los shocks financieros en todos los sectores, productos bÃ¡sicos e instituciones.",
+    "ctaPrimary": "Explorar grÃ¡fico en vivo",
+    "ctaSecondary": "Ver demostraciÃ³n",
+    "stats": {
+      "nodes": "MÃ¡s de 50.000 entidades",
+      "edges": "MÃ¡s de 200.000 relaciones",
+      "latency": "< Procesamiento de grÃ¡ficos de 12 ms"
+    }
+  },
+  "problem": {
+    "title": "La interconexiÃ³n oculta de los mercados globales",
+    "description": "Rastree los shocks financieros en todos los sectores, productos bÃ¡sicos e instituciones.",
+    "cards": {
+      "contagion": {
+        "title": "Contagio en cascada",
+        "desc": "Los fracasos de una sola contraparte se propagan a travÃ©s de las capas de derivados antes de que los motores de riesgo tradicionales detecten movimiento."
+      },
+      "opacity": {
+        "title": "Opacidad intersectorial",
+        "desc": "Las dependencias opacas de la cadena de suministro ocultan la exposiciÃ³n a las materias primas, los bancos centrales y la deuda soberana."
+      },
+      "speed": {
+        "title": "Volatilidad inferior al segundo",
+        "desc": "Las cascadas sistÃ©micas de alta frecuencia exigen cÃ¡lculos grÃ¡ficos en tiempo real en lugar de informes tabulares estÃ¡ticos."
+      }
+    }
+  },
+  "auth": {
+    "signInTitle": "Bienvenido de nuevo a Financial Graph",
+    "signUpTitle": "Solicitar acceso a la API empresarial",
+    "emailLabel": "Correo Institucional",
+    "passwordLabel": "ContraseÃ±a de seguridad",
+    "signInBtn": "Autenticar sesiÃ³n",
+    "signUpBtn": "Registrar OrganizaciÃ³n",
+    "oauthGoogle": "Continuar con SSO",
+    "forgotPassword": "Restablecer credenciales"
+  },
+  "graph": {
+    "nodes": {
+      "bank": "Banco Central / Comercial",
+      "corporation": "CorporaciÃ³n Multinacional",
+      "commodity": "Activo de materias primas/energÃ­a",
+      "sovereign": "Bono Soberano / Tesoro",
+      "fund": "Fondo de cobertura / Gestor de activos"
+    },
+    "edges": {
+      "credit": "Riesgo crediticio",
+      "supply": "Enlace de la cadena de suministro",
+      "equity": "ParticipaciÃ³n accionaria",
+      "derivative": "Contraparte Derivado"
+    },
+    "metrics": {
+      "centrality": "Centralidad del vector propio",
+      "systemicRisk": "PuntuaciÃ³n de riesgo sistÃ©mico",
+      "contagionPotential": "Ãndice de contagio"
+    }
+  },
+  "themes": {
+    "clayLight": "Luz de arcilla",
+    "clayDark": "Arcilla Oscura",
+    "clayNordic": "Arcilla NÃ³rdica",
+    "clayAmber": "Ãmbar de arcilla"
+  },
+  "locales": {
+    "en": "InglÃ©s",
+    "hi": "hindi",
+    "fr": "FrancÃ©s",
+    "es": "EspaÃ±ol (EspaÃ±ol)",
+    "de": "AlemÃ¡n",
+    "ja": "japonÃ©s",
+    "zh": "mandarÃ­n (chino)",
+    "ar": "Ã¡rabe"
+  },
+  "dashboard": {
+    "title": "Financial Shock & Contagion Transmission Engine",
+    "activeCatalyst": "Active Catalyst",
+    "propagate": "Propagate",
+    "simulatePrompt": "Enter financial event or supply shock...",
+    "impactPathways": "Impact Pathways",
+    "causalChain": "Causal Chain",
+    "evidenceSources": "Evidence Sources",
+    "liveTelemetry": "Live Telemetry"
+  }
+}

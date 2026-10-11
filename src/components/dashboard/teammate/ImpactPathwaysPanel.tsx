@@ -1,0 +1,303 @@
+import React, { useState } from "react";
+import { FinGraphScenario, PathwayHop, EvidenceSource } from "@/types/fingraph/types";
+
+interface ImpactPathwaysPanelProps {
+  scenario: FinGraphScenario;
+  selectedHop: PathwayHop | null;
+  onSelectHop: (hop: PathwayHop) => void;
+}
+
+export const ImpactPathwaysPanel: React.FC<ImpactPathwaysPanelProps> = ({
+  scenario,
+  selectedHop,
+  onSelectHop,
+}) => {
+  const [activeTab, setActiveTab] = useState<"pathways" | "evidence" | "citations">("pathways");
+
+  // Aggregate all reference links from center node and radial nodes
+  const allReferences: Array<{ nodeTitle: string; link: { title: string; url: string; publisher: string; date?: string } }> = [];
+  if (scenario.centerNode?.refLinks) {
+    scenario.centerNode.refLinks.forEach((link) => {
+      allReferences.push({ nodeTitle: scenario.centerNode.title, link });
+    });
+  }
+  scenario.radialNodes?.forEach((node) => {
+    if (node.refLinks) {
+      node.refLinks.forEach((link) => {
+        allReferences.push({ nodeTitle: node.title, link });
+      });
+    }
+  });
+
+  return (
+    <aside className="w-96 shrink-0 clay-surface border-l border-[var(--clay-border)] h-full flex flex-col p-5 select-none z-10 overflow-y-auto">
+      {/* Panel Header */}
+      <div className="flex items-center justify-between pb-3">
+        <h2 className="text-xl font-black tracking-tight text-[var(--text-primary)] font-sans">
+          Impact pathways
+        </h2>
+        <button className="clay-surface p-1.5 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Alert Banner: Potentially High Transmission */}
+      <div className="mb-4 p-3.5 rounded-2xl clay-inset border border-rose-500/30 flex items-start gap-3">
+        <div className="text-rose-500 shrink-0 mt-0.5">
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-xs font-black text-rose-500 leading-tight">
+            {scenario.transmissionRisk}
+          </span>
+          <span className="text-[11px] text-[var(--text-secondary)] leading-snug font-medium">
+            {scenario.transmissionRiskDetail}
+          </span>
+        </div>
+      </div>
+
+      {/* Evidence Strength Row */}
+      <div className="mb-4 pb-4 border-b border-[var(--clay-border)] flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1">
+            <span>Evidence strength</span>
+            <svg className="w-3.5 h-3.5 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </span>
+          <span className="px-2 py-0.5 rounded-full clay-badge text-amber-500 text-[10px] font-black">
+            {scenario.evidenceStrength}
+          </span>
+        </div>
+        <span className="text-[11px] text-[var(--text-secondary)] font-medium">
+          {scenario.evidenceStrengthDetail}
+        </span>
+      </div>
+
+      {/* Sub-Tabs: Pathways vs Evidence vs Citations */}
+      <div className="flex items-center gap-4 border-b border-[var(--clay-border)] mb-4 text-xs font-bold">
+        <button
+          onClick={() => setActiveTab("pathways")}
+          className={`pb-2 transition-all relative cursor-pointer ${
+            activeTab === "pathways"
+              ? "text-[var(--accent-primary)] font-black"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <span>Pathways ({scenario.pathways.length})</span>
+          {activeTab === "pathways" && (
+            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent-primary)] rounded-full" />
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab("evidence")}
+          className={`pb-2 transition-all relative cursor-pointer ${
+            activeTab === "evidence"
+              ? "text-[var(--accent-primary)] font-black"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <span>Evidence ({scenario.evidenceSources.length})</span>
+          {activeTab === "evidence" && (
+            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent-primary)] rounded-full" />
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab("citations")}
+          className={`pb-2 transition-all relative flex items-center gap-1 cursor-pointer ${
+            activeTab === "citations"
+              ? "text-[var(--accent-primary)] font-black"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <span>Citations ({allReferences.length})</span>
+          {activeTab === "citations" && (
+            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent-primary)] rounded-full" />
+          )}
+        </button>
+      </div>
+
+      {/* Tab Content: Pathways List */}
+      {activeTab === "pathways" && (
+        <div className="flex flex-col gap-3">
+          {scenario.pathways.map((hop) => {
+            const isSelected = selectedHop?.hopNumber === hop.hopNumber;
+            return (
+              <div
+                key={hop.hopNumber}
+                onClick={() => onSelectHop(hop)}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col gap-2.5 ${
+                  isSelected
+                    ? "clay-inset ring-2 ring-[var(--accent-primary)]"
+                    : "clay-surface hover:scale-101 border-[var(--clay-border)]"
+                }`}
+              >
+                {/* Header: Hop Title & Chevron */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-[12.5px] font-bold text-slate-900">
+                    <span className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold">
+                      Hop {hop.hopNumber}
+                    </span>
+                    <span>{hop.source}</span>
+                    <span className="text-slate-400">→</span>
+                    <span>{hop.target}</span>
+                  </div>
+                  <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+
+                {/* Metric Pill & Timeframe */}
+                <div className="flex items-center justify-between text-[11.5px]">
+                  <span
+                    className={`px-2 py-0.5 rounded-md font-semibold ${
+                      hop.impactType === "Increases"
+                        ? "bg-red-50 text-red-600 border border-red-200/80"
+                        : "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                    }`}
+                  >
+                    {hop.impactLabel}
+                  </span>
+
+                  <span className="flex items-center gap-1 text-slate-500 font-medium">
+                    <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{hop.timeframe}</span>
+                  </span>
+                </div>
+
+                {/* Explanation narrative */}
+                <p className="text-[12px] text-slate-600 leading-relaxed font-normal">
+                  {hop.explanation}
+                </p>
+
+                {/* Category & Evidence Grade Badges */}
+                <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+                  <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px] font-medium">
+                    {hop.sector}
+                  </span>
+
+                  <span
+                    className={`px-2 py-0.5 rounded-md text-[11px] font-medium ${
+                      hop.badgeGradeType === "green"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200/70"
+                        : hop.badgeGradeType === "yellow"
+                        ? "bg-amber-50 text-amber-800 border border-amber-200/70"
+                        : "bg-blue-50 text-blue-700 border border-blue-200/70"
+                    }`}
+                  >
+                    {hop.evidenceGrade}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Tab Content: Evidence Sources */}
+      {activeTab === "evidence" && (
+        <div className="flex flex-col gap-3">
+          {scenario.evidenceSources.map((ev) => (
+            <div
+              key={ev.id}
+              className="p-3.5 rounded-2xl clay-surface border border-[var(--clay-border)] shadow-sm flex flex-col gap-2 hover:scale-101 transition-all"
+            >
+              <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)] font-medium">
+                <span className="px-2 py-0.5 rounded-full clay-badge text-[var(--accent-primary)] font-bold">
+                  {ev.category}
+                </span>
+                <span>{ev.date}</span>
+              </div>
+
+              <h4 className="text-xs font-bold text-[var(--text-primary)] leading-snug">
+                {ev.url && ev.url !== "#" ? (
+                  <a href={ev.url} target="_blank" rel="noreferrer" className="hover:text-[var(--accent-primary)] hover:underline inline-flex items-center gap-1">
+                    <span>{ev.title}</span>
+                    <span className="text-[10px] text-[var(--text-secondary)]">↗</span>
+                  </a>
+                ) : (
+                  ev.title
+                )}
+              </h4>
+
+              <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed font-medium">
+                {ev.summary}
+              </p>
+
+              <div className="flex items-center justify-between text-[11px] pt-1 border-t border-[var(--clay-border)]">
+                <span className="text-[var(--text-secondary)] font-medium">
+                  Source: <strong className="text-[var(--text-primary)]">{ev.source}</strong>
+                </span>
+                <span className="text-[var(--accent-primary)] font-bold font-mono">
+                  Relevance: {Math.round(ev.relevanceScore > 1 ? ev.relevanceScore : ev.relevanceScore * 100)}%
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Tab Content: Verified Citations & Regulatory References */}
+      {activeTab === "citations" && (
+        <div className="flex flex-col gap-3">
+          <div className="p-3 rounded-2xl clay-inset text-xs text-[var(--text-secondary)] font-medium">
+            <span className="font-bold text-[var(--text-primary)]">Verified Literature:</span> Official regulatory bulletins, exchange filings, and central bank econometric elasticity studies underpinning this scenario.
+          </div>
+          {allReferences.map((ref, idx) => (
+            <div
+              key={`${ref.link.title}-${idx}`}
+              className="p-3.5 rounded-2xl clay-surface border border-[var(--clay-border)] flex flex-col gap-2 hover:scale-101 transition-all"
+            >
+              <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)] font-medium">
+                <span className="px-2 py-0.5 rounded-full clay-badge text-emerald-500 font-bold text-[10px]">
+                  {ref.link.publisher}
+                </span>
+                <span className="px-2 py-0.5 rounded-full clay-inset text-[var(--text-secondary)] text-[10px] font-bold">
+                  Node: {ref.nodeTitle}
+                </span>
+              </div>
+
+              <h4 className="text-xs font-bold text-[var(--text-primary)] leading-snug">
+                {ref.link.url ? (
+                  <a
+                    href={ref.link.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-[var(--accent-primary)] hover:underline inline-flex items-center gap-1.5 group"
+                  >
+                    <span>{ref.link.title}</span>
+                    <span className="text-[11px] text-[var(--accent-primary)] group-hover:translate-x-0.5 transition-transform">↗</span>
+                  </a>
+                ) : (
+                  ref.link.title
+                )}
+              </h4>
+
+              <div className="flex items-center justify-between text-[11px] pt-1 border-t border-[var(--clay-border)]">
+                <span className="text-[var(--text-secondary)] font-mono truncate max-w-[200px] text-[10px]">
+                  {ref.link.url ? ref.link.url.replace(/^https?:\/\//, "").split("/")[0] : "Verified Citation"}
+                </span>
+                <a
+                  href={ref.link.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[var(--accent-primary)] font-bold text-xs hover:underline"
+                >
+                  Open Filing →
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </aside>
+  );
+};

@@ -1,0 +1,255 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -------------------------------------------------------------------------- */
+/* 4-Theme Color Engine CSS Variable Definitions                              */
+/* -------------------------------------------------------------------------- */
+
+@layer base {
+  /* 1. Porcelain Matte (Classic Clean Clay) */
+  :root,
+  [data-theme="porcelain"],
+  .theme-porcelain {
+    --bg-page: #F3F5F9;
+    --clay-surface: #FFFFFF;
+    --clay-shadow-dark: rgba(160, 175, 200, 0.45);
+    --clay-shadow-light: rgba(255, 255, 255, 0.95);
+    --accent-primary: #3B82F6;
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+
+    --clay-bg: var(--bg-page);
+    --clay-text: var(--text-primary);
+    --clay-text-muted: var(--text-secondary);
+    --clay-accent: var(--accent-primary);
+    --clay-border: rgba(160, 175, 200, 0.25);
+  }
+
+  /* 2. Bubblegum / Neon Pink Clay (Vibrant High-Contrast Clay) */
+  [data-theme="neon-pink"],
+  .theme-neon-pink {
+    --bg-page: #FFF1F5;
+    --clay-surface: #FFE4EC;
+    --clay-shadow-dark: rgba(244, 114, 182, 0.4);
+    --clay-shadow-light: rgba(255, 255, 255, 0.95);
+    --accent-primary: #EC4899;
+    --text-primary: #831843;
+    --text-secondary: #9D174D;
+
+    --clay-bg: var(--bg-page);
+    --clay-text: var(--text-primary);
+    --clay-text-muted: var(--text-secondary);
+    --clay-accent: var(--accent-primary);
+    --clay-border: rgba(244, 114, 182, 0.3);
+  }
+
+  /* 3. Electric Royal Blue Clay (Financial Cyber Clay) */
+  [data-theme="electric-blue"],
+  .theme-electric-blue {
+    --bg-page: #EFF6FF;
+    --clay-surface: #DBEAFE;
+    --clay-shadow-dark: rgba(59, 130, 246, 0.35);
+    --clay-shadow-light: rgba(255, 255, 255, 0.9);
+    --accent-primary: #1D4ED8;
+    --text-primary: #1E3A8A;
+    --text-secondary: #3B82F6;
+
+    --clay-bg: var(--bg-page);
+    --clay-text: var(--text-primary);
+    --clay-text-muted: var(--text-secondary);
+    --clay-accent: var(--accent-primary);
+    --clay-border: rgba(59, 130, 246, 0.3);
+  }
+
+  /* 4. Obsidian Clay (Stealth Dark Matte Clay) */
+  [data-theme="obsidian"],
+  .theme-obsidian,
+  .dark {
+    --bg-page: #0E1117;
+    --clay-surface: #181D27;
+    --clay-shadow-dark: rgba(0, 0, 0, 0.7);
+    --clay-shadow-light: rgba(36, 44, 58, 0.3);
+    --accent-primary: #38BDF8;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+
+    --clay-bg: var(--bg-page);
+    --clay-text: var(--text-primary);
+    --clay-text-muted: var(--text-secondary);
+    --clay-accent: var(--accent-primary);
+    --clay-border: rgba(255, 255, 255, 0.08);
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  html, body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: none;
+  }
+
+  body {
+    background-color: var(--clay-bg);
+    color: var(--clay-text);
+  }
+}
+
+/* Completely hide floating dev badge & toasts */
+[data-nextjs-dev-indicator],
+#nextjs-dev-indicator,
+div[data-nextjs-toast-wrapper],
+div[data-next-badge] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Core Solid Claymorphic Utility Classes & Presets                          */
+/* -------------------------------------------------------------------------- */
+
+@layer utilities {
+  /* Header Frosted Glassmorphism ONLY */
+  .nav-glass {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
+  }
+
+  [data-theme="obsidian"] .nav-glass,
+  .dark .nav-glass {
+    background: rgba(20, 24, 33, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+  }
+
+  /* 100% Opaque Solid Clay Surface for Cards & Containers */
+  .clay-surface,
+  .clay-card,
+  .clay-card-sm,
+  .clay-card-solid,
+  .clay-glass {
+    background: var(--clay-surface);
+    border-radius: 2rem;
+    box-shadow: 
+      16px 20px 36px var(--clay-shadow-dark),
+      -12px -12px 28px var(--clay-shadow-light),
+      inset 2px 2px 4px rgba(255, 255, 255, 0.6),
+      inset -3px -3px 6px rgba(0, 0, 0, 0.08);
+    border: none;
+    overflow: hidden;
+  }
+
+  /* Tactile Inset Textboxes & Inputs */
+  .clay-inset,
+  .clay-input {
+    background: var(--clay-bg);
+    border-radius: 9999px;
+    box-shadow: 
+      inset 4px 5px 8px var(--clay-shadow-dark),
+      inset -4px -5px 8px var(--clay-shadow-light);
+    border: none;
+  }
+
+  /* Tactile Solid Clay Buttons */
+  .clay-button-primary,
+  .clay-btn-accent {
+    background: linear-gradient(145deg, var(--clay-accent), #2563EB);
+    color: #FFFFFF;
+    border-radius: 9999px;
+    box-shadow: 
+      6px 8px 18px var(--clay-shadow-dark),
+      -3px -3px 10px var(--clay-shadow-light),
+      inset 2px 2px 3px rgba(255, 255, 255, 0.5),
+      inset -2px -2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .clay-button-primary:hover,
+  .clay-btn-accent:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 
+      8px 12px 24px var(--clay-shadow-dark),
+      -3px -3px 12px var(--clay-shadow-light);
+  }
+
+  .clay-button-primary:active,
+  .clay-btn-accent:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 
+      inset 3px 3px 6px rgba(0, 0, 0, 0.4),
+      inset -2px -2px 4px rgba(255, 255, 255, 0.2);
+  }
+
+  /* Solid Clay Badges & Chips */
+  .clay-glass-pill,
+  .clay-badge,
+  .clay-btn {
+    background: var(--clay-surface);
+    border-radius: 9999px;
+    box-shadow: 
+      6px 8px 16px var(--clay-shadow-dark),
+      -4px -4px 14px var(--clay-shadow-light),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.6),
+      inset -2px -2px 4px rgba(0, 0, 0, 0.08);
+    border: none;
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /* React Flow Controls Theme Overrides                                        */
+  /* -------------------------------------------------------------------------- */
+  .react-flow__controls {
+    box-shadow: 6px 8px 18px var(--clay-shadow-dark) !important;
+    border-radius: 1rem !important;
+    overflow: hidden !important;
+    border: 1px solid var(--clay-border, rgba(255, 255, 255, 0.1)) !important;
+  }
+
+  .react-flow__controls-button {
+    background: var(--clay-surface) !important;
+    border-bottom: 1px solid rgba(120, 120, 120, 0.15) !important;
+    fill: var(--text-primary) !important;
+    color: var(--text-primary) !important;
+    transition: background 0.2s, fill 0.2s !important;
+  }
+
+  .react-flow__controls-button:hover {
+    background: var(--clay-shadow-light) !important;
+    fill: var(--accent-primary) !important;
+  }
+
+  .react-flow__controls-button svg {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+    max-width: 14px !important;
+    max-height: 14px !important;
+  }
+}
+
+nextjs-portal,
+#__next-build-watcher,
+[data-nextjs-dialog-overlay],
+#nextjs-dev-indicator,
+[data-nextjs-dev-indicator],
+[data-next-badge],
+div[class*="nextjs-toast"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  clip-path: inset(100%) !important;
+}
+
