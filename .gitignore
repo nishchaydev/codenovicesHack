@@ -1,15 +1,15 @@
 # Dependencies
 node_modules/
-__pycache__/
-*.pyc
-.venv/
-venv/
-env/
+*/node_modules/
+*/*/node_modules/
+.pnp
+.pnp.js
 
 # Environment
 .env
 .env.local
 .env.*.local
+*.env
 
 # Build
 .next/
@@ -17,17 +17,29 @@ out/
 dist/
 build/
 
+# Heavy media & frames
+frontend/public/frames/
+public/frames/
+**/frames/**
+*.mp4
+*.webm
+*.mov
+*.pptx
+
 # Cache
 backend/cache/
 *.cache
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
 
-# IDE
+# IDE & OS
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS
 .DS_Store
 Thumbs.db
 
@@ -35,7 +47,7 @@ Thumbs.db
 *.log
 npm-debug.log*
 
-# Testing
+# Testing & tool caches
 coverage/
 .pytest_cache/
 .playwright-mcp/
@@ -43,5 +55,7 @@ coverage/
 .claude/
 .codeartsdoer/
 skills-lock.json
+
+# Data
 /data/
 !frontend/src/data/
