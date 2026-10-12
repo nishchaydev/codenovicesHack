@@ -1,6 +1,6 @@
 import datetime
 import random
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 # Approximate baseline anchors for instant reliable sparklines
 TICKER_BASELINES = {

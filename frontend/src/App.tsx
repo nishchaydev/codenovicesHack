@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sidebar, NavTab } from "./components/Sidebar";
 import { TopNav } from "./components/TopNav";
 import { ScenarioHeader } from "./components/ScenarioHeader";
@@ -15,6 +15,7 @@ import { MethodologyDocsView } from "./components/MethodologyDocsView";
 import { MarketOverviewView } from "./components/MarketOverviewView";
 import { EventExplorerView } from "./components/EventExplorerView";
 import { LandingPage } from "./components/LandingPage";
+import { GlobalNewsRelationMap } from "./components/GlobalNewsRelationMap";
 import AuthSectionOne from "@/components/ui/auth-section-1";
 import { RbacLoginModal, PRESET_ROLES } from "./components/RbacLoginModal";
 import { EventRegressionModal } from "./components/EventRegressionModal";
@@ -23,11 +24,83 @@ import { FINGRAPH_SCENARIOS } from "./data/fingraphData";
 import { FinGraphScenario, RadialCardNode, PathwayHop, UserProfile, RegressionCalibration } from "./types";
 import { generateStockScenario } from "./api";
 
+const VALID_NAV_TABS: NavTab[] = [
+  "landing",
+  "event_explorer",
+  "impact_graph",
+  "ai_hub",
+  "asset_profiler",
+  "overview",
+  "historical_replay",
+  "contagion_matrix",
+  "geo_map",
+  "audit_reports",
+  "saved_analyses",
+  "settings",
+  "help_docs",
+];
+
+const getInitialNavTab = (): NavTab => {
+  if (typeof window === "undefined") return "landing";
+
+  // 1. Check URL hash (e.g. #event_explorer or #/event_explorer)
+  const hash = window.location.hash.replace(/^#[/]?/, "").trim() as NavTab;
+  if (hash && VALID_NAV_TABS.includes(hash)) {
+    return hash;
+  }
+
+  // 2. Check localStorage for last active tab
+  try {
+    const saved = localStorage.getItem("find_active_nav_tab") as NavTab | null;
+    if (saved && VALID_NAV_TABS.includes(saved) && saved !== "landing") {
+      return saved;
+    }
+  } catch (e) {
+    console.warn("Could not read nav tab from localStorage", e);
+  }
+
+  return "landing";
+};
+
+const getInitialSynthesized = (): boolean => {
+  if (typeof window === "undefined") return false;
+  try {
+    const saved = localStorage.getItem("find_has_synthesized");
+    if (saved !== null) return saved === "true";
+    const hash = window.location.hash.replace(/^#[/]?/, "").trim();
+    if (hash === "impact_graph") return true;
+  } catch {}
+  return false;
+};
+
+const getInitialScenario = (allScenarios: FinGraphScenario[]): FinGraphScenario => {
+  if (typeof window === "undefined") return allScenarios[0];
+  try {
+    const savedId = localStorage.getItem("find_active_scenario_id");
+    if (savedId) {
+      const found = allScenarios.find((s) => s.id === savedId);
+      if (found) return found;
+    }
+  } catch {}
+  return allScenarios[0];
+};
+
+const getInitialUser = (): UserProfile => {
+  if (typeof window === "undefined") return PRESET_ROLES[0];
+  try {
+    const saved = localStorage.getItem("find_current_user");
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch {}
+  return PRESET_ROLES[0];
+};
+
 export const App: React.FC = () => {
-  const [activeNavTab, setActiveNavTab] = useState<NavTab>("landing");
+  const [activeNavTab, setActiveNavTab] = useState<NavTab>(getInitialNavTab);
   const [isAuthScreenOpen, setIsAuthScreenOpen] = useState<boolean>(false);
   const [scenarios, setScenarios] = useState<FinGraphScenario[]>(FINGRAPH_SCENARIOS);
-  const [activeScenario, setActiveScenario] = useState<FinGraphScenario>(FINGRAPH_SCENARIOS[0]);
+  const [activeScenario, setActiveScenario] = useState<FinGraphScenario>(() => getInitialScenario(FINGRAPH_SCENARIOS));
   const [selectedNode, setSelectedNode] = useState<RadialCardNode | null>(null);
   const [selectedHop, setSelectedHop] = useState<PathwayHop | null>(null);
   const [isDrilldownOpen, setIsDrilldownOpen] = useState<boolean>(false);
@@ -35,14 +108,71 @@ export const App: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
 
   // RBAS User Authentication & Regression Modals
-  const [currentUser, setCurrentUser] = useState<UserProfile>(PRESET_ROLES[0]);
+  const [currentUser, setCurrentUser] = useState<UserProfile>(getInitialUser);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [isRbacModalOpen, setIsRbacModalOpen] = useState<boolean>(false);
   const [isRegressionModalOpen, setIsRegressionModalOpen] = useState<boolean>(false);
   const [extendedNodeIds, setExtendedNodeIds] = useState<string[]>([]);
   const [toast, setToast] = useState<{ message: string; type: "success" | "info" } | null>(null);
   const [historicalEra, setHistoricalEra] = useState<"All" | "1970s" | "2000s" | "2020s">("All");
-  const [hasUserSynthesized, setHasUserSynthesized] = useState<boolean>(false);
+  const [hasUserSynthesized, setHasUserSynthesized] = useState<boolean>(getInitialSynthesized);
+
+  // Persist activeNavTab & keep URL hash in sync for persistent page refreshes
+  useEffect(() => {
+    try {
+      localStorage.setItem("find_active_nav_tab", activeNavTab);
+      if (activeNavTab !== "landing") {
+        if (window.location.hash !== `#${activeNavTab}`) {
+          window.history.replaceState(null, "", `#${activeNavTab}`);
+        }
+      } else {
+        if (window.location.hash) {
+          window.history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+      }
+    } catch (e) {
+      console.warn("Could not sync nav tab to localStorage", e);
+    }
+  }, [activeNavTab]);
+
+  // Support browser Back/Forward navigation with URL hash
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#[/]?/, "").trim() as NavTab;
+      if (hash && VALID_NAV_TABS.includes(hash)) {
+        setActiveNavTab(hash);
+      } else if (!window.location.hash) {
+        setActiveNavTab("landing");
+      }
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  // Persist activeScenario
+  useEffect(() => {
+    try {
+      if (activeScenario?.id) {
+        localStorage.setItem("find_active_scenario_id", activeScenario.id);
+      }
+    } catch {}
+  }, [activeScenario]);
+
+  // Persist hasUserSynthesized
+  useEffect(() => {
+    try {
+      localStorage.setItem("find_has_synthesized", String(hasUserSynthesized));
+    } catch {}
+  }, [hasUserSynthesized]);
+
+  // Persist currentUser
+  useEffect(() => {
+    try {
+      if (currentUser) {
+        localStorage.setItem("find_current_user", JSON.stringify(currentUser));
+      }
+    } catch {}
+  }, [currentUser]);
 
   const showToast = (message: string, type: "success" | "info" = "success") => {
     setToast({ message, type });
@@ -341,16 +471,28 @@ export const App: React.FC = () => {
     );
   }
 
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem("find_active_nav_tab");
+      localStorage.removeItem("find_has_synthesized");
+      localStorage.removeItem("find_active_scenario_id");
+      localStorage.removeItem("find_current_user");
+    } catch (e) {
+      console.warn("Could not clear session storage", e);
+    }
+    setActiveNavTab("landing");
+    setHasUserSynthesized(false);
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    showToast("Logged out to portal", "info");
+  };
+
   return (
     <div className="flex h-screen w-screen overflow-hidden apple-mesh-bg text-slate-900 font-sans antialiased">
       {/* 1. Left Navigation Rail Sidebar */}
       <Sidebar 
         activeTab={activeNavTab} 
         onTabChange={setActiveNavTab}
-        onLogout={() => {
-          setActiveNavTab("landing");
-          showToast("Logged out to portal", "info");
-        }}
+        onLogout={handleLogout}
       />
 
       {/* 2. Main Workspace Layout */}
@@ -637,6 +779,13 @@ export const App: React.FC = () => {
                   setActiveNavTab("impact_graph");
                 }}
               />
+            )}
+
+            {/* Geo News Relation Map — Mappls powered */}
+            {activeNavTab === "geo_map" && (
+              <div className="w-full h-full min-h-[600px]">
+                <GlobalNewsRelationMap />
+              </div>
             )}
 
             {/* AI Engine Settings Tab */}

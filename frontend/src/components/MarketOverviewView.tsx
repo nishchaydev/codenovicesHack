@@ -230,12 +230,104 @@ const RECENT_EVENTS: MarketEventItem[] = [
   },
 ];
 
+// Helper to interpolate array of values into ~30 points for realistic intraday chart
+const interpolatePoints = (arr: number[], targetCount: number = 30): number[] => {
+  if (arr.length <= 1) return arr;
+  const result: number[] = [];
+  const step = (arr.length - 1) / (targetCount - 1);
+  for (let i = 0; i < targetCount; i++) {
+    const pos = i * step;
+    const low = Math.floor(pos);
+    const high = Math.min(low + 1, arr.length - 1);
+    const weight = pos - low;
+    result.push(arr[low] * (1 - weight) + arr[high] * weight);
+  }
+  return result;
+};
+
+// Intraday SVG Area Chart
+interface AreaChartProps {
+  dataPoints: number[];
+  isPositive: boolean;
+  chartId: string;
+}
+
+const MiniAreaChart: React.FC<AreaChartProps> = ({ dataPoints, isPositive, chartId }) => {
+  const width = 240;
+  const height = 48;
+  const min = Math.min(...dataPoints);
+  const max = Math.max(...dataPoints);
+  const range = max - min || 1;
+  const paddingY = 4;
+  const chartHeight = height - paddingY * 2;
+
+  const points = dataPoints.map((v, i) => {
+    const x = (i / (dataPoints.length - 1)) * width;
+    const y = height - paddingY - ((v - min) / range) * chartHeight;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+
+  const linePath = `M ${points.join(" L ")}`;
+  const areaPath = `${linePath} L ${width},${height} L 0,${height} Z`;
+
+  const strokeColor = isPositive ? "#10b981" : "#f43f5e";
+  const gradId = `area-grad-${chartId}`;
+
+  return (
+    <div className="w-full h-12 relative overflow-hidden">
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="w-full h-full overflow-visible"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop
+              offset="0%"
+              stopColor={strokeColor}
+              stopOpacity={isPositive ? 0.35 : 0.3}
+            />
+            <stop
+              offset="100%"
+              stopColor={strokeColor}
+              stopOpacity={0.0}
+            />
+          </linearGradient>
+        </defs>
+        <path d={areaPath} fill={`url(#${gradId})`} />
+        <path
+          d={linePath}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  );
+};
+
 export const MarketOverviewView: React.FC = () => {
   const [activeTimeframe, setActiveTimeframe] = useState<"1D" | "1W" | "1M" | "YTD">("1D");
   const [sectorFilter, setSectorFilter] = useState<"all" | "gainers" | "losers">("all");
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [lastRefreshed, setLastRefreshed] = useState<string>("14:30:15 IST");
+
+  // Determine if Indian market is open (9:15 - 15:30 IST, Mon-Fri)
+  const isMarketOpen = (() => {
+    const now = new Date();
+    // Convert to IST (UTC + 5.5 hours)
+    const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+    const istTime = new Date(utcTime + 5.5 * 3600000);
+    const day = istTime.getDay(); // 0 is Sun, 6 is Sat
+    const isWeekday = day >= 1 && day <= 5;
+    const currentMinutes = istTime.getHours() * 60 + istTime.getMinutes();
+    const openMinutes = 9 * 60 + 15;
+    const closeMinutes = 15 * 60 + 30;
+    return isWeekday && currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
+  })();
 
   // Breadth constants
   const advances = 1245;
@@ -277,12 +369,24 @@ export const MarketOverviewView: React.FC = () => {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Market Overview
             </h1>
+            {/* Market Status Pill */}
+            {isMarketOpen ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Market Open
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold font-mono bg-slate-100 text-slate-600 border border-slate-200">
+                <span className="w-2 h-2 rounded-full bg-slate-400" />
+                Market Closed
+              </span>
+            )}
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               Live NSE / BSE Feed
             </span>
-            <span className="text-xs font-mono text-slate-400 border border-slate-200 bg-slate-50 px-2 py-0.5 rounded-md">
-              Session: Regular Trading
+            <span className="text-xs font-mono text-slate-500 border border-slate-200 bg-slate-50 px-2 py-0.5 rounded-md">
+              Exchange timezone: Kolkata (UTC+5:30)
             </span>
           </div>
           <p className="text-sm text-slate-500 max-w-2xl">
@@ -344,10 +448,12 @@ export const MarketOverviewView: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {INDEX_CARDS.map((card) => {
             const isChangePos = card.changePercent >= 0;
+            const interpolatedBars = interpolatePoints(card.bars, 30);
+
             return (
               <div
                 key={card.name}
-                className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all flex flex-col justify-between gap-4"
+                className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all flex flex-col justify-between gap-3"
               >
                 {/* Header: Title and Ticker */}
                 <div className="flex items-start justify-between">
@@ -393,27 +499,17 @@ export const MarketOverviewView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Sparkline & Intraday CSS Bar visual */}
-                <div className="pt-2 border-t border-slate-100 flex items-end justify-between gap-3">
-                  <div className="flex flex-col text-[11px] text-slate-400 font-mono">
-                    <span>H: {card.dayHigh}</span>
+                {/* Intraday SVG Area Chart */}
+                <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
+                  <MiniAreaChart
+                    dataPoints={interpolatedBars}
+                    isPositive={isChangePos}
+                    chartId={card.name.replace(/\s+/g, "-").toLowerCase()}
+                  />
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
                     <span>L: {card.dayLow}</span>
-                  </div>
-
-                  {/* Tiny Sparkline-like CSS Bars */}
-                  <div className="flex items-end gap-1 h-7 px-1.5 py-0.5 rounded-md bg-slate-50 border border-slate-100">
-                    {card.bars.map((barHeight, idx) => (
-                      <div
-                        key={idx}
-                        title={`Tick ${idx + 1}: ${barHeight}%`}
-                        className={`w-1 rounded-2xs transition-all ${
-                          isChangePos
-                            ? "bg-emerald-500/80 hover:bg-emerald-600"
-                            : "bg-rose-500/80 hover:bg-rose-600"
-                        }`}
-                        style={{ height: `${Math.max(15, (barHeight / 100) * 22)}px` }}
-                      />
-                    ))}
+                    <span className="text-[10px] text-slate-400 font-sans">Intraday 1D</span>
+                    <span>H: {card.dayHigh}</span>
                   </div>
                 </div>
               </div>

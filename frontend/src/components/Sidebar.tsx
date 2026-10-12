@@ -30,6 +30,7 @@ export type NavTab =
   | "overview" 
   | "historical_replay" 
   | "contagion_matrix" 
+  | "geo_map"
   | "audit_reports" 
   | "saved_analyses" 
   | "settings" 
@@ -68,6 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpen
     { id: "overview", label: "Market Overview", icon: <LayoutDashboard className="w-4 h-4 flex-shrink-0 text-[#626260]" />, badge: "INDEX" },
     { id: "historical_replay", label: "Historical Replay", icon: <History className="w-4 h-4 flex-shrink-0 text-amber-600" />, badge: "CRISIS" },
     { id: "contagion_matrix", label: "Sector Heatmap", icon: <Grid className="w-4 h-4 flex-shrink-0 text-emerald-600" />, badge: "HEATMAP" },
+    { id: "geo_map", label: "Geo News Map", icon: <Network className="w-4 h-4 flex-shrink-0 text-sky-500" />, badge: "GEO" },
     { id: "audit_reports", label: "Audit Reports", icon: <FileText className="w-4 h-4 flex-shrink-0 text-[#626260]" />, badge: "LOGS" },
     { id: "saved_analyses", label: "Saved Watchlists", icon: <Bookmark className="w-4 h-4 flex-shrink-0 text-[#626260]" /> },
   ];
@@ -133,6 +135,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpen
                     : item.badge === "STOCKS" ? "bg-emerald-100 text-emerald-700"
                     : item.badge === "CRISIS" ? "bg-rose-100 text-rose-800"
                     : item.badge === "HEATMAP" ? "bg-indigo-100 text-indigo-700"
+                    : item.badge === "GEO" ? "bg-sky-100 text-sky-700"
                     : "bg-neutral-200 text-neutral-700"
                   }`}>{item.badge}</span>
                 )}
