@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Network, GitFork, Maximize2, ArrowDownRight, ArrowUpRight, 
   ArrowDown, ChevronRight, FileSignature, Check, ShieldAlert, 
-  Zap, Layers, ExternalLink, Activity, Info
+  Zap, Layers, ExternalLink, Activity, Info, Tag, RotateCcw, 
+  ThumbsUp, Rocket, Bell, CheckCircle2, AlertCircle, Sparkles, 
+  TrendingDown, TrendingUp, Clock, HelpCircle, ArrowRight
 } from 'lucide-react';
 import { Network as VisNetwork } from 'vis-network/standalone';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
@@ -311,13 +313,558 @@ const PRESET_VOUCHERS = [
         ]
       }
     ]
+  },
+  {
+    id: 'defense-surge',
+    title: 'Defense Procurement Surge',
+    tag: 'AEROSPACE & SECURITY',
+    voucherCode: 'FIN-VOUCHER-DEF-04',
+    accentColor: '#8b5cf6',
+    root: { 
+      id: "DEF_INDEX", 
+      name: "Defense & Aerospace Index", 
+      sector: "Aerospace & Defense", 
+      baseShock: 24.5, 
+      displayShock: "+24.5%", 
+      role: "Geopolitical Catalyst",
+      summary: "Strategic border modernisation budgets and sovereign contracts trigger multi-year order backlog expansion."
+    },
+    tier1Title: "Direct Defense Equipment & Avionics",
+    tier2Title: "Secondary Logistics & Dual-Use Tech",
+    tier3Title: "Terminal Sovereign Fiscal Reallocation",
+    impacts: [
+      { 
+        id: "HAL.NS", 
+        name: "Hindustan Aeronautics (HAL)", 
+        sector: "Aeronautics & Defense", 
+        baseImpact: 16.4, 
+        channel: "Fighter Jet Order Expansion", 
+        hop: 1, 
+        parentId: "DEF_INDEX",
+        confidence: "95.1%", 
+        beta: 1.25,
+        explanation: "Domestic manufacturing mandate (Make-in-India) channels 65%+ of fresh budgetary modernization capital directly into HAL order book.",
+        timeSeries: [
+          { day: "T-5", price: 4450 }, { day: "T-4", price: 4490 }, { day: "T-3", price: 4520 },
+          { day: "T-2", price: 4580 }, { day: "T-1", price: 4620 }, { day: "Shock T0", price: 5180 }
+        ]
+      },
+      { 
+        id: "BEL.NS", 
+        name: "Bharat Electronics (BEL)", 
+        sector: "Defense Radar & Electronics", 
+        baseImpact: 12.8, 
+        channel: "Radar & Tactical Avionics Delivery", 
+        hop: 1, 
+        parentId: "DEF_INDEX",
+        confidence: "93.4%", 
+        beta: 0.98,
+        explanation: "Airborne early-warning electronic warfare systems and drone detection radars see expedited delivery schedules.",
+        timeSeries: [
+          { day: "T-5", price: 285 }, { day: "T-4", price: 288 }, { day: "T-3", price: 290 },
+          { day: "T-2", price: 292 }, { day: "T-1", price: 295 }, { day: "Shock T0", price: 332 }
+        ]
+      },
+      { 
+        id: "SHIPPING_CORP", 
+        name: "Maritime Defense Logistics", 
+        sector: "Naval Freight", 
+        baseImpact: -8.5, 
+        channel: "Corridor Rerouting & War Risk", 
+        hop: 2, 
+        parentId: "HAL.NS",
+        confidence: "88.6%", 
+        beta: -0.65,
+        explanation: "Civilian container vessels absorb elevated Lloyd's war risk insurance premiums and detour around high-tension choke points.",
+        timeSeries: [
+          { day: "T-5", price: 220 }, { day: "T-4", price: 218 }, { day: "T-3", price: 215 },
+          { day: "T-2", price: 210 }, { day: "T-1", price: 208 }, { day: "Shock T0", price: 191 }
+        ]
+      },
+      { 
+        id: "CYBER_SEC", 
+        name: "Defense Cyber Command Tier-1", 
+        sector: "Cyber Intelligence", 
+        baseImpact: 18.2, 
+        channel: "National Firewall Infrastructure", 
+        hop: 2, 
+        parentId: "BEL.NS",
+        confidence: "91.2%", 
+        beta: 1.12,
+        explanation: "Critical infrastructure security audits accelerate, awarding multi-crore intrusion defense contracts to domestic firms.",
+        timeSeries: [
+          { day: "T-5", price: 1200 }, { day: "T-4", price: 1220 }, { day: "T-3", price: 1235 },
+          { day: "T-2", price: 1250 }, { day: "T-1", price: 1280 }, { day: "Shock T0", price: 1450 }
+        ]
+      },
+      { 
+        id: "FISCAL_DEFICIT", 
+        name: "Sovereign Defense Allocation", 
+        sector: "Fiscal Macro Policy", 
+        baseImpact: 4.8, 
+        channel: "Terminal Sovereign Debt Supply", 
+        hop: 3, 
+        parentId: "CYBER_SEC",
+        confidence: "96.0%", 
+        beta: 0.38,
+        explanation: "Supplementary budgetary demands raise sovereign debt issuance, pushing benchmark yields up by +14 bps.",
+        timeSeries: [
+          { day: "T-5", price: 7.02 }, { day: "T-4", price: 7.04 }, { day: "T-3", price: 7.05 },
+          { day: "T-2", price: 7.08 }, { day: "T-1", price: 7.12 }, { day: "Shock T0", price: 7.36 }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'metal-rally',
+    title: 'Metals & Lithium Squeeze',
+    tag: 'BASIC MATERIALS & EV',
+    voucherCode: 'FIN-VOUCHER-METALS-05',
+    accentColor: '#f97316',
+    root: { 
+      id: "METAL_FUTURES", 
+      name: "Copper & Lithium Futures", 
+      sector: "Industrial Commodities", 
+      baseShock: 21.0, 
+      displayShock: "+21.0%", 
+      role: "Raw Commodity Squeeze",
+      summary: "Major mining output suspensions and refinery restrictions choke global refined cathode stockpiles."
+    },
+    tier1Title: "Primary Smelters & Mining Giants",
+    tier2Title: "Automotive & Industrial Equipment COGS",
+    tier3Title: "Terminal Consumer Durable Inflation",
+    impacts: [
+      { 
+        id: "TATASTEEL.NS", 
+        name: "Tata Steel Ltd", 
+        sector: "Ferrous Metallurgy", 
+        baseImpact: 14.2, 
+        channel: "Global Finished Steel Re-rating", 
+        hop: 1, 
+        parentId: "METAL_FUTURES",
+        confidence: "94.0%", 
+        beta: 1.15,
+        explanation: "International spot prices for hot-rolled coil spike, boosting European and Indian operating EBIDTA per tonne by $45/t.",
+        timeSeries: [
+          { day: "T-5", price: 142 }, { day: "T-4", price: 144 }, { day: "T-3", price: 143 },
+          { day: "T-2", price: 147 }, { day: "T-1", price: 150 }, { day: "Shock T0", price: 168 }
+        ]
+      },
+      { 
+        id: "HINDALCO.NS", 
+        name: "Hindalco Industries", 
+        sector: "Non-Ferrous Metals", 
+        baseImpact: 11.8, 
+        channel: "Specialty Aluminum Spread", 
+        hop: 1, 
+        parentId: "METAL_FUTURES",
+        confidence: "92.5%", 
+        beta: 0.94,
+        explanation: "Tight upstream metal liquidity widens recycling conversion margins for beverage can sheets and specialty aerospace alloys.",
+        timeSeries: [
+          { day: "T-5", price: 610 }, { day: "T-4", price: 615 }, { day: "T-3", price: 618 },
+          { day: "T-2", price: 625 }, { day: "T-1", price: 630 }, { day: "Shock T0", price: 698 }
+        ]
+      },
+      { 
+        id: "AUTO_OEMS", 
+        name: "Automotive Vehicle Assemblers", 
+        sector: "Auto Manufacturing", 
+        baseImpact: -9.4, 
+        channel: "Chassis & Battery Pack Cost Spike", 
+        hop: 2, 
+        parentId: "TATASTEEL.NS",
+        confidence: "89.0%", 
+        beta: -0.74,
+        explanation: "Automakers face unhedged bill-of-materials inflation across body-in-white stampings and wiring harness assemblies.",
+        timeSeries: [
+          { day: "T-5", price: 1850 }, { day: "T-4", price: 1840 }, { day: "T-3", price: 1820 },
+          { day: "T-2", price: 1810 }, { day: "T-1", price: 1800 }, { day: "Shock T0", price: 1650 }
+        ]
+      },
+      { 
+        id: "EV_BATTERY", 
+        name: "Lithium-Ion Battery Fabricators", 
+        sector: "Clean Energy Tech", 
+        baseImpact: -13.2, 
+        channel: "Cathode Feedstock Deficit", 
+        hop: 2, 
+        parentId: "HINDALCO.NS",
+        confidence: "90.4%", 
+        beta: -0.92,
+        explanation: "Lithium carbonate spot rates jump 35%, forcing battery pack manufacturers to absorb margin shrinkage or risk cancellation.",
+        timeSeries: [
+          { day: "T-5", price: 780 }, { day: "T-4", price: 775 }, { day: "T-3", price: 760 },
+          { day: "T-2", price: 750 }, { day: "T-1", price: 740 }, { day: "Shock T0", price: 642 }
+        ]
+      },
+      { 
+        id: "CORE_WPI", 
+        name: "Wholesale PPI Manufacturing Index", 
+        sector: "Macro Price Index", 
+        baseImpact: 3.2, 
+        channel: "Terminal Industrial Pass-Through", 
+        hop: 3, 
+        parentId: "AUTO_OEMS",
+        confidence: "95.5%", 
+        beta: 0.28,
+        explanation: "Upstream metal inputs cascade into white goods, construction rebar, and industrial machinery, lifting core wholesale inflation.",
+        timeSeries: [
+          { day: "T-5", price: 132 }, { day: "T-4", price: 132.2 }, { day: "T-3", price: 132.5 },
+          { day: "T-2", price: 132.9 }, { day: "T-1", price: 133.4 }, { day: "Shock T0", price: 137.6 }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'fii-outflow',
+    title: 'FII Capital Outflow Shock',
+    tag: 'LIQUIDITY & FOREX',
+    voucherCode: 'FIN-VOUCHER-FII-06',
+    accentColor: '#ec4899',
+    root: { 
+      id: "FII_FLOW", 
+      name: "FII Institutional Liquidity Exit", 
+      sector: "Foreign Institutional Flows", 
+      baseShock: -12.4, 
+      displayShock: "-$420M Exit", 
+      role: "Capital Repatriation Shock",
+      summary: "US 10-Yr Treasury yield spike to 4.45% triggers automated emerging market portfolio unwinding across domestic equities."
+    },
+    tier1Title: "Largecap Banking & Liquid Weightages",
+    tier2Title: "Currency Depreciation & Exporter Divergence",
+    tier3Title: "Terminal Systemic Liquidity Deficit",
+    impacts: [
+      { 
+        id: "HDFCBANK.NS", 
+        name: "HDFC Bank Ltd", 
+        sector: "Private Commercial Banking", 
+        baseImpact: -6.8, 
+        channel: "Heavy Institutional Selloff", 
+        hop: 1, 
+        parentId: "FII_FLOW",
+        confidence: "96.2%", 
+        beta: -1.08,
+        explanation: "Highest foreign institutional holding makes tier-1 private banks the primary liquidity ATM during algorithmic outflows.",
+        timeSeries: [
+          { day: "T-5", price: 1720 }, { day: "T-4", price: 1715 }, { day: "T-3", price: 1705 },
+          { day: "T-2", price: 1690 }, { day: "T-1", price: 1675 }, { day: "Shock T0", price: 1560 }
+        ]
+      },
+      { 
+        id: "NIFTY_LARGE", 
+        name: "Nifty 50 High-Beta Index", 
+        sector: "Benchmark Equities", 
+        baseImpact: -4.5, 
+        channel: "Index Arbitrage Desk Selling", 
+        hop: 1, 
+        parentId: "FII_FLOW",
+        confidence: "94.8%", 
+        beta: -0.92,
+        explanation: "ETF basket redemption pressure ripples across top 10 index heavyweights, dragging headline multiples lower.",
+        timeSeries: [
+          { day: "T-5", price: 24800 }, { day: "T-4", price: 24750 }, { day: "T-3", price: 24600 },
+          { day: "T-2", price: 24450 }, { day: "T-1", price: 24300 }, { day: "Shock T0", price: 23680 }
+        ]
+      },
+      { 
+        id: "USDINR_FX", 
+        name: "USD/INR FX Depreciatory Bias", 
+        sector: "Foreign Exchange", 
+        baseImpact: 1.8, 
+        channel: "Outbound Currency Conversion", 
+        hop: 2, 
+        parentId: "HDFCBANK.NS",
+        confidence: "92.0%", 
+        beta: 0.65,
+        explanation: "Aggressive dollar demand against rupee spot pushes exchange rate to historical resistance bands.",
+        timeSeries: [
+          { day: "T-5", price: 83.8 }, { day: "T-4", price: 83.9 }, { day: "T-3", price: 84.0 },
+          { day: "T-2", price: 84.1 }, { day: "T-1", price: 84.3 }, { day: "Shock T0", price: 85.2 }
+        ]
+      },
+      { 
+        id: "INFY_EXPORT", 
+        name: "IT Exporters (Infosys)", 
+        sector: "IT Software Exports", 
+        baseImpact: 5.2, 
+        channel: "FX Realization Tailwind", 
+        hop: 2, 
+        parentId: "NIFTY_LARGE",
+        confidence: "89.5%", 
+        beta: 0.54,
+        explanation: "Weakening rupee acts as natural gross margin tailwind for offshore dollar-billed technology contracts.",
+        timeSeries: [
+          { day: "T-5", price: 1820 }, { day: "T-4", price: 1825 }, { day: "T-3", price: 1835 },
+          { day: "T-2", price: 1850 }, { day: "T-1", price: 1870 }, { day: "Shock T0", price: 1945 }
+        ]
+      },
+      { 
+        id: "INTERBANK_LIQ", 
+        name: "Net Banking System Deficit (LAF)", 
+        sector: "Interbank Liquidity", 
+        baseImpact: 18.4, 
+        channel: "Terminal Overnight Call Rates", 
+        hop: 3, 
+        parentId: "USDINR_FX",
+        confidence: "95.0%", 
+        beta: 0.45,
+        explanation: "RBI foreign exchange intervention drains domestic rupee liquidity, spiking overnight call money borrowing rates.",
+        timeSeries: [
+          { day: "T-5", price: 6.45 }, { day: "T-4", price: 6.48 }, { day: "T-3", price: 6.52 },
+          { day: "T-2", price: 6.58 }, { day: "T-1", price: 6.64 }, { day: "Shock T0", price: 6.92 }
+        ]
+      }
+    ]
   }
 ];
+
+// ─── DYNAMIC VALUATION & PRICE STATS ENGINE (FROM USER MOCKUPS) ───────────────
+const GET_STOCK_VALUATION_STATS = (node) => {
+  if (!node) {
+    return {
+      currentPrice: 449,
+      highest: 1099,
+      avg: 529.89,
+      lowest: 449,
+      dealScore: 92,
+      dealBadge: "Epic Hatke Steal 🚀",
+      recommendation: "Go Ahead & Buy now",
+      recommendationSub: "Optimal price point",
+      scoreBreakup: [
+        { label: "No Price hike before sale", pts: 36, status: "complete" },
+        { label: "At All time low price (₹449)", pts: 29, status: "complete" },
+        { label: "At 6 months low productPrice (₹449)", pts: 21, status: "complete" },
+        { label: "Below average price (₹524)", pts: 6, status: "partial" }
+      ]
+    };
+  }
+
+  const lastPrice = node.timeSeries?.[node.timeSeries.length - 1]?.price || 500;
+  const isShockNegative = (node.baseImpact || 0) < 0;
+  
+  // Create tailored real-world pricing
+  let lowest, highest, avg, currentPrice, dealScore, dealBadge, rec, recSub;
+
+  if (node.id === 'INDIGO.NS') {
+    currentPrice = 3865;
+    lowest = 3865;
+    highest = 4890;
+    avg = 4380;
+    dealScore = 88;
+    dealBadge = "Capitulation Dip Steal ⚡";
+    rec = "Go Ahead & Buy now";
+    recSub = "Fuel shock priced in; risk-reward favorable";
+  } else if (node.id === 'ASIANPAINT') {
+    currentPrice = 2608;
+    lowest = 2608;
+    highest = 3350;
+    avg = 2890;
+    dealScore = 92;
+    dealBadge = "Epic Hatke Steal 🚀";
+    rec = "Go Ahead & Buy now";
+    recSub = "Optimal price point (52-week support)";
+  } else if (node.id === 'HAL.NS') {
+    currentPrice = 5180;
+    lowest = 3920;
+    highest = 5400;
+    avg = 4650;
+    dealScore = 94;
+    dealBadge = "Momentum Breakout Steal 🚀";
+    rec = "Go Ahead & Buy now";
+    recSub = "Order backlog expansion supercycle";
+  } else if (node.id === 'SPICEJET') {
+    currentPrice = 50.5;
+    lowest = 44.9;
+    highest = 78.5;
+    avg = 58.2;
+    dealScore = 76;
+    dealBadge = "Deep Value Turnaround 🏷️";
+    rec = "Wait for 2-3 Days Dip";
+    recSub = "Wait for lease clarity before full allocation";
+  } else if (node.id === 'TATASTEEL.NS') {
+    currentPrice = 168;
+    lowest = 138;
+    highest = 184;
+    avg = 152;
+    dealScore = 90;
+    dealBadge = "Commodity Supercycle Steal 🚀";
+    rec = "Go Ahead & Buy now";
+    recSub = "Steel spread expansion confirmed";
+  } else {
+    currentPrice = lastPrice;
+    lowest = Math.round(lastPrice * (isShockNegative ? 0.96 : 0.82));
+    highest = Math.round(lastPrice * 1.55);
+    avg = Number(((lowest + highest) / 2).toFixed(2));
+    dealScore = isShockNegative ? 86 : 91;
+    dealBadge = "Smart Valuation Entry 🎯";
+    rec = "Go Ahead & Buy now";
+    recSub = "Favorable risk-adjusted entry zone";
+  }
+
+  const scoreBreakup = [
+    { label: "No speculative bubble prior to drop", pts: 36, status: "complete" },
+    { label: `At All time low price (₹${lowest.toLocaleString()})`, pts: 29, status: "complete" },
+    { label: `At 6 months low valuation (₹${lowest.toLocaleString()})`, pts: 21, status: "complete" },
+    { label: `Below 200-DMA average (₹${avg.toLocaleString()})`, pts: 6, status: "partial" }
+  ];
+
+  return {
+    currentPrice,
+    lowest,
+    avg,
+    highest,
+    dealScore,
+    dealBadge,
+    recommendation: rec,
+    recommendationSub: recSub,
+    scoreBreakup
+  };
+};
+
+const GENERATE_PRICE_HISTORY_DATA = (node, timeframe = "Max") => {
+  const stats = GET_STOCK_VALUATION_STATS(node);
+  const base = stats.currentPrice;
+  const high = stats.highest;
+  const low = stats.lowest;
+  const avg = stats.avg;
+
+  if (timeframe === "1 Month") {
+    return [
+      { date: "10 Sep", price: Math.round(avg * 1.05) },
+      { date: "15 Sep", price: Math.round(avg * 1.02) },
+      { date: "20 Sep", price: Math.round(avg * 0.98) },
+      { date: "25 Sep", price: Math.round(avg * 0.96) },
+      { date: "30 Sep", price: Math.round(avg * 0.94) },
+      { date: "05 Oct", price: Math.round(base * 1.01) },
+      { date: "10 Oct", price: base }
+    ];
+  } else if (timeframe === "3 Month") {
+    return [
+      { date: "15 Jul", price: Math.round(high * 0.88) },
+      { date: "30 Jul", price: Math.round(high * 0.85) },
+      { date: "15 Aug", price: Math.round(high * 0.82) },
+      { date: "30 Aug", price: Math.round(avg * 1.04) },
+      { date: "15 Sep", price: Math.round(avg * 0.97) },
+      { date: "30 Sep", price: low },
+      { date: "10 Oct", price: base }
+    ];
+  } else {
+    // Max timeframe matching Image 1
+    return [
+      { date: "16 Mar", price: high },
+      { date: "30 Mar", price: Math.round(avg * 1.14) },
+      { date: "13 Apr", price: Math.round(avg * 1.08) },
+      { date: "27 Apr", price: Math.round(avg * 1.09) },
+      { date: "11 May", price: Math.round(avg * 1.05) },
+      { date: "25 May", price: Math.round(avg * 1.06) },
+      { date: "8 Jun", price: Math.round(avg * 1.04) },
+      { date: "22 Jun", price: Math.round(avg * 1.05) },
+      { date: "6 Jul", price: Math.round(avg * 1.03) },
+      { date: "20 Jul", price: Math.round(avg * 1.04) },
+      { date: "3 Aug", price: Math.round(avg * 1.03) },
+      { date: "17 Aug", price: Math.round(avg * 1.04) },
+      { date: "31 Aug", price: Math.round(avg * 1.02) },
+      { date: "14 Sep", price: Math.round(avg * 1.03) },
+      { date: "28 Sep", price: low },
+      { date: "10 Oct", price: base }
+    ];
+  }
+};
+
+// ─── SVG SPEEDOMETER GAUGE COMPONENT (ACCURATE TO UPLOADED SCREENSHOT) ─────────
+const SpeedometerGauge = ({ score = 92, label = "Deal Score", showRecommendation = false, recommendationText = "Go Ahead & Buy now", subText = "Optimal price point" }) => {
+  const clampedScore = Math.min(100, Math.max(0, score));
+  // Needle angle: 180 deg (left, 0) to 0 deg (right, 100)
+  const angleDeg = 180 - (clampedScore / 100) * 180;
+  const angleRad = (angleDeg * Math.PI) / 180;
+  
+  const cx = 80;
+  const cy = 72;
+  const needleLength = 46;
+  const nx = cx + needleLength * Math.cos(angleRad);
+  const ny = cy - needleLength * Math.sin(angleRad);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div style={{ position: 'relative', width: 160, height: 96, flexShrink: 0 }}>
+        <svg viewBox="0 0 160 96" width="160" height="96">
+          {/* Red Arc: 180 to 125 deg */}
+          <path
+            d="M 25 72 A 55 55 0 0 1 48 27"
+            fill="none"
+            stroke="#ef4444"
+            strokeWidth="11"
+            strokeLinecap="round"
+          />
+          {/* Yellow Arc: 125 to 55 deg */}
+          <path
+            d="M 54 23 A 55 55 0 0 1 106 23"
+            fill="none"
+            stroke="#eab308"
+            strokeWidth="11"
+          />
+          {/* Green Arc: 55 to 0 deg */}
+          <path
+            d="M 112 27 A 55 55 0 0 1 135 72"
+            fill="none"
+            stroke="#22c55e"
+            strokeWidth="11"
+            strokeLinecap="round"
+          />
+          {/* Needle Line */}
+          <line
+            x1={cx}
+            y1={cy}
+            x2={nx}
+            y2={ny}
+            stroke="#1e1b4b"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+          />
+          {/* Needle Pivot Circle */}
+          <circle cx={cx} cy={cy} r="6" fill="#1e1b4b" />
+          <circle cx={cx} cy={cy} r="3" fill="#ffffff" />
+          {/* "0" and "100" labels */}
+          <text x="24" y="87" fontSize="11" fontWeight="800" fill="#ef4444" textAnchor="middle">0</text>
+          <text x="136" y="87" fontSize="11" fontWeight="800" fill="#22c55e" textAnchor="middle">100</text>
+        </svg>
+        {label && (
+          <div style={{ textAlign: 'center', marginTop: -8, fontSize: 13, fontWeight: 800, color: '#0f172a' }}>
+            {label} <span style={{ fontSize: 16, color: '#16a34a', fontWeight: 900 }}>{clampedScore}</span>
+          </div>
+        )}
+      </div>
+
+      {showRecommendation && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Our Recommendation</div>
+          <div style={{ fontSize: 16, fontWeight: 900, color: '#16a34a', lineHeight: 1.2 }}>{recommendationText}</div>
+          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{subText}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4, fontSize: 11, fontWeight: 700, color: '#475569' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ width: 8, height: 8, background: '#ef4444', borderRadius: 2 }} /> Bad Time
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ width: 8, height: 8, background: '#22c55e', borderRadius: 2 }} /> Good Time
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function AIHub() {
   const [activeVoucher, setActiveVoucher] = useState(PRESET_VOUCHERS[0]);
   const [selectedNode, setSelectedNode] = useState(PRESET_VOUCHERS[0].impacts[0]);
   const [graphViewMode, setGraphViewMode] = useState('diagram'); // 'diagram' | 'network'
+  const [inspectorTab, setInspectorTab] = useState('deal'); // 'deal' | 'history' | 'voucher'
+  const [dealTab, setDealTab] = useState('deal_scanner'); // 'deal_scanner' | 'price_drop'
+  const [buyTimingWindow, setBuyTimingWindow] = useState('2-3 Days');
+  const [priceHistoryTf, setPriceHistoryTf] = useState('Max');
+  const [alertTargetPrice, setAlertTargetPrice] = useState('');
+  const [alertSuccessToast, setAlertSuccessToast] = useState('');
 
   const graphContainerRef = useRef(null);
   const networkInstanceRef = useRef(null);
@@ -325,6 +872,13 @@ export default function AIHub() {
   const handleSelectVoucher = (v) => {
     setActiveVoucher(v);
     setSelectedNode(v.impacts[0]);
+  };
+
+  const handleSetAlert = (e) => {
+    e.preventDefault();
+    if (!alertTargetPrice) return;
+    setAlertSuccessToast(`✅ Alert Active: You will be notified when ${selectedNode.name} reaches ₹${alertTargetPrice}`);
+    setTimeout(() => setAlertSuccessToast(''), 4500);
   };
 
   // Vis-Network initialization
@@ -534,8 +1088,8 @@ export default function AIHub() {
 
         {/* CONTROLS: EVENT PICKER & GRAPH VIEW TOGGLE */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          {/* Compact Event Pills */}
-          <div style={{ display: 'flex', background: 'var(--bg2)', border: '1px solid var(--line)', borderRadius: 24, padding: 3, gap: 4 }}>
+          {/* 6 Scenario Cards */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {PRESET_VOUCHERS.map(v => {
               const isSelected = activeVoucher.id === v.id;
               return (
@@ -543,22 +1097,36 @@ export default function AIHub() {
                   key={v.id}
                   onClick={() => handleSelectVoucher(v)}
                   style={{
-                    padding: '6px 14px',
-                    borderRadius: 20,
+                    padding: '8px 14px',
+                    borderRadius: 10,
                     fontSize: 12,
                     fontWeight: 700,
-                    border: 'none',
+                    border: isSelected ? `2px solid ${v.accentColor}` : '1px solid var(--line)',
                     cursor: 'pointer',
-                    background: isSelected ? v.accentColor : 'transparent',
-                    color: isSelected ? '#ffffff' : 'var(--muted2)',
+                    background: isSelected ? v.accentColor : 'var(--panel2)',
+                    color: isSelected ? '#ffffff' : 'var(--text)',
+                    boxShadow: isSelected ? `0 4px 14px ${v.accentColor}35` : 'none',
                     transition: 'all 0.2s',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6
+                    gap: 7
                   }}
                 >
+                  <span style={{
+                    width: 7, height: 7, borderRadius: '50%',
+                    background: isSelected ? '#ffffff' : v.accentColor
+                  }} />
                   <span>{v.title}</span>
-                  <span style={{ fontSize: 11, opacity: 0.9, fontWeight: 800 }}>({v.root.displayShock})</span>
+                  <span style={{ 
+                    fontSize: 10, 
+                    fontWeight: 800,
+                    padding: '2px 6px',
+                    borderRadius: 4,
+                    background: isSelected ? 'rgba(0,0,0,0.25)' : 'var(--bg2)',
+                    color: isSelected ? '#ffffff' : 'var(--muted2)'
+                  }}>
+                    {v.root.displayShock}
+                  </span>
                 </button>
               );
             })}
@@ -628,7 +1196,7 @@ export default function AIHub() {
       </div>
 
       {/* ─── MAIN LAYOUT: GRAPH CANVAS (LEFT) + INTELLIGENCE INSPECTOR (RIGHT) ─── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 360px', gap: 18, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 420px', gap: 18, alignItems: 'start' }}>
         
         {/* ─── LEFT: THE EXECUTIVE FLOW GRAPH ─────────────────────── */}
         <div className="card" style={{ padding: 24, minHeight: 650, background: 'var(--panel)', position: 'relative', overflow: 'hidden' }}>
@@ -1078,150 +1646,649 @@ export default function AIHub() {
 
         </div>
 
-        {/* ─── RIGHT: INTELLIGENCE VOUCHER INSPECTOR ───────────────── */}
+        {/* ─── RIGHT: INTELLIGENCE & VALUATION INSPECTOR (WITH DEAL SCANNER) ─── */}
         <div>
-          {selectedNode ? (
-            <div style={{
-              borderRadius: 16,
-              padding: '3px',
-              background: 'linear-gradient(135deg, #38bdf8, #818cf8, #ec4899)',
-              boxShadow: '0 12px 35px -5px rgba(56, 189, 248, 0.35)',
-              position: 'sticky',
-              top: 20
-            }}>
+          {selectedNode ? (() => {
+            const stats = GET_STOCK_VALUATION_STATS(selectedNode);
+            const historyData = GENERATE_PRICE_HISTORY_DATA(selectedNode, priceHistoryTf);
+
+            return (
               <div style={{
-                background: 'var(--panel2)',
-                borderRadius: 14,
-                padding: '22px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 16
+                borderRadius: 16,
+                padding: '3px',
+                background: 'linear-gradient(135deg, #38bdf8, #818cf8, #ec4899)',
+                boxShadow: '0 12px 35px -5px rgba(56, 189, 248, 0.35)',
+                position: 'sticky',
+                top: 20
               }}>
-                {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <span style={{ 
-                      fontSize: 10, fontWeight: 900, textTransform: 'uppercase', 
-                      letterSpacing: 1, color: 'var(--accent)', background: 'var(--accent-light)',
-                      padding: '3px 8px', borderRadius: 4
-                    }}>
-                      INTELLIGENCE VOUCHER
-                    </span>
-                    <h3 style={{ margin: '8px 0 0 0', fontSize: 18, fontWeight: 900, color: 'var(--text)' }}>
-                      {selectedNode.name}
-                    </h3>
-                  </div>
-                  <span style={{ 
-                    fontFamily: 'monospace', fontSize: 13, fontWeight: 800, 
-                    color: 'var(--accent)', padding: '4px 8px', background: 'var(--bg2)',
-                    borderRadius: 6, border: '1px solid var(--line)' 
-                  }}>
-                    {selectedNode.id}
-                  </span>
-                </div>
-
-                {/* Key Metric Shock Delta */}
-                <div style={{ 
-                  background: isSelectedNegative ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)',
-                  border: `1px solid ${isSelectedNegative ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.25)'}`,
-                  borderRadius: 12,
-                  padding: '14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}>
-                  <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted2)' }}>PROJECTED SHOCK DELTA</div>
-                    <div style={{ 
-                      fontSize: 24, fontWeight: 900, 
-                      color: isSelectedNegative ? '#ef4444' : '#10b981',
-                      marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 
-                    }}>
-                      {isSelectedNegative ? <ArrowDownRight size={22} /> : <ArrowUpRight size={22} />}
-                      {isSelectedNegative ? '' : '+'}{calculatedImpact}%
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted2)' }}>TOPOLOGY DEPTH</div>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text)', marginTop: 2 }}>
-                      Hop {selectedNode.hop} Ripple
-                    </div>
-                  </div>
-                </div>
-
-                {/* Attributes Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <div style={{ background: 'var(--bg2)', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--line)' }}>
-                    <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 700 }}>SECTOR</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginTop: 2 }}>{selectedNode.sector}</div>
-                  </div>
-                  <div style={{ background: 'var(--bg2)', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--line)' }}>
-                    <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 700 }}>AI CONFIDENCE</div>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: '#10b981', marginTop: 2 }}>{selectedNode.confidence}</div>
-                  </div>
-                </div>
-
-                {/* Propagation Rationale */}
                 <div style={{
-                  background: 'var(--bg2)',
-                  borderRadius: 10,
-                  padding: '12px 14px',
-                  border: '1px solid var(--line)',
-                  fontSize: 12,
-                  lineHeight: 1.6,
-                  color: 'var(--text)'
+                  background: 'var(--panel2)',
+                  borderRadius: 14,
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 16
                 }}>
-                  <strong style={{ color: 'var(--accent)', display: 'block', marginBottom: 4 }}>
-                    🧠 Propagation Rationale:
-                  </strong>
-                  {selectedNode.explanation}
-                </div>
-
-                {/* Historical Beta Sparkline */}
-                {selectedNode.timeSeries && (
-                  <div style={{ height: 110, background: 'var(--bg2)', padding: '8px 10px', borderRadius: 10, border: '1px solid var(--line)' }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted)', marginBottom: 4 }}>
-                      PRICE SHOCK TIMELINE (T-5 to T0)
-                    </div>
-                    <ResponsiveContainer width="100%" height={80}>
-                      <AreaChart data={selectedNode.timeSeries}>
-                        <defs>
-                          <linearGradient id="sparkColor" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor={isSelectedNegative ? '#ef4444' : '#10b981'} stopOpacity={0.4}/>
-                            <stop offset="95%" stopColor={isSelectedNegative ? '#ef4444' : '#10b981'} stopOpacity={0.0}/>
-                          </linearGradient>
-                        </defs>
-                        <Area type="monotone" dataKey="price" stroke={isSelectedNegative ? '#ef4444' : '#10b981'} strokeWidth={2} fillOpacity={1} fill="url(#sparkColor)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-
-                {/* Export Brief Button */}
-                <button
-                  onClick={() => handlePrintBrief(selectedNode)}
-                  style={{
-                    background: 'var(--accent)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 10,
-                    padding: '12px 16px',
-                    fontSize: 13,
-                    fontWeight: 700,
+                  {/* Top Switcher: Deal Scanner | Price History | Contagion Brief */}
+                  <div style={{
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 8,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  <FileSignature size={16} /> Export Intelligence Voucher (PDF)
-                </button>
+                    background: 'var(--bg2)',
+                    padding: 3,
+                    borderRadius: 10,
+                    border: '1px solid var(--line)',
+                    gap: 4
+                  }}>
+                    <button
+                      onClick={() => setInspectorTab('deal')}
+                      style={{
+                        flex: 1,
+                        padding: '6px 8px',
+                        borderRadius: 7,
+                        fontSize: 11.5,
+                        fontWeight: 800,
+                        border: 'none',
+                        cursor: 'pointer',
+                        background: inspectorTab === 'deal' ? 'var(--accent)' : 'transparent',
+                        color: inspectorTab === 'deal' ? '#fff' : 'var(--muted)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 5,
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <Tag size={13} />
+                      Deal Scanner
+                    </button>
+                    <button
+                      onClick={() => setInspectorTab('history')}
+                      style={{
+                        flex: 1,
+                        padding: '6px 8px',
+                        borderRadius: 7,
+                        fontSize: 11.5,
+                        fontWeight: 800,
+                        border: 'none',
+                        cursor: 'pointer',
+                        background: inspectorTab === 'history' ? 'var(--accent)' : 'transparent',
+                        color: inspectorTab === 'history' ? '#fff' : 'var(--muted)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 5,
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <Activity size={13} />
+                      Price History
+                    </button>
+                    <button
+                      onClick={() => setInspectorTab('voucher')}
+                      style={{
+                        flex: 1,
+                        padding: '6px 8px',
+                        borderRadius: 7,
+                        fontSize: 11.5,
+                        fontWeight: 800,
+                        border: 'none',
+                        cursor: 'pointer',
+                        background: inspectorTab === 'voucher' ? 'var(--accent)' : 'transparent',
+                        color: inspectorTab === 'voucher' ? '#fff' : 'var(--muted)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 5,
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <FileSignature size={13} />
+                      Brief
+                    </button>
+                  </div>
+
+                  {/* Header: Selected Asset Title */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ 
+                          fontSize: 10, fontWeight: 900, textTransform: 'uppercase', 
+                          letterSpacing: 0.8, color: 'var(--accent)', background: 'var(--accent-light)',
+                          padding: '2px 7px', borderRadius: 4
+                        }}>
+                          {selectedNode.sector}
+                        </span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)' }}>
+                          Hop {selectedNode.hop} Ripple
+                        </span>
+                      </div>
+                      <h3 style={{ margin: '6px 0 0 0', fontSize: 17, fontWeight: 900, color: 'var(--text)' }}>
+                        {selectedNode.name}
+                      </h3>
+                    </div>
+                    <span style={{ 
+                      fontFamily: 'monospace', fontSize: 13, fontWeight: 800, 
+                      color: 'var(--accent)', padding: '4px 8px', background: 'var(--bg2)',
+                      borderRadius: 6, border: '1px solid var(--line)' 
+                    }}>
+                      {selectedNode.id}
+                    </span>
+                  </div>
+
+                  {/* ─────────────────────────────────────────────────────────────
+                      TAB VIEW 1: DEAL SCANNER & PRICE DROP (USER UPLOADED FEATURE)
+                     ───────────────────────────────────────────────────────────── */}
+                  {inspectorTab === 'deal' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                      {/* Sub-tabs: Deal Scanner vs Price Drop */}
+                      <div style={{
+                        display: 'flex',
+                        border: '1px solid var(--line)',
+                        borderRadius: 8,
+                        overflow: 'hidden',
+                        background: '#f8fafc'
+                      }}>
+                        <button
+                          onClick={() => setDealTab('deal_scanner')}
+                          style={{
+                            flex: 1,
+                            padding: '10px 14px',
+                            fontSize: 13,
+                            fontWeight: 700,
+                            border: 'none',
+                            cursor: 'pointer',
+                            background: dealTab === 'deal_scanner' ? '#ffffff' : 'transparent',
+                            color: dealTab === 'deal_scanner' ? '#2563eb' : '#64748b',
+                            boxShadow: dealTab === 'deal_scanner' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                            transition: 'all 0.15s'
+                          }}
+                        >
+                          Deal Scanner
+                        </button>
+                        <button
+                          onClick={() => setDealTab('price_drop')}
+                          style={{
+                            flex: 1,
+                            padding: '10px 14px',
+                            fontSize: 13,
+                            fontWeight: 700,
+                            border: 'none',
+                            cursor: 'pointer',
+                            background: dealTab === 'price_drop' ? '#ffffff' : 'transparent',
+                            color: dealTab === 'price_drop' ? '#6366f1' : '#64748b',
+                            boxShadow: dealTab === 'price_drop' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                            transition: 'all 0.15s'
+                          }}
+                        >
+                          Price Drop
+                        </button>
+                      </div>
+
+                      {/* 1A. DEAL SCANNER ACTIVE VIEW (IMAGE 3) */}
+                      {dealTab === 'deal_scanner' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                          {/* Badge + Gauge Row */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                            <div style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 6,
+                              padding: '6px 14px',
+                              borderRadius: 24,
+                              border: '1.5px solid #22c55e',
+                              background: '#f0fdf4',
+                              color: '#15803d',
+                              fontWeight: 800,
+                              fontSize: 12.5,
+                              boxShadow: '0 2px 8px rgba(34, 197, 94, 0.15)'
+                            }}>
+                              <ThumbsUp size={14} color="#16a34a" />
+                              <span>{stats.dealBadge}</span>
+                            </div>
+
+                            {/* Gauge on Right */}
+                            <SpeedometerGauge score={stats.dealScore} label="Deal Score" />
+                          </div>
+
+                          {/* Lowest Price Ever Banner */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            padding: '12px 14px',
+                            borderRadius: 10,
+                            background: '#dcfce7',
+                            border: '1px solid #bbf7d0',
+                            color: '#14532d'
+                          }}>
+                            <div style={{
+                              width: 32, height: 32, borderRadius: 8,
+                              background: '#bbf7d0', display: 'flex', alignItems: 'center',
+                              justifyContent: 'center', color: '#16a34a'
+                            }}>
+                              <RotateCcw size={16} strokeWidth={2.5} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 14, fontWeight: 900 }}>Lowest Price Ever</div>
+                              <div style={{ fontSize: 11, color: '#166534', marginTop: 1 }}>
+                                Best valuation point we've ever recorded for this asset
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Deal Score Breakup */}
+                          <div style={{
+                            background: 'var(--bg2)',
+                            borderRadius: 12,
+                            padding: '14px',
+                            border: '1px solid var(--line)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 10
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>
+                                Deal Score Breakup
+                              </span>
+                              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)' }}>
+                                Pts
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                              {stats.scoreBreakup.map((item, idx) => (
+                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12 }}>
+                                  <span style={{ color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    {item.label}
+                                  </span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <span style={{
+                                      width: 14, height: 14, borderRadius: '50%',
+                                      border: item.status === 'complete' ? 'none' : '2px solid #22c55e',
+                                      background: item.status === 'complete' ? '#22c55e' : 'transparent',
+                                      display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                    }}>
+                                      {item.status === 'complete' && <Check size={10} color="#fff" strokeWidth={3} />}
+                                    </span>
+                                    <span style={{ fontWeight: 800, color: 'var(--text)', minWidth: 20, textAlign: 'right' }}>
+                                      {item.pts}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div style={{ fontSize: 10.5, fontStyle: 'italic', color: 'var(--muted)', marginTop: 4, lineHeight: 1.4, borderTop: '1px dashed var(--line)', paddingTop: 8 }}>
+                              **We analyse past prices, supply chain contagion, and shock patterns to evaluate optimal risk-reward.
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 1B. PRICE DROP / SHOULD YOU BUY NOW ACTIVE VIEW (IMAGE 2) */}
+                      {dealTab === 'price_drop' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                          {/* Title + Time Horizon Filter */}
+                          <div>
+                            <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)' }}>
+                              Should you buy now?
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
+                              <div style={{ display: 'flex', background: 'var(--bg2)', padding: 2, borderRadius: 20, border: '1px solid var(--line)' }}>
+                                {["2-3 Days", "1 Week", "1 Month"].map(w => (
+                                  <button
+                                    key={w}
+                                    onClick={() => setBuyTimingWindow(w)}
+                                    style={{
+                                      padding: '4px 10px',
+                                      borderRadius: 16,
+                                      fontSize: 11,
+                                      fontWeight: 700,
+                                      border: 'none',
+                                      cursor: 'pointer',
+                                      background: buyTimingWindow === w ? 'var(--panel2)' : 'transparent',
+                                      color: buyTimingWindow === w ? 'var(--accent)' : 'var(--muted)',
+                                      boxShadow: buyTimingWindow === w ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                                      transition: 'all 0.15s'
+                                    }}
+                                  >
+                                    {w}
+                                  </button>
+                                ))}
+                              </div>
+                              <Info size={14} color="var(--muted)" style={{ cursor: 'pointer' }} title="AI timing algorithm calibrates based on your investment horizon" />
+                            </div>
+                            <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 4 }}>
+                              Select based on your need
+                            </div>
+                          </div>
+
+                          {/* Gauge + Recommendation Block */}
+                          <div style={{
+                            background: 'var(--bg2)',
+                            borderRadius: 12,
+                            padding: '12px 14px',
+                            border: '1px solid var(--line)'
+                          }}>
+                            <SpeedometerGauge
+                              score={stats.dealScore}
+                              label=""
+                              showRecommendation={true}
+                              recommendationText={stats.recommendation}
+                              subText={stats.recommendationSub}
+                            />
+                          </div>
+
+                          {/* Price Stats Cards Grid */}
+                          <div>
+                            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', marginBottom: 8 }}>
+                              Price Stats
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+                              {/* Highest Price */}
+                              <div style={{
+                                background: '#f8fafc',
+                                padding: '12px 14px',
+                                borderRadius: 10,
+                                border: '1px solid #e2e8f0',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 2
+                              }}>
+                                <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                  Highest Price <span style={{ color: '#dc2626' }}>↑</span>
+                                </div>
+                                <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>
+                                  ₹{stats.highest.toLocaleString()}
+                                </div>
+                              </div>
+
+                              {/* Average Price */}
+                              <div style={{
+                                background: '#f8fafc',
+                                padding: '12px 14px',
+                                borderRadius: 10,
+                                border: '1px solid #e2e8f0',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 2
+                              }}>
+                                <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                  Average Price <span style={{ color: '#ea580c' }}>⇅</span>
+                                </div>
+                                <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>
+                                  ₹{stats.avg.toLocaleString()}
+                                </div>
+                              </div>
+
+                              {/* Lowest Price (Span 2 columns) */}
+                              <div style={{
+                                gridColumn: 'span 2',
+                                background: '#f0fdf4',
+                                padding: '12px 14px',
+                                borderRadius: 10,
+                                border: '1px solid #bbf7d0',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: 2
+                              }}>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                  Lowest Price <span>↓</span>
+                                </div>
+                                <div style={{ fontSize: 22, fontWeight: 900, color: '#15803d' }}>
+                                  ₹{stats.lowest.toLocaleString()}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Set Price Drop Alert Feature (Images 2 & 3 Footer) */}
+                      <div style={{
+                        marginTop: 4,
+                        paddingTop: 12,
+                        borderTop: '1px dashed var(--line)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 8
+                      }}>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <Bell size={15} color="var(--accent)" />
+                          Set price drop alert to buy later
+                        </div>
+
+                        <form onSubmit={handleSetAlert} style={{ display: 'flex', gap: 6 }}>
+                          <input
+                            type="number"
+                            placeholder={`Alert target (e.g. ₹${Math.round(stats.lowest * 0.98)})`}
+                            value={alertTargetPrice}
+                            onChange={(e) => setAlertTargetPrice(e.target.value)}
+                            style={{
+                              flex: 1,
+                              padding: '8px 12px',
+                              borderRadius: 8,
+                              border: '1px solid var(--line)',
+                              background: 'var(--bg2)',
+                              color: 'var(--text)',
+                              fontSize: 12
+                            }}
+                          />
+                          <button
+                            type="submit"
+                            style={{
+                              padding: '8px 14px',
+                              borderRadius: 8,
+                              border: 'none',
+                              background: '#2563eb',
+                              color: '#fff',
+                              fontWeight: 700,
+                              fontSize: 12,
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            Set Alert
+                          </button>
+                        </form>
+
+                        {alertSuccessToast && (
+                          <div style={{
+                            padding: '8px 12px',
+                            borderRadius: 8,
+                            background: '#dcfce7',
+                            border: '1px solid #86efac',
+                            color: '#15803d',
+                            fontSize: 11.5,
+                            fontWeight: 700
+                          }}>
+                            {alertSuccessToast}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ─────────────────────────────────────────────────────────────
+                      TAB VIEW 2: PRICE HISTORY INTERACTIVE CHART (IMAGE 1)
+                     ───────────────────────────────────────────────────────────── */}
+                  {inspectorTab === 'history' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)' }}>
+                          Price History
+                        </div>
+                        {/* Timeframe selector: 1 Month | 3 Month | Max */}
+                        <div style={{ display: 'flex', background: 'var(--bg2)', padding: 2, borderRadius: 8, border: '1px solid var(--line)' }}>
+                          {["1 Month", "3 Month", "Max"].map(tf => (
+                            <button
+                              key={tf}
+                              onClick={() => setPriceHistoryTf(tf)}
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: 6,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                border: 'none',
+                                cursor: 'pointer',
+                                background: priceHistoryTf === tf ? 'var(--panel2)' : 'transparent',
+                                color: priceHistoryTf === tf ? 'var(--accent)' : 'var(--muted)',
+                                boxShadow: priceHistoryTf === tf ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                                transition: 'all 0.15s'
+                              }}
+                            >
+                              {tf}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Area Chart matching Image 1 */}
+                      <div style={{
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 12,
+                        padding: '14px 8px 8px 0',
+                        height: 240
+                      }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={historyData} margin={{ top: 10, right: 15, left: -10, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id="historyColorGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#ef4444" stopOpacity={0.6} />
+                                <stop offset="50%" stopColor="#f59e0b" stopOpacity={0.25} />
+                                <stop offset="100%" stopColor="#22c55e" stopOpacity={0.08} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis
+                              dataKey="date"
+                              stroke="#94a3b8"
+                              fontSize={10}
+                              tickLine={false}
+                              axisLine={false}
+                            />
+                            <YAxis
+                              stroke="#94a3b8"
+                              fontSize={10}
+                              tickLine={false}
+                              axisLine={false}
+                              tickFormatter={(val) => val >= 1000 ? `₹${(val / 1000).toFixed(1)}K` : `₹${val}`}
+                            />
+                            <Tooltip
+                              contentStyle={{ background: '#0f172a', border: '1px solid #334155', borderRadius: 8, color: '#f8fafc', fontSize: 12 }}
+                              formatter={(value) => [`₹${Number(value).toLocaleString()}`, 'Price']}
+                              labelStyle={{ color: '#94a3b8', fontWeight: 600 }}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="price"
+                              stroke="#ef4444"
+                              strokeWidth={2.2}
+                              fillOpacity={1}
+                              fill="url(#historyColorGrad)"
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      {/* Stats Summary below Chart */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                        <div style={{ background: 'var(--bg2)', padding: '8px 10px', borderRadius: 8, textAlign: 'center', border: '1px solid var(--line)' }}>
+                          <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 600 }}>Highest</div>
+                          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>₹{stats.highest.toLocaleString()}</div>
+                        </div>
+                        <div style={{ background: 'var(--bg2)', padding: '8px 10px', borderRadius: 8, textAlign: 'center', border: '1px solid var(--line)' }}>
+                          <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 600 }}>Average</div>
+                          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>₹{stats.avg.toLocaleString()}</div>
+                        </div>
+                        <div style={{ background: 'var(--bg2)', padding: '8px 10px', borderRadius: 8, textAlign: 'center', border: '1px solid var(--line)' }}>
+                          <div style={{ fontSize: 10, color: '#16a34a', fontWeight: 600 }}>Lowest</div>
+                          <div style={{ fontSize: 13, fontWeight: 800, color: '#16a34a' }}>₹{stats.lowest.toLocaleString()}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ─────────────────────────────────────────────────────────────
+                      TAB VIEW 3: CONTAGION VOUCHER & RATIONALE (EXISTING BRIEF)
+                     ───────────────────────────────────────────────────────────── */}
+                  {inspectorTab === 'voucher' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                      {/* Projected Shock Delta */}
+                      <div style={{ 
+                        background: isSelectedNegative ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)',
+                        border: `1px solid ${isSelectedNegative ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.25)'}`,
+                        borderRadius: 12,
+                        padding: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}>
+                        <div>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted2)' }}>PROJECTED SHOCK DELTA</div>
+                          <div style={{ 
+                            fontSize: 24, fontWeight: 900, 
+                            color: isSelectedNegative ? '#ef4444' : '#10b981',
+                            marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 
+                          }}>
+                            {isSelectedNegative ? <ArrowDownRight size={22} /> : <ArrowUpRight size={22} />}
+                            {isSelectedNegative ? '' : '+'}{calculatedImpact}%
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted2)' }}>AI CONFIDENCE</div>
+                          <div style={{ fontSize: 15, fontWeight: 800, color: '#10b981', marginTop: 2 }}>
+                            {selectedNode.confidence}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Propagation Rationale */}
+                      <div style={{
+                        background: 'var(--bg2)',
+                        borderRadius: 10,
+                        padding: '12px 14px',
+                        border: '1px solid var(--line)',
+                        fontSize: 12,
+                        lineHeight: 1.6,
+                        color: 'var(--text)'
+                      }}>
+                        <strong style={{ color: 'var(--accent)', display: 'block', marginBottom: 4 }}>
+                          🧠 Propagation Rationale:
+                        </strong>
+                        {selectedNode.explanation}
+                      </div>
+
+                      {/* Export Brief Button */}
+                      <button
+                        onClick={() => handlePrintBrief(selectedNode)}
+                        style={{
+                          background: 'var(--accent)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: 10,
+                          padding: '12px 16px',
+                          fontSize: 13,
+                          fontWeight: 700,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 8,
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <FileSignature size={16} /> Export Intelligence Voucher (PDF)
+                      </button>
+                    </div>
+                  )}
+
+                </div>
               </div>
-            </div>
-          ) : (
+            );
+          })() : (
             <div className="card" style={{ padding: 24, textAlign: 'center', color: 'var(--muted)' }}>
               Click any node on the left to inspect its certified transmission voucher.
             </div>

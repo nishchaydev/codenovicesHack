@@ -113,4 +113,55 @@ export const api = {
 
   audit: () => req('/api/audit'),
   auditVerify: () => req('/api/audit/verify'),
+
+  fetchStockHistory: async (ticker) => {
+    try {
+      const r = await fetch(`/api/stock/${encodeURIComponent(ticker)}`);
+      if (r.ok) return await r.json();
+    } catch (_) {}
+
+    try {
+      const key = import.meta.env.VITE_ALPHA_VANTAGE_API_KEY || 'V2AKQHWKPOSIOWJT';
+      let sym = ticker;
+      if (sym.endsWith('.NS')) sym = sym.replace('.NS', '.BSE');
+      else if (sym.endsWith('.BO')) sym = sym.replace('.BO', '.BSE');
+      else if (sym === 'CL=F') sym = 'USO';
+      else if (sym === 'SEMI') sym = 'SOXX';
+
+      const av = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${encodeURIComponent(sym)}&outputsize=compact&apikey=${key}`);
+      if (av.ok) {
+        const json = await av.json();
+        const ts = json['Time Series (Daily)'];
+        if (ts && typeof ts === 'object') {
+          const dates = Object.keys(ts).sort().slice(-30);
+          const prices = dates.map(d => ({
+            date: d,
+            close: parseFloat(ts[d]['4. close']),
+            open: parseFloat(ts[d]['1. open']),
+            high: parseFloat(ts[d]['2. high']),
+            low: parseFloat(ts[d]['3. low']),
+            volume: parseInt(ts[d]['5. volume'] || 0, 10),
+          }));
+          const curr = prices[prices.length - 1].close;
+          const minVal = Math.min(...prices.map(p => p.close));
+          const maxVal = Math.max(...prices.map(p => p.close));
+          const avgVal = parseFloat((prices.reduce((a, b) => a + b.close, 0) / prices.length).toFixed(2));
+          const dealScore = Math.max(15, Math.min(98, Math.round(100 - ((curr - minVal) / (maxVal - minVal || 1)) * 60)));
+          return {
+            ticker,
+            current_price: curr,
+            prices,
+            high_ever: maxVal,
+            low_ever: minVal,
+            avg_price: avgVal,
+            deal_score: dealScore,
+            data_source: 'alphavantage_live',
+            api_connected: true
+          };
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
 }
+
