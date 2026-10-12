@@ -236,7 +236,7 @@ export const AivanaVoiceAssistant: React.FC = () => {
         </div>
 
         {/* Floating Animated Orb Container */}
-        <div className="relative w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center">
+        <div className="relative w-[58px] h-[58px] sm:w-[66px] sm:h-[66px] flex items-center justify-center">
           {/* Multi-color ambient glow waves */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 via-amber-400 to-cyan-400 opacity-60 blur-xl group-hover:opacity-90 group-hover:scale-110 transition-all duration-500 animate-pulse" />
           
@@ -246,7 +246,7 @@ export const AivanaVoiceAssistant: React.FC = () => {
           </div>
 
           {/* Actual Orb Image (From Uploaded Design) */}
-          <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden flex items-center justify-center shadow-2xl transition-transform duration-300 group-hover:scale-105 border border-white/20">
+          <div className="relative w-[50px] h-[50px] sm:w-[58px] sm:h-[58px] rounded-full overflow-hidden flex items-center justify-center shadow-2xl transition-transform duration-300 group-hover:scale-105 border border-white/20">
             <img 
               src="/aivana_orb.png" 
               alt="Hi Aivana Voice Assistant" 
@@ -258,16 +258,16 @@ export const AivanaVoiceAssistant: React.FC = () => {
             />
             {/* Fallback Center Badge if image is loading */}
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#07090E]/60 backdrop-blur-[2px]">
-              <span className="text-[11px] sm:text-xs font-bold tracking-tight text-white drop-shadow-md">
+              <span className="text-[10px] sm:text-[11px] font-bold tracking-tight text-white drop-shadow-md">
                 Hi Aivana
               </span>
             </div>
           </div>
 
           {/* Online Radar Beacon Dot */}
-          <span className="absolute top-0 right-0 flex h-3.5 w-3.5">
+          <span className="absolute top-0 right-0 flex h-3 w-3 sm:h-3.5 sm:w-3.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-cyan-500 border-2 border-[#07090E]" />
+            <span className="relative inline-flex rounded-full h-3 w-3 sm:h-3.5 sm:w-3.5 bg-cyan-500 border-2 border-[#07090E]" />
           </span>
         </div>
       </div>
