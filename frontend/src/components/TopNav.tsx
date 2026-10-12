@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { UserProfile } from "../types";
 import { ChevronDown, Plus, Search } from "lucide-react";
+import { GoogleTranslateDropdown } from "./GoogleTranslateDropdown";
 
 interface TopNavProps {
   onAnalyze: (query: string) => void;
@@ -122,6 +123,9 @@ export const TopNav: React.FC<TopNavProps> = ({
             </div>
           )}
         </div>
+
+        {/* ─── GOOGLE TRANSLATE (PLACED RIGHT BESIDE INDIA & OTHER COUNTRY DROPDOWN) ─── */}
+        <GoogleTranslateDropdown />
 
         {/* User Profile Avatar & RBAS Clearance Button */}
         <div className="flex items-center gap-2">

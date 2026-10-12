@@ -81,6 +81,10 @@ export interface SimulationResponse {
 export interface StockPricePoint {
   date: string;
   close: number;
+  open?: number;
+  high?: number;
+  low?: number;
+  volume?: number;
 }
 
 export interface StockHistory {
@@ -89,6 +93,16 @@ export interface StockHistory {
   change_pct: number;
   prices: StockPricePoint[];
   data_source: string;
+  open?: number;
+  high_24h?: number;
+  low_24h?: number;
+  volume?: number;
+  high_ever?: number;
+  low_ever?: number;
+  avg_price?: number;
+  deal_score?: number;
+  deal_rating?: string;
+  api_connected?: boolean;
 }
 
 export interface ReferenceLink {
@@ -286,6 +300,18 @@ export interface StockProfileData {
   current_price: number;
   change_pct: number;
   market_cap: string;
+  open?: number;
+  high_24h?: number;
+  low_24h?: number;
+  volume?: number;
+  high_ever?: number;
+  low_ever?: number;
+  avg_price?: number;
+  deal_score?: number;
+  deal_rating?: string;
+  data_source?: string;
+  api_connected?: boolean;
+  prices?: StockPricePoint[];
   supply_chain: StockSupplyChain;
   news: StockNewsItem[];
 }

@@ -123,16 +123,22 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
                 <span className="text-amber-600 font-extrabold text-sm">×</span>
                 <span className="truncate">{collision.catalystB.flag} {collision.catalystB.title}</span>
                 <span className="text-slate-400">──▶</span>
-                <span className="text-red-600 font-bold font-mono shrink-0">Crude {scenario.centerNode.metric}</span>
+                <span className={`px-2 py-0.5 rounded-md font-bold font-mono text-[10.5px] border shrink-0 ${
+                  scenario.centerNode.metricColor === "green" 
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
+                    : "bg-rose-50 text-rose-700 border-rose-200"
+                }`}>
+                  {scenario.centerNode.title} • {scenario.centerNode.metric}
+                </span>
               </div>
             </div>
 
             <button
               onClick={() => setIsCollisionExpanded(!isCollisionExpanded)}
-              className="px-2.5 py-1 rounded-full bg-white/90 hover:bg-white border border-amber-300 text-amber-900 text-[11px] font-semibold flex items-center gap-1 transition-all cursor-pointer shrink-0 shadow-2xs"
+              className="px-3 py-1 rounded-full bg-white hover:bg-amber-50/80 border border-amber-300/90 text-amber-900 text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-2xs"
             >
-              <span>{isCollisionExpanded ? "Hide Genesis Details" : "Why This Happened"}</span>
-              {isCollisionExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              <span>{isCollisionExpanded ? "Hide Genesis Analysis" : "Why This Happened"}</span>
+              {isCollisionExpanded ? <ChevronUp className="w-3.5 h-3.5 text-amber-700" /> : <ChevronDown className="w-3.5 h-3.5 text-amber-700" />}
             </button>
           </div>
 
@@ -140,11 +146,11 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
           {isCollisionExpanded && (
             <div className="mt-3 pt-3 border-t border-amber-200/60 grid grid-cols-1 md:grid-cols-2 gap-3 animate-in fade-in duration-150">
               {/* Catalyst A Card */}
-              <div className="p-3 rounded-[14px] bg-white/90 border border-amber-100 flex flex-col gap-1">
+              <div className="p-3 rounded-[14px] bg-white/90 border border-amber-100 flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-amber-800 flex items-center gap-1">
                     <span>{collision.catalystA.flag}</span>
-                    <span>Catalyst 1: Physical Supply Choke</span>
+                    <span>Catalyst A: {collision.catalystA.title}</span>
                   </span>
                   <span className="text-[10px] font-mono text-slate-400">{collision.catalystA.source}</span>
                 </div>
@@ -154,11 +160,11 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
               </div>
 
               {/* Catalyst B Card */}
-              <div className="p-3 rounded-[14px] bg-white/90 border border-blue-100 flex flex-col gap-1">
+              <div className="p-3 rounded-[14px] bg-white/90 border border-blue-100 flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-blue-800 flex items-center gap-1">
                     <span>{collision.catalystB.flag}</span>
-                    <span>Catalyst 2: US Secondary Sanctions</span>
+                    <span>Catalyst B: {collision.catalystB.title}</span>
                   </span>
                   <span className="text-[10px] font-mono text-slate-400">{collision.catalystB.source}</span>
                 </div>
@@ -168,17 +174,17 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
               </div>
 
               {/* Collision Mechanism */}
-              <div className="md:col-span-2 p-2.5 rounded-[14px] bg-rose-50/80 border border-rose-200/80 flex flex-col gap-1.5">
+              <div className="md:col-span-2 p-3 rounded-[14px] bg-rose-50/80 border border-rose-200/80 flex flex-col gap-1.5">
                 <div className="text-[11px] font-bold text-rose-800 flex items-center gap-1.5">
                   <Flame className="w-3.5 h-3.5 text-rose-600" />
                   <span>Causal Collision Intersection: {collision.collisionPoint}</span>
                 </div>
-                <p className="text-[11px] text-slate-700 leading-relaxed">
+                <p className="text-[11.5px] text-slate-700 leading-relaxed">
                   {collision.collisionMechanism}
                 </p>
                 <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[10.5px] text-slate-600 font-medium">
                   {collision.causalFlow.map((step, idx) => (
-                    <span key={idx} className="flex items-center gap-1 bg-white/80 px-2 py-0.5 rounded-md border border-rose-100">
+                    <span key={idx} className="flex items-center gap-1 bg-white/90 px-2 py-0.5 rounded-md border border-rose-100 font-sans">
                       {step}
                       {idx < collision.causalFlow.length - 1 && <ArrowRight className="w-2.5 h-2.5 text-rose-400" />}
                     </span>
@@ -194,74 +200,56 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
         </p>
       )}
 
-      {/* ─── ROW 3: COMPACT AESTHETIC 3 KPI METRICS (STRICT DESIGN.MD: 24PX GEOMETRY, NO WASTED SPACE) ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        {/* Metric 1: Entities Identified */}
-        <div className="flex items-center justify-between px-3.5 py-1.5 rounded-[20px] bg-white border border-[#e5e7eb] hover:border-[#141414]/30 hover:bg-[#fafafa] transition-all">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-[14px] bg-[#f0f4ff] border border-[#dbeafe] flex items-center justify-center text-[#0066ff] shrink-0">
-              <Network className="w-3.5 h-3.5" />
-            </div>
-            <div className="flex items-baseline gap-1.5 leading-none">
-              <span className="text-base font-bold text-[#141414] font-sans tracking-tight">
-                {scenario.entitiesCount}
-              </span>
-              <span className="text-[11.5px] font-semibold text-[#141414]">
-                Entities Identified
-              </span>
-              <span className="text-[10px] text-[#707070] font-normal hidden xl:inline">
-                ({sectorCount} Sectors · {macroCount} Macro · {companyTickersCount || 6} Equities)
-              </span>
-            </div>
+      {/* ─── ROW 3: COMPACT KPI BUTTON PILLS ─── */}
+      <div className="flex flex-wrap items-center gap-2 pt-0.5">
+        {/* Metric 1: Entities */}
+        <div 
+          className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white border border-slate-200 shadow-2xs hover:border-slate-300 transition-all cursor-default"
+          title={`${scenario.entitiesCount} Entities Identified (${sectorCount} Sectors · ${macroCount} Macro · ${companyTickersCount || 6} Equities)`}
+        >
+          <div className="w-5 h-5 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+            <Network className="w-3 h-3" />
           </div>
-          <span className="px-2 py-0.2 rounded-full bg-[#f0f4ff] text-[#0066ff] border border-[#dbeafe] font-mono text-[9px] font-semibold shrink-0">
+          <div className="flex items-center gap-1.5 leading-none">
+            <span className="font-bold text-slate-900 font-mono text-xs">{scenario.entitiesCount}</span>
+            <span className="font-semibold text-slate-700 text-[11px]">Entities</span>
+          </div>
+          <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 font-mono text-[9px] font-bold shrink-0">
             GRAPH
           </span>
         </div>
 
-        {/* Metric 2: Propagation Pathways */}
-        <div className="flex items-center justify-between px-3.5 py-1.5 rounded-[20px] bg-white border border-[#e5e7eb] hover:border-[#141414]/30 hover:bg-[#fafafa] transition-all">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-[14px] bg-[#f5f3ff] border border-[#ede9fe] flex items-center justify-center text-[#6366f1] shrink-0">
-              <GitFork className="w-3.5 h-3.5" />
-            </div>
-            <div className="flex items-baseline gap-1.5 leading-none">
-              <span className="text-base font-bold text-[#141414] font-sans tracking-tight">
-                {scenario.pathwaysCount}
-              </span>
-              <span className="text-[11.5px] font-semibold text-[#141414]">
-                Propagation Pathways
-              </span>
-              <span className="text-[10px] text-[#707070] font-normal hidden xl:inline">
-                (Direct & 2nd Order · 3-Hop BFS)
-              </span>
-            </div>
+        {/* Metric 2: Pathways */}
+        <div 
+          className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white border border-slate-200 shadow-2xs hover:border-slate-300 transition-all cursor-default"
+          title={`${scenario.pathwaysCount} Propagation Pathways (Direct & 2nd Order · 3-Hop BFS)`}
+        >
+          <div className="w-5 h-5 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+            <GitFork className="w-3 h-3" />
           </div>
-          <span className="px-2 py-0.2 rounded-full bg-[#fef2f2] text-[#dc2626] border border-[#fecaca] font-mono text-[9px] font-semibold flex items-center gap-1 shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#dc2626] animate-pulse" />
+          <div className="flex items-center gap-1.5 leading-none">
+            <span className="font-bold text-slate-900 font-mono text-xs">{scenario.pathwaysCount}</span>
+            <span className="font-semibold text-slate-700 text-[11px]">Pathways</span>
+          </div>
+          <span className="px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[9px] font-bold flex items-center gap-1 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
             ACTIVE
           </span>
         </div>
 
-        {/* Metric 3: Evidence Sources */}
-        <div className="flex items-center justify-between px-3.5 py-1.5 rounded-[20px] bg-white border border-[#e5e7eb] hover:border-[#141414]/30 hover:bg-[#fafafa] transition-all">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-[14px] bg-[#f0fdf4] border border-[#dcfce7] flex items-center justify-center text-[#16a34a] shrink-0">
-              <ShieldCheck className="w-3.5 h-3.5" />
-            </div>
-            <div className="flex items-baseline gap-1.5 leading-none">
-              <span className="text-base font-bold text-[#141414] font-sans tracking-tight">
-                {scenario.evidenceCount}
-              </span>
-              <span className="text-[11.5px] font-semibold text-[#141414]">
-                Evidence Sources
-              </span>
-              <span className="text-[10px] text-[#707070] font-normal hidden xl:inline">
-                (Terminal Telemetry · 12 Citations)
-              </span>
-            </div>
+        {/* Metric 3: Evidence */}
+        <div 
+          className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white border border-slate-200 shadow-2xs hover:border-slate-300 transition-all cursor-default"
+          title={`${scenario.evidenceCount} Evidence Sources (Terminal Telemetry · 12 Citations)`}
+        >
+          <div className="w-5 h-5 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+            <ShieldCheck className="w-3 h-3" />
           </div>
-          <span className="px-2 py-0.2 rounded-full bg-[#f0fdf4] text-[#16a34a] border border-[#dcfce7] font-mono text-[9px] font-semibold shrink-0">
+          <div className="flex items-center gap-1.5 leading-none">
+            <span className="font-bold text-slate-900 font-mono text-xs">{scenario.evidenceCount}</span>
+            <span className="font-semibold text-slate-700 text-[11px]">Sources</span>
+          </div>
+          <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[9px] font-bold shrink-0">
             94% CONF
           </span>
         </div>

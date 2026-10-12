@@ -10,6 +10,7 @@ class Settings(BaseModel):
     DEFAULT_MODEL: str = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o")
     OPENROUTER_MODEL: str = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o")
     FALLBACK_MODEL: str = "anthropic/claude-3.5-sonnet"
+    ALPHA_VANTAGE_API_KEY: str = os.getenv("ALPHA_VANTAGE_API_KEY", "V2AKQHWKPOSIOWJT")
     CACHE_DIR: str = os.path.join(os.path.dirname(__file__), "cache")
     DECAY_THRESHOLD: float = 4.0
     INITIAL_SHOCK_MAGNITUDE: float = 100.0

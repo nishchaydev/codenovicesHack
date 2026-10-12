@@ -18,6 +18,7 @@ import { LandingPage } from "./components/LandingPage";
 import AuthSectionOne from "@/components/ui/auth-section-1";
 import { RbacLoginModal, PRESET_ROLES } from "./components/RbacLoginModal";
 import { EventRegressionModal } from "./components/EventRegressionModal";
+import { AivanaVoiceAssistant } from "./components/AivanaVoiceAssistant";
 import { FINGRAPH_SCENARIOS } from "./data/fingraphData";
 import { FinGraphScenario, RadialCardNode, PathwayHop, UserProfile, RegressionCalibration } from "./types";
 import { generateStockScenario } from "./api";
@@ -761,7 +762,7 @@ export const App: React.FC = () => {
       {/* In-App Toast Notification */}
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border text-sm font-medium ${
+          className={`fixed bottom-24 right-6 z-[100] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border text-sm font-medium ${
             toast.type === "success"
               ? "bg-emerald-50 border-emerald-200 text-emerald-800"
               : "bg-blue-50 border-blue-200 text-blue-800"
@@ -776,6 +777,9 @@ export const App: React.FC = () => {
           </button>
         </div>
       )}
+
+      {/* 9. Aivana Voice & Multimodal AI Assistant (Corner Orb & Voice Modal) */}
+      <AivanaVoiceAssistant />
     </div>
   );
 };

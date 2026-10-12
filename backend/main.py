@@ -210,6 +210,19 @@ def get_stock_profile_endpoint(ticker: str):
     from data.stock_intelligence import get_stock_profile
     return get_stock_profile(ticker)
 
+@app.get("/api/stock/{ticker}")
+@app.get("/api/stocks/{ticker}/history")
+def get_stock_history_endpoint(ticker: str):
+    """Returns real-time price history from Alpha Vantage with fallback."""
+    from data.market import get_market_data
+    return get_market_data(ticker)
+
+@app.get("/api/market/quote/{ticker}")
+def get_stock_quote_endpoint(ticker: str):
+    """Returns live quote with technical indicators."""
+    from data.market import get_market_data
+    return get_market_data(ticker)
+
 @app.post("/api/stocks/scenario")
 def generate_stock_scenario_endpoint(payload: Dict[str, Any]):
     """

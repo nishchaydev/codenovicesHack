@@ -505,165 +505,165 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
           transform: `translate(${pan.x % 24}px, ${pan.y % 24}px)`,
         }}
       />
-
-      {/* Floating Apple Glass Top Controls Bar */}
-      <div className="absolute top-4 inset-x-4 z-20 flex flex-wrap items-center justify-between gap-3 pointer-events-none">
-        {/* Left Action Controls */}
-        <div className="flex flex-wrap items-center gap-2 pointer-events-auto">
-          {isFullscreen && (
-            <div className="px-3 py-1.5 rounded-2xl apple-glass border border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.04)] flex items-center gap-2 mr-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-bold text-slate-800 tracking-wide truncate max-w-xs">
-                {scenario.title} • Fullscreen Topology
-              </span>
-            </div>
-          )}
-
-          {/* Priority Filter Toggle */}
-          <div className="flex items-center apple-glass rounded-2xl p-1 shadow-[0_4px_16px_rgba(0,0,0,0.04)] text-xs border border-white/80">
-            <button
-              onClick={() => setPriorityFilter("all")}
-              className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${
-                priorityFilter === "all"
-                  ? "bg-slate-900 text-white font-semibold shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              All Relations ({scenario.radialNodes.length})
-            </button>
-            <button
-              onClick={() => setPriorityFilter("p1_critical")}
-              className={`px-3 py-1.5 rounded-xl font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                priorityFilter === "p1_critical"
-                  ? "bg-[#FF3B30] text-white font-semibold shadow-xs"
-                  : "text-red-700 hover:text-red-900"
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-              <span>P1 Critical</span>
-            </button>
-          </div>
-
-          {/* Priority Hierarchy Visual Indicator */}
-          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl apple-glass text-[11px] font-semibold text-slate-700 border border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
-            <span className="flex items-center gap-1 text-red-600">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span>P1 Critical (Top Arc)</span>
-            </span>
-            <span className="text-slate-300">•</span>
-            <span className="flex items-center gap-1 text-amber-700">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
-              <span>P2 High (Bottom Arc)</span>
+         {/* ─── CORNER 1: TOP-LEFT (Filter Switch & Optional Fullscreen Title) ─── */}
+      <div className="absolute top-3 left-3 z-20 flex items-center gap-2 pointer-events-auto">
+        {isFullscreen && (
+          <div className="px-2.5 py-1 rounded-xl apple-glass border border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.04)] flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[11px] font-bold text-slate-800 tracking-wide truncate max-w-xs">
+              {scenario.title}
             </span>
           </div>
+        )}
 
-          {/* Dismiss Active Relation Button */}
-          {selectedNodeId && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelectNode(null);
-              }}
-              className="px-3.5 py-1.5 rounded-2xl apple-glass hover:bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-300"
-              title="Dismiss active relation and return to primary radial graph"
-            >
-              <RotateCcw className="w-3.5 h-3.5 text-blue-600" />
-              <span>Dismiss Relation</span>
-            </button>
-          )}
-
-          {/* Inspect Exposed Equities Button */}
-          {(() => {
-            const selectedNodeData = scenario.radialNodes.find((n) => n.id === selectedNodeId) ||
-              (scenario.centerNode?.id === selectedNodeId ? scenario.centerNode : null);
-            if (selectedNodeData?.tickers && selectedNodeData.tickers.length > 0 && onOpenStockDrilldown) {
-              return (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenStockDrilldown(selectedNodeData);
-                  }}
-                  className="px-3.5 py-1.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white shadow-[0_4px_16px_rgba(37,99,235,0.25)] border border-blue-500 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
-                  title="Inspect live company pricing and transmission sensitivity"
-                >
-                  <Building2 className="w-3.5 h-3.5 text-white" />
-                  <span>Inspect {selectedNodeData.title} Equities</span>
-                </button>
-              );
-            }
-            return null;
-          })()}
-
-          {/* Calibrate Regression Modal Button */}
-          {onOpenRegressionModal && (
-            <button
-              onClick={onOpenRegressionModal}
-              className="px-3.5 py-1.5 rounded-2xl apple-glass hover:bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-300"
-              title="Calibrate econometric regression equation"
-            >
-              <Calculator className="w-3.5 h-3.5 text-[#007AFF]" />
-              <span>Calibrate Regression</span>
-            </button>
-          )}
-        </div>
-
-        {/* Right Zoom & Fullscreen Controls */}
-        <div className="flex items-center gap-1.5 pointer-events-auto">
-          <div className="flex items-center gap-1 apple-glass rounded-2xl p-1 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80">
-            <button
-              onClick={() => setZoom((z) => Math.max(z - 0.15, 0.4))}
-              className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
-              title="Zoom out"
-            >
-              <ZoomOut className="w-3.5 h-3.5" />
-            </button>
-
-            <span className="px-1.5 text-[12px] font-semibold text-slate-700 min-w-[42px] text-center select-none font-mono">
-              {Math.round(zoom * 100)}%
-            </span>
-
-            <button
-              onClick={() => setZoom((z) => Math.min(z + 0.15, 2.8))}
-              className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
-              title="Zoom in"
-            >
-              <ZoomIn className="w-3.5 h-3.5" />
-            </button>
-
-            <button
-              onClick={handleResetView}
-              className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
-              title="Reset View to Center"
-            >
-              <RotateCcw className="w-3 h-3" />
-            </button>
-          </div>
-
-          {/* Fullscreen Action Button */}
-          {isFullscreen ? (
-            <button
-              onClick={handleToggleFullscreen}
-              className="px-3.5 py-1.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
-              title="Exit Fullscreen Mode (Esc)"
-            >
-              <Minimize2 className="w-3.5 h-3.5" />
-              <span>Exit Fullscreen</span>
-              <kbd className="px-1.5 py-0.2 bg-slate-800 border border-slate-700 rounded text-[10px] text-slate-300 font-mono">
-                Esc
-              </kbd>
-            </button>
-          ) : (
-            <button
-              onClick={handleToggleFullscreen}
-              className="px-3 py-1.5 rounded-2xl apple-glass hover:bg-white text-slate-700 hover:text-slate-900 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
-              title="Open Fullscreen Topology Canvas"
-            >
-              <Maximize2 className="w-3.5 h-3.5 text-[#007AFF]" />
-              <span>Fullscreen</span>
-            </button>
-          )}
+        {/* Priority Filter Pill Button */}
+        <div className="flex items-center apple-glass rounded-xl p-0.5 shadow-[0_4px_16px_rgba(0,0,0,0.04)] text-xs border border-white/80">
+          <button
+            onClick={() => setPriorityFilter("all")}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer ${
+              priorityFilter === "all"
+                ? "bg-slate-900 text-white font-bold shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            All Relations ({scenario.radialNodes.length})
+          </button>
+          <button
+            onClick={() => setPriorityFilter("p1_critical")}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+              priorityFilter === "p1_critical"
+                ? "bg-[#FF3B30] text-white font-bold shadow-xs"
+                : "text-red-700 hover:text-red-900"
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+            <span>P1 Critical</span>
+          </button>
         </div>
       </div>
+
+      {/* ─── CORNER 2: TOP-RIGHT (Context Actions: Calibrate Regression, Inspect Equities, Dismiss) ─── */}
+      <div className="absolute top-3 right-3 z-20 flex items-center gap-2 pointer-events-auto">
+        {/* Dismiss Active Relation Button */}
+        {selectedNodeId && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectNode(null);
+            }}
+            className="px-2.5 py-1 rounded-xl apple-glass hover:bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-300"
+            title="Dismiss active relation and return to primary radial graph"
+          >
+            <RotateCcw className="w-3 h-3 text-blue-600" />
+            <span>Dismiss Relation</span>
+          </button>
+        )}
+
+        {/* Inspect Exposed Equities Button */}
+        {(() => {
+          const selectedNodeData = scenario.radialNodes.find((n) => n.id === selectedNodeId) ||
+            (scenario.centerNode?.id === selectedNodeId ? scenario.centerNode : null);
+          if (selectedNodeData?.tickers && selectedNodeData.tickers.length > 0 && onOpenStockDrilldown) {
+            return (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenStockDrilldown(selectedNodeData);
+                }}
+                className="px-2.5 py-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-[0_4px_16px_rgba(37,99,235,0.25)] border border-blue-500 text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                title="Inspect live company pricing and transmission sensitivity"
+              >
+                <Building2 className="w-3 h-3 text-white" />
+                <span>Inspect {selectedNodeData.title}</span>
+              </button>
+            );
+          }
+          return null;
+        })()}
+
+        {/* Calibrate Regression Modal Button */}
+        {onOpenRegressionModal && (
+          <button
+            onClick={onOpenRegressionModal}
+            className="px-2.5 py-1 rounded-xl apple-glass hover:bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer hover:border-blue-300"
+            title="Calibrate econometric regression equation"
+          >
+            <Calculator className="w-3.5 h-3.5 text-[#007AFF]" />
+            <span>Calibrate Regression</span>
+          </button>
+        )}
+      </div>
+
+      {/* ─── CORNER 3: BOTTOM-LEFT (Subtle Topology Arc Legend) ─── */}
+      <div className="absolute bottom-3 left-3 z-20 hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-xl apple-glass text-[10.5px] font-medium text-slate-600 border border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.04)] pointer-events-auto">
+        <span className="flex items-center gap-1 text-red-600 font-semibold">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          <span>P1 Critical (Top Arc)</span>
+        </span>
+        <span className="text-slate-300">•</span>
+        <span className="flex items-center gap-1 text-amber-700 font-semibold">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+          <span>P2 High (Bottom Arc)</span>
+        </span>
+      </div>
+
+      {/* ─── CORNER 4: BOTTOM-RIGHT (Docked Zoom & Fullscreen Controls) ─── */}
+      <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1.5 pointer-events-auto">
+        <div className="flex items-center gap-0.5 apple-glass rounded-xl p-0.5 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80">
+          <button
+            onClick={() => setZoom((z) => Math.max(z - 0.15, 0.4))}
+            className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+            title="Zoom out"
+          >
+            <ZoomOut className="w-3 h-3" />
+          </button>
+
+          <span className="px-1 text-[11px] font-bold text-slate-700 min-w-[36px] text-center select-none font-mono">
+            {Math.round(zoom * 100)}%
+          </span>
+
+          <button
+            onClick={() => setZoom((z) => Math.min(z + 0.15, 2.8))}
+            className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+            title="Zoom in"
+          >
+            <ZoomIn className="w-3 h-3" />
+          </button>
+
+          <button
+            onClick={handleResetView}
+            className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+            title="Reset View to Center"
+          >
+            <RotateCcw className="w-2.5 h-2.5" />
+          </button>
+        </div>
+
+        {/* Fullscreen Action Button */}
+        {isFullscreen ? (
+          <button
+            onClick={handleToggleFullscreen}
+            className="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg border border-slate-700 text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+            title="Exit Fullscreen Mode (Esc)"
+          >
+            <Minimize2 className="w-3 h-3" />
+            <span>Exit Fullscreen</span>
+            <kbd className="px-1 py-0.2 bg-slate-800 border border-slate-700 rounded text-[9px] text-slate-300 font-mono">
+              Esc
+            </kbd>
+          </button>
+        ) : (
+          <button
+            onClick={handleToggleFullscreen}
+            className="px-2.5 py-1 rounded-xl apple-glass hover:bg-white text-slate-700 hover:text-slate-900 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-white/80 text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+            title="Open Fullscreen Topology Canvas"
+          >
+            <Maximize2 className="w-3 h-3 text-[#007AFF]" />
+            <span>Fullscreen</span>
+          </button>
+        )}
+      </div>
+
 
       {/* Dynamic Interaction Status Pill in Bottom-Center */}
       <div className="absolute bottom-4 inset-x-0 mx-auto w-fit z-20 flex items-center gap-2 pointer-events-auto">

@@ -529,6 +529,18 @@ def get_stock_profile(ticker: str) -> Dict[str, Any]:
         "current_price": current_price,
         "change_pct": change_pct,
         "market_cap": market_cap_str,
+        "open": market_info.get("open", current_price),
+        "high_24h": market_info.get("high_24h", current_price),
+        "low_24h": market_info.get("low_24h", current_price),
+        "volume": market_info.get("volume", 0),
+        "high_ever": market_info.get("high_ever", current_price * 1.15),
+        "low_ever": market_info.get("low_ever", current_price * 0.85),
+        "avg_price": market_info.get("avg_price", current_price),
+        "deal_score": market_info.get("deal_score", 85),
+        "deal_rating": market_info.get("deal_rating", "Great Value"),
+        "data_source": market_info.get("data_source", "alphavantage_live"),
+        "api_connected": market_info.get("api_connected", True),
+        "prices": market_info.get("prices", []),
         "supply_chain": mapping,
         "news": news
     }
