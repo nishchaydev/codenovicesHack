@@ -82,7 +82,7 @@ export const PRESET_ROLES: Array<UserProfile & {
     firm: "Jane Street Capital",
     desk: "Index & Commodity Arbitrage",
     email: "m.vance@janestreet.internal",
-    badgeColor: "bg-purple-100 text-purple-800 border-purple-300",
+    badgeColor: "bg-indigo-100 text-indigo-800 border-indigo-300",
     permissions: [
       "Immediate-Hop Dislocation Alerts",
       "Crude & Commodity Spread Arbitrage",

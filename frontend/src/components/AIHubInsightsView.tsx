@@ -8,7 +8,7 @@ import {
   TrendingDown, 
   Sparkles,
   Zap,
-  ShoppingBag,
+  Target,
   Layers
 } from "lucide-react";
 
@@ -145,27 +145,27 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
               <div className="flex items-center gap-2.5 mt-1">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
                   activeCardModule === "card1"
-                    ? "bg-indigo-600 text-white shadow-xs"
-                    : "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "bg-slate-100 text-slate-700 group-hover:bg-slate-200"
                 }`}>
-                  <ShoppingBag className="w-5 h-5" />
+                  <Target className="w-5 h-5 text-emerald-500" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 leading-tight">
-                  ThinkBeforeBuy Radar
+                  ThinkBeforeBuy Valuation Radar
                 </h3>
               </div>
 
               <p className="text-xs text-slate-500 leading-relaxed">
-                Empirical price drop tracking, deal verification score breakup, and optimal capital timing recommendation.
+                Stock search input, 52-week price cycle positioning, and institutional capital entry timing analysis.
               </p>
             </div>
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
               <span className="text-[11px] text-slate-400 font-mono">
-                Lowest: ₹449 • Steal 🚀
+                NSE/BSE & Global • Valuation Engine
               </span>
               <span className={`flex items-center gap-1 text-[11px] font-bold ${
-                activeCardModule === "card1" ? "text-indigo-600" : "text-slate-500 group-hover:text-slate-900"
+                activeCardModule === "card1" ? "text-slate-900" : "text-slate-500 group-hover:text-slate-900"
               }`}>
                 {activeCardModule === "card1" ? "● Active View" : "Click to Open"}
                 <ChevronRight className={`w-3.5 h-3.5 transition-transform ${activeCardModule === "card1" ? "rotate-90" : "group-hover:translate-x-0.5"}`} />

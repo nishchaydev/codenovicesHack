@@ -154,7 +154,7 @@ const SECTORS_DATA: SectorItem[] = [
     volumeRatio: 1.32,
     shockVulnerability: "Vulnerable to steel/rubber input inflation, NBFC vehicle loan rate spikes & rural purchasing power.",
     constituents: [
-      { ticker: "TATAMOTORS.NS", name: "Tata Motors Ltd.", weightInSector: 22.4, ltp: "₹915.20", change1D: -3.42, transmissionRole: "Core Bellwether" },
+      { ticker: "HEROMOTOCO.NS", name: "Hero MotoCorp Ltd.", weightInSector: 22.4, ltp: "₹4,850.00", change1D: -1.25, transmissionRole: "Core Bellwether" },
       { ticker: "MARUTI.NS", name: "Maruti Suzuki India", weightInSector: 20.8, ltp: "₹12,480.00", change1D: -0.78, transmissionRole: "Core Bellwether" },
       { ticker: "M&M.NS", name: "Mahindra & Mahindra", weightInSector: 18.6, ltp: "₹2,940.00", change1D: 1.25, transmissionRole: "Core Bellwether" },
       { ticker: "BAJAJ-AUTO.NS", name: "Bajaj Auto Ltd.", weightInSector: 10.5, ltp: "₹9,850.00", change1D: -1.45, transmissionRole: "Margin Sensitive" },

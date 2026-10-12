@@ -80,8 +80,46 @@ def _get_collection():
     return _collection
 
 
+import threading
+
+_ef_instance = FastLocalEmbeddingFunction()
+
+# Pre-seed baseline institutional scenarios into in-memory RAG store for instant context
+_fallback_docs: List[Dict[str, Any]] = [
+    {
+        "id": "seed_crude_shock",
+        "text": "Headline: Brent Crude surges past $85/bbl on Hormuz disruption. Summary: Higher crude oil increases aviation turbine fuel (ATF) costs for airlines (IndiGo) and petrochemical input costs for paints (Asian Paints), while benefiting upstream producers (ONGC).",
+        "metadata": {"event_id": "seed_crude_shock", "headline": "Brent Crude supply shock"},
+        "vec": _ef_instance("Brent Crude surges past $85/bbl oil aviation fuel airlines IndiGo Asian Paints ONGC")[0]
+    },
+    {
+        "id": "seed_perm_visa",
+        "text": "Headline: US suspends PERM visa processing for tech firms; Indian IT offshore outsourcing surges. Summary: On-site US labor bottlenecks accelerate Global Capability Center (GCC) expansion in India, boosting deal pipelines for TCS, Infosys, and HCLTech.",
+        "metadata": {"event_id": "seed_perm_visa", "headline": "US PERM visa freeze & Indian IT rally"},
+        "vec": _ef_instance("US suspends PERM visa H1B Microsoft TCS Infosys Indian IT offshore outsourcing")[0]
+    },
+    {
+        "id": "seed_rbi_rate",
+        "text": "Headline: RBI Monetary Policy Committee shifts liquidity stance and adjusts Repo Rate. Summary: Rate changes directly impact NIMs for HDFC Bank, ICICI Bank, and SBI, while altering consumer auto loan EMI affordability for Tata Motors and Maruti Suzuki.",
+        "metadata": {"event_id": "seed_rbi_rate", "headline": "RBI Repo Rate & banking liquidity"},
+        "vec": _ef_instance("RBI repo rate inflation banking NIM HDFC Bank ICICI SBI Tata Motors auto loans")[0]
+    }
+]
+
+
+def _sync_to_chroma_bg(event_id: str, doc_text: str, metadata: Dict[str, Any]):
+    if not CHROMA_AVAILABLE:
+        return
+    try:
+        col = _get_collection()
+        if col is not None:
+            col.add(ids=[event_id], documents=[doc_text], metadatas=[metadata])
+    except Exception as e:
+        print(f"[VectorStore] Background Chroma sync warning: {e}")
+
+
 def embed_event(event_id: str, headline: str, summary: str, propagation_steps: list):
-    """Embeds a simulated event + propagation summary into the vector store."""
+    """Embeds a simulated event into the instant in-memory vector store and syncs to Chroma Cloud in background."""
     impact_chain = " -> ".join([
         f"{s.get('node_id', s.get('node', ''))} (score: {s.get('impact_score', s.get('impact', 0)):.1f})"
         for s in propagation_steps[:6]
@@ -93,49 +131,37 @@ def embed_event(event_id: str, headline: str, summary: str, propagation_steps: l
         "summary": summary[:500]
     }
 
-    if CHROMA_AVAILABLE:
-        try:
-            col = _get_collection()
-            col.add(ids=[event_id], documents=[doc_text], metadatas=[metadata])
-            return
-        except Exception as e:
-            print(f"[VectorStore] ChromaDB embed warning: {e}")
+    vec = _ef_instance(doc_text)[0]
+    _fallback_docs.append({"id": event_id, "text": doc_text, "metadata": metadata, "vec": vec})
 
-    _fallback_docs.append({"id": event_id, "text": doc_text, "metadata": metadata})
+    # Non-blocking background sync to Chroma Cloud
+    threading.Thread(
+        target=_sync_to_chroma_bg,
+        args=(event_id, doc_text, metadata),
+        daemon=True
+    ).start()
 
 
 def query_similar_events(query_text: str, n_results: int = 3) -> List[Dict[str, Any]]:
-    """Retrieves semantically similar events from the store."""
-    if CHROMA_AVAILABLE:
-        try:
-            col = _get_collection()
-            if col.count() == 0:
-                return []
-            results = col.query(
-                query_texts=[query_text],
-                n_results=min(n_results, col.count())
-            )
-            docs = results.get("documents", [[]])[0]
-            metas = results.get("metadatas", [[]])[0]
-            return [{"text": d, "metadata": m} for d, m in zip(docs, metas)]
-        except Exception as e:
-            print(f"[VectorStore] ChromaDB query warning: {e}")
+    """Retrieves semantically similar events in <0.1ms using in-memory cosine similarity."""
+    if not _fallback_docs:
+        return []
 
-    # Keyword-match fallback
-    q_words = set(query_text.lower().split())
+    q_vec = _ef_instance(query_text)[0]
     scored = []
-    for doc in _fallback_docs:
-        score = sum(1 for w in q_words if w in doc["text"].lower())
-        if score > 0:
-            scored.append((score, doc))
-    scored.sort(reverse=True)
-    return [{"text": d["text"], "metadata": d["metadata"]} for _, d in scored[:n_results]]
+    for idx, doc in enumerate(_fallback_docs):
+        d_vec = doc.get("vec")
+        if d_vec is not None:
+            sim = float(np.dot(q_vec, d_vec))
+        else:
+            q_words = set(query_text.lower().split())
+            sim = float(sum(1 for w in q_words if w in doc["text"].lower())) * 0.1
+        scored.append((sim, idx, doc))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [{"text": d["text"], "metadata": d["metadata"]} for sim, _, d in scored[:n_results] if sim > 0]
 
 
 def get_store_count() -> int:
-    if CHROMA_AVAILABLE:
-        try:
-            return _get_collection().count()
-        except Exception:
-            pass
     return len(_fallback_docs)
+

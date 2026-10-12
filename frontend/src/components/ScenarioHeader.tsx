@@ -8,21 +8,25 @@ import {
   ChevronUp,
   ExternalLink,
   Flame,
-  Globe2,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Compass
 } from "lucide-react";
 
 interface ScenarioHeaderProps {
   scenario: FinGraphScenario;
   scenariosList: FinGraphScenario[];
   onSelectScenario: (scenario: FinGraphScenario) => void;
+  canvasViewMode?: "radial" | "fingraph_dag";
+  onCanvasViewModeChange?: (mode: "radial" | "fingraph_dag") => void;
 }
 
 export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
   scenario,
   scenariosList,
   onSelectScenario,
+  canvasViewMode = "radial",
+  onCanvasViewModeChange,
 }) => {
   const [isScenarioDropdownOpen, setIsScenarioDropdownOpen] = useState(false);
   const [isCollisionExpanded, setIsCollisionExpanded] = useState(false);
@@ -97,15 +101,21 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
         <div className="flex items-center gap-2 text-[11.5px] text-[#707070] font-medium">
           <span className="font-mono text-[#adadad]">{scenario.date}</span>
           <span>•</span>
-          <a
-            href={scenario.sourceUrl || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#707070] hover:text-[#0066ff] flex items-center gap-1 transition-colors"
-          >
-            <span>Source: {scenario.source}</span>
-            <ExternalLink className="w-3 h-3 text-[#adadad] hover:text-[#0066ff]" />
-          </a>
+          {scenario.sourceUrl ? (
+            <a
+              href={scenario.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#707070] hover:text-[#0066ff] flex items-center gap-1 transition-colors"
+            >
+              <span>Source: {scenario.source}</span>
+              <ExternalLink className="w-3 h-3 text-[#adadad] hover:text-[#0066ff]" />
+            </a>
+          ) : (
+            <span className="text-[#707070] flex items-center gap-1">
+              <span>Source: {scenario.source}</span>
+            </span>
+          )}
         </div>
       </div>
 
@@ -200,59 +210,96 @@ export const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
         </p>
       )}
 
-      {/* ─── ROW 3: COMPACT KPI BUTTON PILLS ─── */}
-      <div className="flex flex-wrap items-center gap-2 pt-0.5">
-        {/* Metric 1: Entities */}
-        <div 
-          className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white border border-slate-200 shadow-2xs hover:border-slate-300 transition-all cursor-default"
-          title={`${scenario.entitiesCount} Entities Identified (${sectorCount} Sectors · ${macroCount} Macro · ${companyTickersCount || 6} Equities)`}
-        >
-          <div className="w-5 h-5 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-            <Network className="w-3 h-3" />
+      {/* ─── ROW 3: COMPACT KPI BUTTON PILLS & VIEW MODE SWITCHER ─── */}
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Metric 1: Entities */}
+          <div 
+            className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white border border-slate-200 shadow-2xs hover:border-slate-300 transition-all cursor-default"
+            title={`${scenario.entitiesCount} Entities Identified (${sectorCount} Sectors · ${macroCount} Macro · ${companyTickersCount || 6} Equities)`}
+          >
+            <div className="w-5 h-5 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+              <Network className="w-3 h-3" />
+            </div>
+            <div className="flex items-center gap-1.5 leading-none">
+              <span className="font-bold text-slate-900 font-mono text-xs">{scenario.entitiesCount}</span>
+              <span className="font-semibold text-slate-700 text-[11px]">Entities</span>
+            </div>
+            <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 font-mono text-[9px] font-bold shrink-0">
+              GRAPH
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 leading-none">
-            <span className="font-bold text-slate-900 font-mono text-xs">{scenario.entitiesCount}</span>
-            <span className="font-semibold text-slate-700 text-[11px]">Entities</span>
+
+          {/* Metric 2: Pathways */}
+          <div 
+            className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white border border-slate-200 shadow-2xs hover:border-slate-300 transition-all cursor-default"
+            title={`${scenario.pathwaysCount} Propagation Pathways (Direct & 2nd Order · 3-Hop BFS)`}
+          >
+            <div className="w-5 h-5 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+              <GitFork className="w-3 h-3" />
+            </div>
+            <div className="flex items-center gap-1.5 leading-none">
+              <span className="font-bold text-slate-900 font-mono text-xs">{scenario.pathwaysCount}</span>
+              <span className="font-semibold text-slate-700 text-[11px]">Pathways</span>
+            </div>
+            <span className="px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[9px] font-bold flex items-center gap-1 shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+              ACTIVE
+            </span>
           </div>
-          <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 font-mono text-[9px] font-bold shrink-0">
-            GRAPH
-          </span>
+
+          {/* Metric 3: Evidence */}
+          <div 
+            className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white border border-slate-200 shadow-2xs hover:border-slate-300 transition-all cursor-default"
+            title={`${scenario.evidenceCount} Evidence Sources (Terminal Telemetry · 12 Citations)`}
+          >
+            <div className="w-5 h-5 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+              <ShieldCheck className="w-3 h-3" />
+            </div>
+            <div className="flex items-center gap-1.5 leading-none">
+              <span className="font-bold text-slate-900 font-mono text-xs">{scenario.evidenceCount}</span>
+              <span className="font-semibold text-slate-700 text-[11px]">Sources</span>
+            </div>
+            <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[9px] font-bold shrink-0">
+              94% CONF
+            </span>
+          </div>
         </div>
 
-        {/* Metric 2: Pathways */}
-        <div 
-          className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white border border-slate-200 shadow-2xs hover:border-slate-300 transition-all cursor-default"
-          title={`${scenario.pathwaysCount} Propagation Pathways (Direct & 2nd Order · 3-Hop BFS)`}
-        >
-          <div className="w-5 h-5 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
-            <GitFork className="w-3 h-3" />
+        {/* View Switcher in Row 3 directly above the canvas */}
+        {onCanvasViewModeChange && (
+          <div className="flex items-center rounded-xl bg-slate-900/5 p-1 border border-slate-300 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => onCanvasViewModeChange("radial")}
+              className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                canvasViewMode === "radial"
+                  ? "bg-white text-slate-900 shadow-2xs border border-slate-200"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+              title="View 360° Radial Transmission Topology"
+            >
+              <Compass className="w-3.5 h-3.5 text-blue-600" />
+              <span>Radial 360° Topology</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onCanvasViewModeChange("fingraph_dag")}
+              className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                canvasViewMode === "fingraph_dag"
+                  ? "bg-slate-900 text-white shadow-2xs"
+                  : "text-blue-700 hover:text-blue-900 hover:bg-blue-50"
+              }`}
+              title="View FinGraph Multi-Tier DAG Engine (Satyam)"
+            >
+              <GitFork className="w-3.5 h-3.5 text-cyan-400" />
+              <span>FinGraph Flow Engine (DAG)</span>
+              <span className="px-1.5 py-0.2 rounded-full bg-blue-600 text-white text-[9px] font-mono font-bold">
+                NEW
+              </span>
+            </button>
           </div>
-          <div className="flex items-center gap-1.5 leading-none">
-            <span className="font-bold text-slate-900 font-mono text-xs">{scenario.pathwaysCount}</span>
-            <span className="font-semibold text-slate-700 text-[11px]">Pathways</span>
-          </div>
-          <span className="px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[9px] font-bold flex items-center gap-1 shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-            ACTIVE
-          </span>
-        </div>
-
-        {/* Metric 3: Evidence */}
-        <div 
-          className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white border border-slate-200 shadow-2xs hover:border-slate-300 transition-all cursor-default"
-          title={`${scenario.evidenceCount} Evidence Sources (Terminal Telemetry · 12 Citations)`}
-        >
-          <div className="w-5 h-5 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
-            <ShieldCheck className="w-3 h-3" />
-          </div>
-          <div className="flex items-center gap-1.5 leading-none">
-            <span className="font-bold text-slate-900 font-mono text-xs">{scenario.evidenceCount}</span>
-            <span className="font-semibold text-slate-700 text-[11px]">Sources</span>
-          </div>
-          <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[9px] font-bold shrink-0">
-            94% CONF
-          </span>
-        </div>
+        )}
       </div>
     </div>
   );

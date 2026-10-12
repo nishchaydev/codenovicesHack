@@ -379,15 +379,15 @@ export const EventExplorerView: React.FC<EventExplorerViewProps> = ({
       })
       .catch(() => {});
 
-    // Stage 1: Wire ingestion (~850ms)
-    await new Promise((r) => setTimeout(r, 850));
+    // Stage 1: Wire ingestion (~80ms)
+    await new Promise((r) => setTimeout(r, 80));
 
-    // Stage 2: NLP entity extraction (~900ms)
+    // Stage 2: NLP entity extraction (~90ms)
     setSynthesisProgress(52);
     setSynthesisStage("🧠 NLP extracting entities (Microsoft, TCS, Infosys, GCCs) & causal channels...");
-    await new Promise((r) => setTimeout(r, 900));
+    await new Promise((r) => setTimeout(r, 90));
 
-    // Stage 3: Multi-hop BFS propagation (~850ms)
+    // Stage 3: Multi-hop BFS propagation (~90ms)
     setSynthesisProgress(78);
     setSynthesisStage("⚡ Simulating multi-hop BFS shock propagation & Nifty IT elasticity scoring...");
 
@@ -403,12 +403,15 @@ export const EventExplorerView: React.FC<EventExplorerViewProps> = ({
       }),
     }).catch(() => {});
 
-    await new Promise((r) => setTimeout(r, 850));
+    await new Promise((r) => setTimeout(r, 90));
 
-    // Stage 4: Graph construction (~800ms)
+    // Stage 4: Graph construction (~90ms)
     setSynthesisProgress(96);
     setSynthesisStage("📊 Constructing radial impact graph & verifying institutional citations...");
-    await Promise.all([newsPromise, new Promise((r) => setTimeout(r, 800))]);
+    await Promise.race([
+      Promise.all([newsPromise, new Promise((r) => setTimeout(r, 90))]),
+      new Promise((r) => setTimeout(r, 350)),
+    ]);
 
     // Select matching scenario and enrich citations with any fetched live articles
     const matched = scenarios.find((s) => s.id === scenarioId) || scenarios[0];
@@ -545,7 +548,7 @@ export const EventExplorerView: React.FC<EventExplorerViewProps> = ({
           <Search className="w-3.5 h-3.5 absolute left-3 text-slate-400" />
           <input
             type="text"
-            placeholder="Search or enter topic (TATAMOTORS, Fed, Oil)..."
+            placeholder="Search or enter topic (RELIANCE, TCS, Fed, Oil)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-8 pr-20 py-1.5 rounded-full bg-[#f8fafc] border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"

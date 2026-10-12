@@ -119,7 +119,7 @@ export const FloraVoiceAssistant: React.FC = () => {
 
   const toggleListening = () => {
     if (!recognitionRef.current) {
-      alert("Speech recognition is not supported in this browser. Please type your query!");
+      deliverAiResponse("Voice recognition is not supported in this browser environment. Please type your question below and I will analyze it immediately.");
       return;
     }
 
@@ -176,21 +176,31 @@ export const FloraVoiceAssistant: React.FC = () => {
 
     // 2. Try backend chat endpoint if backend is live
     try {
-      const backendRes = await fetch("http://localhost:8000/api/chat", {
+      let res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q })
-      });
+      }).catch(() => null);
 
-      if (backendRes.ok) {
-        const data = await backendRes.json();
+      if (!res || !res.ok) {
+        if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+          res = await fetch("http://localhost:8000/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: q })
+          }).catch(() => null);
+        }
+      }
+
+      if (res && res.ok) {
+        const data = await res.json();
         if (data.answer && !data.answer.includes("Simulate an event first")) {
           deliverAiResponse(data.answer);
           return;
         }
       }
     } catch {
-      // Backend unavailable or error
+      // Proceed to Flora built-in knowledge engine
     }
 
     // 3. Comprehensive Flora Built-in Knowledge Engine (Instant, zero latency)
@@ -356,7 +366,7 @@ export const FloraVoiceAssistant: React.FC = () => {
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 via-amber-400 to-cyan-400 opacity-60 blur-xl group-hover:opacity-90 group-hover:scale-110 transition-all duration-500 animate-pulse" />
           
           {/* Rotating Ring Wave Border */}
-          <div className="absolute inset-0 rounded-full p-[2px] bg-gradient-to-r from-rose-500 via-yellow-400 via-emerald-400 via-cyan-400 to-purple-500 animate-spin" style={{ animationDuration: "8s" }}>
+          <div className="absolute inset-0 rounded-full p-[2px] bg-gradient-to-r from-rose-500 via-yellow-400 via-emerald-400 via-cyan-400 to-indigo-500 animate-spin" style={{ animationDuration: "8s" }}>
             <div className="w-full h-full rounded-full bg-[#07090E]" />
           </div>
 
@@ -453,7 +463,7 @@ export const FloraVoiceAssistant: React.FC = () => {
 
                 {/* Rotating Spectral Ring */}
                 <div 
-                  className="absolute inset-2 rounded-full p-[3px] bg-gradient-to-r from-rose-500 via-yellow-400 via-cyan-400 to-purple-600 animate-spin"
+                  className="absolute inset-2 rounded-full p-[3px] bg-gradient-to-r from-rose-500 via-yellow-400 via-cyan-400 to-indigo-600 animate-spin"
                   style={{ animationDuration: isListening ? "3s" : isSpeaking ? "5s" : "12s" }}
                 >
                   <div className="w-full h-full rounded-full bg-[#07090E]" />

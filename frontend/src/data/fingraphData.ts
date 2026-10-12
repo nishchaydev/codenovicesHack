@@ -1051,7 +1051,7 @@ export const FINGRAPH_SCENARIOS: FinGraphScenario[] = [
         position: "bottom-right",
         timeHorizon: "3–9 months",
         lineType: "negative",
-        tickers: ["TATAMOTORS.NS", "TSLA", "TM"],
+        tickers: ["M&M.NS", "TSLA", "TM"],
       },
     ],
     pathways: [
@@ -1169,7 +1169,7 @@ export const FINGRAPH_SCENARIOS: FinGraphScenario[] = [
         position: "left",
         timeHorizon: "1–3 months",
         lineType: "positive",
-        tickers: ["TATAMOTORS.NS", "MARUTI.NS", "M&M.NS"],
+        tickers: ["HEROMOTOCO.NS", "MARUTI.NS", "M&M.NS"],
       },
       {
         id: "real-estate",

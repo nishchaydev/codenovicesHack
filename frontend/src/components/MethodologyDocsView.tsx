@@ -114,7 +114,7 @@ export const MethodologyDocsView: React.FC = () => {
     {
       headline: "RBI unexpectedly increases Repo Rate by 25 bps to 6.75% citing core inflation",
       category: "Policy Change",
-      categoryColor: "text-purple-700 bg-purple-50 border-purple-200",
+      categoryColor: "text-indigo-700 bg-indigo-50 border-indigo-200",
       severity: 0.72,
       severityLabel: "High Policy Shift",
       polarity: "Mixed / Contractionary",
@@ -168,10 +168,10 @@ export const MethodologyDocsView: React.FC = () => {
       number: "02",
       title: "Event Detection & NLP Pipeline",
       badge: "Entity Ingestion",
-      badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
+      badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200",
       summary:
         "Uses NLP to detect financial events from news, extract named entities, classify event types (commodity shock, policy change, earnings), and score severity.",
-      icon: <FileText className="w-5 h-5 text-purple-600" />,
+      icon: <FileText className="w-5 h-5 text-indigo-600" />,
     },
     {
       id: "knowledge-graph",
@@ -463,7 +463,7 @@ export const MethodologyDocsView: React.FC = () => {
                           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between gap-3">
                             <div className="space-y-1.5">
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-mono font-bold text-purple-600 px-1.5 py-0.5 bg-purple-100 rounded">
+                                <span className="text-[10px] font-mono font-bold text-indigo-600 px-1.5 py-0.5 bg-indigo-100 rounded">
                                   STAGE 2
                                 </span>
                                 <Cpu className="w-4 h-4 text-slate-400" />
@@ -543,7 +543,7 @@ export const MethodologyDocsView: React.FC = () => {
                           <ArrowRight className="w-4 h-4 text-slate-500 self-center hidden md:block" />
 
                           <div className="p-3 rounded-xl bg-slate-800 border border-slate-700 flex-1">
-                            <span className="text-[10px] text-purple-400 font-bold block mb-1">2nd HOP TRANSMISSION</span>
+                            <span className="text-[10px] text-indigo-400 font-bold block mb-1">2nd HOP TRANSMISSION</span>
                             <span className="font-bold text-white text-sm">Indian Paint Makers</span>
                             <p className="text-[11px] text-slate-300 mt-1 font-sans">Asian Paints & Berger gross margin -180 bps</p>
                           </div>
@@ -592,7 +592,7 @@ export const MethodologyDocsView: React.FC = () => {
 
                         {/* 2. Event Classification */}
                         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
-                          <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">
+                          <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
                             CLS
                           </div>
                           <h4 className="text-sm font-bold text-slate-900">Taxonomy Classification</h4>
@@ -603,7 +603,7 @@ export const MethodologyDocsView: React.FC = () => {
                             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">
                               Commodity Shock
                             </span>
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-medium">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 font-medium">
                               Policy Change
                             </span>
                             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-medium">
@@ -762,7 +762,7 @@ export const MethodologyDocsView: React.FC = () => {
                           </div>
 
                           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-                            <span className="text-xs font-mono font-bold text-purple-600 px-2 py-0.5 rounded bg-purple-100">
+                            <span className="text-xs font-mono font-bold text-indigo-600 px-2 py-0.5 rounded bg-indigo-100">
                               Factor 3: Sector Hierarchy (W_sec)
                             </span>
                             <h5 className="text-sm font-bold text-slate-900">Sector Classification & Betas</h5>
@@ -809,7 +809,7 @@ export const MethodologyDocsView: React.FC = () => {
                                 <td className="p-3">COGS Commodity Regression</td>
                               </tr>
                               <tr className="hover:bg-slate-50/60">
-                                <td className="p-3 font-mono font-bold text-purple-700">POLICY_SENSITIVE_TO</td>
+                                <td className="p-3 font-mono font-bold text-indigo-700">POLICY_SENSITIVE_TO</td>
                                 <td className="p-3">Bajaj Finance → RBI Repo Rate</td>
                                 <td className="p-3 font-mono font-semibold">0.70 – 0.88</td>
                                 <td className="p-3 font-mono text-slate-500">T+0 to T+14 days</td>
@@ -1002,11 +1002,11 @@ export const MethodologyDocsView: React.FC = () => {
                           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-2">
                             <div className="flex items-center justify-between text-xs font-mono">
                               <span className="font-bold text-slate-700">Hop 3 (Tertiary)</span>
-                              <span className="text-purple-600 font-bold">{(hop3Impact * 100).toFixed(0)}%</span>
+                              <span className="text-indigo-600 font-bold">{(hop3Impact * 100).toFixed(0)}%</span>
                             </div>
                             <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
                               <div
-                                className="bg-purple-500 h-2.5 rounded-full transition-all duration-150"
+                                className="bg-indigo-500 h-2.5 rounded-full transition-all duration-150"
                                 style={{ width: `${Math.min(100, hop3Impact * 100)}%` }}
                               />
                             </div>
@@ -1069,10 +1069,10 @@ export const MethodologyDocsView: React.FC = () => {
                         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between gap-3">
                           <div className="space-y-1.5">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-mono font-bold text-purple-700 px-2 py-0.5 bg-purple-100 rounded">
+                              <span className="text-[10px] font-mono font-bold text-indigo-700 px-2 py-0.5 bg-indigo-100 rounded">
                                 WEIGHT: 20%
                               </span>
-                              <BookOpen className="w-4 h-4 text-purple-600" />
+                              <BookOpen className="w-4 h-4 text-indigo-600" />
                             </div>
                             <h5 className="text-sm font-bold text-slate-900">Academic Research</h5>
                             <p className="text-xs text-slate-600 leading-normal">
@@ -1203,10 +1203,10 @@ export const MethodologyDocsView: React.FC = () => {
                         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between gap-3">
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-mono font-bold text-purple-700 px-2 py-0.5 bg-purple-100 rounded">
+                              <span className="text-[10px] font-mono font-bold text-indigo-700 px-2 py-0.5 bg-indigo-100 rounded">
                                 GRAPH DATABASE
                               </span>
-                              <Database className="w-4 h-4 text-purple-600" />
+                              <Database className="w-4 h-4 text-indigo-600" />
                             </div>
                             <h5 className="text-sm font-bold text-slate-900">Neo4j Knowledge Graph</h5>
                             <p className="text-xs text-slate-600 leading-relaxed">
@@ -1216,7 +1216,7 @@ export const MethodologyDocsView: React.FC = () => {
                           </div>
                           <div className="text-[11px] font-mono text-slate-500 pt-2 border-t border-slate-200 flex items-center justify-between">
                             <span>Cypher Engine • Indexed</span>
-                            <span className="text-purple-600 font-semibold">Neo4j</span>
+                            <span className="text-indigo-600 font-semibold">Neo4j</span>
                           </div>
                         </div>
 
@@ -1288,7 +1288,7 @@ export const MethodologyDocsView: React.FC = () => {
                       <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-slate-800 text-white space-y-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <Terminal className="w-4 h-4 text-purple-400" />
+                            <Terminal className="w-4 h-4 text-indigo-400" />
                             <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-200">
                               Representative Neo4j Cypher Traversal Query
                             </span>

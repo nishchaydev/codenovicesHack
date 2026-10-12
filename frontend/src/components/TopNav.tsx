@@ -46,7 +46,7 @@ export const TopNav: React.FC<TopNavProps> = ({
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder='Enter a financial catalyst, e.g. "Crude oil rises 12%" or "Tata Motors margin cut"...'
+              placeholder='Enter a financial catalyst, e.g. "Crude oil rises 12%" or "Reliance refining margin surge"...'
               className="w-full h-10 pl-10 pr-36 rounded-2xl border border-slate-200/80 bg-white/60 backdrop-blur-xl text-[13px] text-slate-900 placeholder:text-slate-400 shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#007AFF]/25 focus:border-[#007AFF] transition-all"
             />
 
@@ -103,19 +103,31 @@ export const TopNav: React.FC<TopNavProps> = ({
           {isDropdownOpen && (
             <div className="absolute right-0 mt-1.5 w-52 rounded-2xl bg-white/95 backdrop-blur-2xl border border-slate-200/80 shadow-xl py-1.5 z-40 text-[13px] animate-in fade-in zoom-in-95 duration-150">
               <button
-                onClick={() => { setMarketSelector("India • All markets"); setIsDropdownOpen(false); }}
+                onClick={() => {
+                  setMarketSelector("India • All markets");
+                  setIsDropdownOpen(false);
+                  onAnalyze("RBI Monetary Policy & Nifty 50 Liquidity");
+                }}
                 className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-slate-50 text-slate-800 cursor-pointer"
               >
                 <span>🇮🇳</span> India • All markets (NSE/BSE)
               </button>
               <button
-                onClick={() => { setMarketSelector("US • Global Tech"); setIsDropdownOpen(false); }}
+                onClick={() => {
+                  setMarketSelector("US • Global Tech");
+                  setIsDropdownOpen(false);
+                  onAnalyze("US PERM visa freeze & global tech hiring");
+                }}
                 className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-slate-50 text-slate-800 cursor-pointer"
               >
                 <span>🇺🇸</span> US • Global Markets (NYSE/NASDAQ)
               </button>
               <button
-                onClick={() => { setMarketSelector("Global Commodities"); setIsDropdownOpen(false); }}
+                onClick={() => {
+                  setMarketSelector("Global Commodities");
+                  setIsDropdownOpen(false);
+                  onAnalyze("Brent Crude oil supply shock");
+                }}
                 className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-slate-50 text-slate-800 cursor-pointer"
               >
                 <span>🌐</span> Cross-Market Commodities
@@ -140,12 +152,14 @@ export const TopNav: React.FC<TopNavProps> = ({
             </button>
           )}
 
-          <div
-            className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-white text-[12px] font-semibold tracking-wider select-none shadow-[0_2px_8px_rgba(0,0,0,0.15)] border border-slate-700"
-            title={userProfile ? `${userProfile.name} (${userProfile.roleLabel})` : "Active Analyst"}
+          <button
+            type="button"
+            onClick={onOpenAuthModal || onOpenRbacModal}
+            className="w-9 h-9 rounded-full bg-slate-900 hover:bg-slate-800 flex items-center justify-center text-white text-[12px] font-semibold tracking-wider select-none shadow-[0_2px_8px_rgba(0,0,0,0.15)] border border-slate-700 cursor-pointer transition-colors"
+            title={userProfile ? `${userProfile.name} (${userProfile.roleLabel}) — Click to switch account` : "Active Analyst"}
           >
             {userProfile ? userProfile.name.split(" ").map(n => n[0]).join("").slice(0, 2) : "DN"}
-          </div>
+          </button>
         </div>
       </div>
     </header>

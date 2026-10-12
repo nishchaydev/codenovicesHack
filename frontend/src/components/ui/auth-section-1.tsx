@@ -13,14 +13,16 @@ const termsText = (
   <>
     By creating an account, you agree to our{" "}
     <a
-      href="#"
+      href="#terms"
+      onClick={(e) => e.preventDefault()}
       className="font-medium text-black/45 underline underline-offset-2 dark:text-white/45"
     >
       Terms and Services
     </a>{" "}
     and{" "}
     <a
-      href="#"
+      href="#privacy"
+      onClick={(e) => e.preventDefault()}
       className="font-medium text-black/45 underline underline-offset-2 dark:text-white/45"
     >
       Privacy Policy

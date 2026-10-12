@@ -5,12 +5,19 @@ from pydantic import BaseModel
 load_dotenv()
 
 class Settings(BaseModel):
+    # Groq LPU Provider (Primary Ultra-Fast Inference)
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    GROQ_BASE_URL: str = os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
+    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "groq")
+
+    # Secondary / OpenRouter Provider
     OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
     DEFAULT_MODEL: str = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o")
     OPENROUTER_MODEL: str = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o")
     FALLBACK_MODEL: str = "anthropic/claude-3.5-sonnet"
-    ALPHA_VANTAGE_API_KEY: str = os.getenv("ALPHA_VANTAGE_API_KEY", "V2AKQHWKPOSIOWJT")
+    ALPHA_VANTAGE_API_KEY: str = os.getenv("ALPHA_VANTAGE_API_KEY", "")
     CACHE_DIR: str = os.path.join(os.path.dirname(__file__), "cache")
     DECAY_THRESHOLD: float = 4.0
     INITIAL_SHOCK_MAGNITUDE: float = 100.0

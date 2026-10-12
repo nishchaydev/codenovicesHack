@@ -108,33 +108,3 @@
 .apple-btn-active:active {
   transform: scale(0.97);
 }
-
-/* Google Translate UI Overrides */
-.goog-te-banner-frame.skiptranslate,
-iframe.goog-te-banner-frame {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-}
-body {
-  top: 0px !important;
-}
-#google_translate_element {
-  display: none !important;
-}
-.goog-logo-link {
-  display: none !important;
-}
-.goog-te-gadget {
-  color: transparent !important;
-  font-size: 0px !important;
-}
-.goog-tooltip,
-.goog-tooltip:hover {
-  display: none !important;
-}
-.goog-text-highlight {
-  background-color: transparent !important;
-  box-shadow: none !important;
-}
-

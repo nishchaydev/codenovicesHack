@@ -1,10 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { FinGraphScenario, RadialCardNode, ReferenceLink } from "../types";
+import { FinGraphScenario, RadialCardNode } from "../types";
 import {
-  PlusCircle,
-  MinusCircle,
-  ExternalLink,
   Calculator,
   Maximize2,
   Minimize2,
@@ -14,13 +11,10 @@ import {
   Layers,
   Sparkles,
   TrendingUp,
-  TrendingDown,
-  Info,
   ChevronRight,
-  ShieldCheck,
   Building2,
   Flame,
-  ArrowRight,
+  GitFork,
   X
 } from "lucide-react";
 
@@ -32,6 +26,7 @@ interface RadialTransmissionCanvasProps {
   onOpenStockDrilldown?: (node: RadialCardNode) => void;
   extendedNodeIds?: string[];
   onToggleExtendNode?: (nodeId: string) => void;
+  onSwitchToFinGraph?: () => void;
 }
 
 // Graph node model for 2D topology simulation
@@ -65,8 +60,9 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
   onSelectNode,
   onOpenRegressionModal,
   onOpenStockDrilldown,
-  extendedNodeIds: externalExtendedIds,
-  onToggleExtendNode: externalToggleExtend,
+  extendedNodeIds: _externalExtendedIds,
+  onToggleExtendNode: _externalToggleExtend,
+  onSwitchToFinGraph,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -540,6 +536,21 @@ export const RadialTransmissionCanvas: React.FC<RadialTransmissionCanvasProps> =
             <span>P1 Critical</span>
           </button>
         </div>
+
+        {/* Switch to FinGraph DAG View Option */}
+        {onSwitchToFinGraph && (
+          <button
+            onClick={onSwitchToFinGraph}
+            className="px-3.5 py-1 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer hover:scale-[1.02] active:scale-95 border border-blue-500/50"
+            title="Switch to FinGraph Multi-Tier DAG Engine (Satyam)"
+          >
+            <GitFork className="w-3.5 h-3.5 text-cyan-200" />
+            <span>⚡ FinGraph DAG View</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-white/20 text-white text-[9px] font-mono font-black">
+              NEW
+            </span>
+          </button>
+        )}
       </div>
 
       {/* ─── CORNER 2: TOP-RIGHT (Context Actions: Calibrate Regression, Inspect Equities, Dismiss) ─── */}

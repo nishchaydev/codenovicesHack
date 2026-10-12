@@ -26,7 +26,7 @@ export const EngineSettingsView: React.FC = () => {
   const [sentimentAnalysis, setSentimentAnalysis] = useState<boolean>(false); // OFF
 
   // 2. Model Configuration
-  const [primaryModel, setPrimaryModel] = useState<string>("GPT-4o");
+  const [primaryModel, setPrimaryModel] = useState<string>("Groq LPU (Qwen 27B)");
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState<boolean>(false);
   const [maxPropagationDepth, setMaxPropagationDepth] = useState<number>(3); // 3 hops
   const [confidenceThreshold, setConfidenceThreshold] = useState<number>(60); // 60%
@@ -91,11 +91,18 @@ export const EngineSettingsView: React.FC = () => {
 
   const modelOptions = [
     {
+      name: "Groq LPU (Qwen 27B)",
+      provider: "Groq Cloud",
+      context: "128k context",
+      description: "Ultra-fast ~500 tok/s hardware-accelerated LPU reasoning with instant JSON graph extraction.",
+      isDefault: true,
+    },
+    {
       name: "GPT-4o",
       provider: "OpenAI",
       context: "128k context",
       description: "High-throughput multimodal reasoning with chain-of-thought verification.",
-      isDefault: true,
+      isDefault: false,
     },
     {
       name: "Claude 3.5 Sonnet",
@@ -131,7 +138,7 @@ export const EngineSettingsView: React.FC = () => {
     setCrossSector(true);
     setTimeDecay(true);
     setSentimentAnalysis(false);
-    setPrimaryModel("GPT-4o");
+    setPrimaryModel("Groq LPU (Qwen 27B)");
     setMaxPropagationDepth(3);
     setConfidenceThreshold(60);
     setDataSources((prev) =>
@@ -145,10 +152,25 @@ export const EngineSettingsView: React.FC = () => {
 
   const handleSaveSettings = () => {
     setIsSaving(true);
+    try {
+      localStorage.setItem(
+        "find_engine_settings",
+        JSON.stringify({
+          multiHop,
+          crossSector,
+          timeDecay,
+          sentimentAnalysis,
+          primaryModel,
+          maxPropagationDepth,
+          confidenceThreshold,
+          updatedAt: new Date().toISOString(),
+        })
+      );
+    } catch {}
     setTimeout(() => {
       setIsSaving(false);
-      showNotice("Fin.D AI Engine parameters successfully applied to production cluster");
-    }, 600);
+      showNotice("Fin.D AI Engine parameters saved & applied to active cluster");
+    }, 150);
   };
 
   const showNotice = (msg: string) => {
@@ -755,15 +777,15 @@ export const EngineSettingsView: React.FC = () => {
               {/* LLM Endpoint Status */}
               <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 flex flex-col justify-between gap-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-600">LLM Endpoint</span>
-                  <Zap className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="text-xs font-semibold text-slate-600">LLM Reasoning Engine</span>
+                  <Zap className="w-3.5 h-3.5 text-amber-500" />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-sm font-bold text-slate-900">Active</span>
+                    <span className="text-sm font-bold text-slate-900">Groq LPU Active</span>
                   </div>
-                  <span className="text-[10px] font-mono text-emerald-600">182ms token p95</span>
+                  <span className="text-[10px] font-mono text-emerald-600">~0.3s ultra-fast latency</span>
                 </div>
               </div>
             </div>

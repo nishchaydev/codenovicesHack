@@ -9,7 +9,6 @@ import { AddStockModal } from "./components/AddStockModal";
 import { AIHubInsightsView } from "./components/AIHubInsightsView";
 import { SectorHeatmapView } from "./components/SectorHeatmapView";
 import { EngineSettingsView } from "./components/EngineSettingsView";
-import { SavedWatchlistsView } from "./components/SavedWatchlistsView";
 import { AuditReportsView } from "./components/AuditReportsView";
 import { MethodologyDocsView } from "./components/MethodologyDocsView";
 import { MarketOverviewView } from "./components/MarketOverviewView";
@@ -20,8 +19,10 @@ import AuthSectionOne from "@/components/ui/auth-section-1";
 import { RbacLoginModal, PRESET_ROLES } from "./components/RbacLoginModal";
 import { EventRegressionModal } from "./components/EventRegressionModal";
 import { AivanaVoiceAssistant } from "./components/AivanaVoiceAssistant";
+import { FinGraphEngineView } from "./components/fingraph/FinGraphEngineView";
+import { AssetProfilerView } from "./components/AssetProfilerView";
 import { FINGRAPH_SCENARIOS } from "./data/fingraphData";
-import { FinGraphScenario, RadialCardNode, PathwayHop, UserProfile, RegressionCalibration } from "./types";
+import { FinGraphScenario, RadialCardNode, PathwayHop, UserProfile } from "./types";
 import { generateStockScenario } from "./api";
 
 const VALID_NAV_TABS: NavTab[] = [
@@ -35,9 +36,19 @@ const VALID_NAV_TABS: NavTab[] = [
   "contagion_matrix",
   "geo_map",
   "audit_reports",
-  "saved_analyses",
   "settings",
   "help_docs",
+];
+
+const DEFAULT_FAVORITE_TICKERS = [
+  "RELIANCE.NS",
+  "HDFCBANK.NS",
+  "TCS.NS",
+  "INFY.NS",
+  "ICICIBANK.NS",
+  "NVDA",
+  "HAL.NS",
+  "ZOMATO.NS",
 ];
 
 const getInitialNavTab = (): NavTab => {
@@ -107,6 +118,40 @@ export const App: React.FC = () => {
   const [isAddStockOpen, setIsAddStockOpen] = useState<boolean>(false);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
 
+  // Asset Profiler & Watchlist State
+  const [selectedProfilerTicker, setSelectedProfilerTicker] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem("find_selected_profiler_ticker");
+      if (saved && saved !== "TATAMOTORS.NS") return saved;
+    } catch {}
+    return "RELIANCE.NS";
+  });
+  const [favoriteTickers, setFavoriteTickers] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("find_profiler_favorites");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const filtered = parsed.filter((t: string) => t !== "TATAMOTORS.NS");
+          if (filtered.length > 0) return filtered;
+        }
+      }
+    } catch {}
+    return DEFAULT_FAVORITE_TICKERS;
+  });
+  const [customTickers, setCustomTickers] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("find_profiler_custom_stocks");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((t: string) => t !== "TATAMOTORS.NS");
+        }
+      }
+    } catch {}
+    return [];
+  });
+
   // RBAS User Authentication & Regression Modals
   const [currentUser, setCurrentUser] = useState<UserProfile>(getInitialUser);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
@@ -116,6 +161,39 @@ export const App: React.FC = () => {
   const [toast, setToast] = useState<{ message: string; type: "success" | "info" } | null>(null);
   const [historicalEra, setHistoricalEra] = useState<"All" | "1970s" | "2000s" | "2020s">("All");
   const [hasUserSynthesized, setHasUserSynthesized] = useState<boolean>(getInitialSynthesized);
+  const [canvasViewMode, setCanvasViewMode] = useState<"radial" | "fingraph_dag">(() => {
+    try {
+      return (localStorage.getItem("find_canvas_view_mode") as any) || "radial";
+    } catch {
+      return "radial";
+    }
+  });
+
+  // Persist Asset Profiler state
+  useEffect(() => {
+    try {
+      localStorage.setItem("find_selected_profiler_ticker", selectedProfilerTicker);
+    } catch {}
+  }, [selectedProfilerTicker]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("find_profiler_favorites", JSON.stringify(favoriteTickers));
+    } catch {}
+  }, [favoriteTickers]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("find_profiler_custom_stocks", JSON.stringify(customTickers));
+    } catch {}
+  }, [customTickers]);
+
+  // Persist canvasViewMode
+  useEffect(() => {
+    try {
+      localStorage.setItem("find_canvas_view_mode", canvasViewMode);
+    } catch {}
+  }, [canvasViewMode]);
 
   // Persist activeNavTab & keep URL hash in sync for persistent page refreshes
   useEffect(() => {
@@ -185,6 +263,22 @@ export const App: React.FC = () => {
     );
   };
 
+  const handleToggleFavoriteStock = (ticker: string) => {
+    const clean = ticker.toUpperCase().trim();
+    setFavoriteTickers((prev) =>
+      prev.includes(clean) ? prev.filter((t) => t !== clean) : [clean, ...prev]
+    );
+  };
+
+  const handleAddCustomStockToProfiler = (ticker: string) => {
+    const clean = ticker.toUpperCase().trim();
+    setCustomTickers((prev) => (prev.includes(clean) ? prev : [clean, ...prev]));
+    setFavoriteTickers((prev) => (prev.includes(clean) ? prev : [clean, ...prev]));
+    setSelectedProfilerTicker(clean);
+    setActiveNavTab("asset_profiler");
+    showToast(`✅ Added ${clean} to Asset Profiler & Watchlist`);
+  };
+
   // Handle Event Analysis from Search Bar
   const handleAnalyzeEvent = async (query: string) => {
     setIsAnalyzing(true);
@@ -200,7 +294,7 @@ export const App: React.FC = () => {
       lower.includes("h-1b") ||
       lower.includes("h1b")
     ) {
-      await new Promise((r) => setTimeout(r, 2800));
+      await new Promise((r) => setTimeout(r, 150));
       const visaScenario =
         scenarios.find((s) => s.id === "us-perm-visa-suspension") || scenarios[0];
       setActiveScenario(visaScenario);
@@ -223,13 +317,18 @@ export const App: React.FC = () => {
 
     if (isTickerOrCompany) {
       try {
-        const stockTicker = lower.includes("tata") ? "TATAMOTORS.NS" :
+        const stockTicker = lower.includes("steel") || lower.includes("tata") ? "TATASTEEL.NS" :
                             lower.includes("reliance") ? "RELIANCE.NS" :
                             lower.includes("hdfc") ? "HDFCBANK.NS" :
+                            lower.includes("icici") ? "ICICIBANK.NS" :
                             lower.includes("paint") || lower.includes("asian") ? "ASIANPAINT.NS" :
                             lower.includes("tcs") ? "TCS.NS" :
                             lower.includes("maruti") ? "MARUTI.NS" :
-                            lower.includes("infy") ? "INFY.NS" :
+                            lower.includes("airtel") || lower.includes("bharti") ? "BHARTIARTL.NS" :
+                            lower.includes("nvda") || lower.includes("nvidia") ? "NVDA" :
+                            lower.includes("coal") ? "COALINDIA.NS" :
+                            lower.includes("jsw") ? "JSWSTEEL.NS" :
+                            lower.includes("infy") || lower.includes("infosys") ? "INFY.NS" :
                             query.trim().toUpperCase();
 
         const generated = await generateStockScenario(stockTicker, query);
@@ -347,7 +446,7 @@ export const App: React.FC = () => {
                 position: "bottom-left",
                 timeHorizon: "2–4 months",
                 lineType: "negative",
-                tickers: ["TATAMOTORS.NS", "ASIANPAINT.NS"],
+                tickers: ["TATASTEEL.NS", "ASIANPAINT.NS"],
               },
               {
                 id: "defensive-sectors",
@@ -424,7 +523,7 @@ export const App: React.FC = () => {
       setHasUserSynthesized(true);
       setIsAnalyzing(false);
       showToast('✅ Event analysis complete — propagation paths traced');
-    }, 1500);
+    }, 150);
   };
 
   // Node Click: sets selected node to dynamically branch out its relations on canvas
@@ -560,21 +659,35 @@ export const App: React.FC = () => {
                         setSelectedNode(null);
                         setSelectedHop(null);
                       }}
+                      canvasViewMode={canvasViewMode}
+                      onCanvasViewModeChange={setCanvasViewMode}
                     />
 
-                    {/* The Radial Transmission Canvas */}
-                    <RadialTransmissionCanvas
-                      scenario={activeScenario}
-                      selectedNodeId={selectedNode?.id || null}
-                      onSelectNode={handleSelectNode}
-                      onOpenRegressionModal={() => setIsRegressionModalOpen(true)}
-                      onOpenStockDrilldown={(node) => {
-                        setSelectedNode(node);
-                        setIsDrilldownOpen(true);
-                      }}
-                      extendedNodeIds={extendedNodeIds}
-                      onToggleExtendNode={handleToggleExtendNode}
-                    />
+                    {/* Canvas View Engine: Radial 360° Topology vs FinGraph Multi-Tier DAG Engine */}
+                    {canvasViewMode === "radial" ? (
+                      <RadialTransmissionCanvas
+                        scenario={activeScenario}
+                        selectedNodeId={selectedNode?.id || null}
+                        onSelectNode={handleSelectNode}
+                        onOpenRegressionModal={() => setIsRegressionModalOpen(true)}
+                        onOpenStockDrilldown={(node) => {
+                          setSelectedNode(node);
+                          setIsDrilldownOpen(true);
+                        }}
+                        extendedNodeIds={extendedNodeIds}
+                        onToggleExtendNode={handleToggleExtendNode}
+                        onSwitchToFinGraph={() => setCanvasViewMode("fingraph_dag")}
+                      />
+                    ) : (
+                      <FinGraphEngineView
+                        scenario={activeScenario}
+                        onToggleViewMode={() => setCanvasViewMode("radial")}
+                        onOpenStockDrilldown={(node) => {
+                          setSelectedNode(node);
+                          setIsDrilldownOpen(true);
+                        }}
+                      />
+                    )}
                   </>
                 )}
               </>
@@ -645,7 +758,7 @@ export const App: React.FC = () => {
                   {(historicalEra === 'All' || historicalEra === '2000s') && (
                   <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col gap-3">
                     <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200">
+                      <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-200">
                         Banking Failure • 2008
                       </span>
                       <span className="text-xs font-mono text-slate-400">Peak VIX: 89.5</span>
@@ -798,24 +911,6 @@ export const App: React.FC = () => {
               <AuditReportsView />
             )}
 
-            {/* Saved Watchlists Tab */}
-            {activeNavTab === "saved_analyses" && (
-              <SavedWatchlistsView
-                onLoadScenario={(scenarioId) => {
-                  const targetScenario = scenarios.find((s) => s.id === scenarioId) || 
-                    (scenarioId === "oil-supply-shock" ? scenarios[0] :
-                     scenarioId === "tsmc-supply-chain" ? scenarios[1] :
-                     scenarioId === "rbi-rate-decision" ? scenarios[2] : scenarios[0]);
-                  if (targetScenario) {
-                    setActiveScenario(targetScenario);
-                  }
-                  setSelectedNode(null);
-                  setSelectedHop(null);
-                  setActiveNavTab("impact_graph");
-                }}
-              />
-            )}
-
             {/* Methodology & Documentation Tab */}
             {activeNavTab === "help_docs" && (
               <MethodologyDocsView />
@@ -824,6 +919,28 @@ export const App: React.FC = () => {
             {/* Market Overview Tab */}
             {activeNavTab === "overview" && (
               <MarketOverviewView />
+            )}
+
+            {/* Asset Profiler — TradingView Superchart, All Stocks Screener & Fav Stocks News */}
+            {activeNavTab === "asset_profiler" && (
+              <AssetProfilerView
+                selectedTicker={selectedProfilerTicker}
+                onSelectTicker={setSelectedProfilerTicker}
+                favoriteTickers={favoriteTickers}
+                onToggleFavorite={handleToggleFavoriteStock}
+                customTickers={customTickers}
+                onAddCustomStock={handleAddCustomStockToProfiler}
+                onOpenAddStockModal={() => setIsAddStockOpen(true)}
+                onApplyScenario={(newSc) => {
+                  setScenarios((prev) => [newSc, ...prev]);
+                  setActiveScenario(newSc);
+                  setSelectedNode(null);
+                  setSelectedHop(null);
+                  setHasUserSynthesized(true);
+                  setActiveNavTab("impact_graph");
+                  showToast(`⚡ Synthesized causal graph for ${newSc.title}`);
+                }}
+              />
             )}
           </main>
 
@@ -860,11 +977,13 @@ export const App: React.FC = () => {
       <AddStockModal
         isOpen={isAddStockOpen}
         onClose={() => setIsAddStockOpen(false)}
+        onAddStockToProfiler={handleAddCustomStockToProfiler}
         onApplyScenario={(newSc) => {
           setScenarios((prev) => [newSc, ...prev]);
           setActiveScenario(newSc);
           setSelectedNode(null);
           setSelectedHop(null);
+          setHasUserSynthesized(true);
           setActiveNavTab("impact_graph");
         }}
       />
@@ -873,7 +992,7 @@ export const App: React.FC = () => {
       <EventRegressionModal
         isOpen={isRegressionModalOpen}
         scenario={activeScenario}
-        onConfirm={(calibration) => {
+        onConfirm={(_calibration) => {
           setIsRegressionModalOpen(false);
           setActiveNavTab("impact_graph");
         }}

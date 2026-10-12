@@ -8,15 +8,15 @@ import yfinance as yf
 # Pre-indexed reference data for instant search & high-speed autocomplete
 EQUITY_UNIVERSE = [
     {
-        "ticker": "TATAMOTORS.NS",
-        "symbol": "TATAMOTORS",
-        "name": "Tata Motors Ltd",
+        "ticker": "M&M.NS",
+        "symbol": "M&M",
+        "name": "Mahindra & Mahindra Ltd",
         "sector": "Automotive",
-        "industry": "Commercial & Passenger Vehicles",
+        "industry": "SUVs, Farm Equipment & Commercial Vehicles",
         "exchange": "NSE",
         "country": "India",
         "currency": "INR",
-        "market_cap": "₹3.28T"
+        "market_cap": "₹3.68T"
     },
     {
         "ticker": "RELIANCE.NS",
@@ -248,24 +248,233 @@ EQUITY_UNIVERSE = [
         "country": "United States",
         "currency": "USD",
         "market_cap": "$3.42T"
+    },
+    {
+        "ticker": "MSFT",
+        "symbol": "MSFT",
+        "name": "Microsoft Corporation",
+        "sector": "Enterprise Software",
+        "industry": "Cloud Computing & AI Infrastructure",
+        "exchange": "NASDAQ",
+        "country": "United States",
+        "currency": "USD",
+        "market_cap": "$3.15T"
+    },
+    {
+        "ticker": "GOOGL",
+        "symbol": "GOOGL",
+        "name": "Alphabet Inc.",
+        "sector": "Digital Services",
+        "industry": "Search Engine, YouTube & Cloud AI",
+        "exchange": "NASDAQ",
+        "country": "United States",
+        "currency": "USD",
+        "market_cap": "$2.28T"
+    },
+    {
+        "ticker": "AMZN",
+        "symbol": "AMZN",
+        "name": "Amazon.com Inc.",
+        "sector": "Consumer Discretionary",
+        "industry": "E-Commerce & AWS Cloud",
+        "exchange": "NASDAQ",
+        "country": "United States",
+        "currency": "USD",
+        "market_cap": "$2.05T"
+    },
+    {
+        "ticker": "TSLA",
+        "symbol": "TSLA",
+        "name": "Tesla Inc.",
+        "sector": "Automotive & Clean Energy",
+        "industry": "Electric Vehicles, Megapack & FSD",
+        "exchange": "NASDAQ",
+        "country": "United States",
+        "currency": "USD",
+        "market_cap": "$780B"
+    },
+    {
+        "ticker": "META",
+        "symbol": "META",
+        "name": "Meta Platforms Inc.",
+        "sector": "Digital Media & AI",
+        "industry": "Social Networks & Llama Open-Source AI",
+        "exchange": "NASDAQ",
+        "country": "United States",
+        "currency": "USD",
+        "market_cap": "$1.48T"
+    },
+    {
+        "ticker": "AMD",
+        "symbol": "AMD",
+        "name": "Advanced Micro Devices Inc.",
+        "sector": "Semiconductors",
+        "industry": "Data Center CPUs & AI Accelerators",
+        "exchange": "NASDAQ",
+        "country": "United States",
+        "currency": "USD",
+        "market_cap": "$252B"
+    },
+    {
+        "ticker": "PLTR",
+        "symbol": "PLTR",
+        "name": "Palantir Technologies Inc.",
+        "sector": "Defense & Enterprise AI",
+        "industry": "AI Platform AIP & Government Analytics",
+        "exchange": "NYSE",
+        "country": "United States",
+        "currency": "USD",
+        "market_cap": "$95B"
+    },
+    {
+        "ticker": "JSWSTEEL.NS",
+        "symbol": "JSWSTEEL",
+        "name": "JSW Steel Ltd",
+        "sector": "Metals & Mining",
+        "industry": "Integrated Steel Manufacturing",
+        "exchange": "NSE",
+        "country": "India",
+        "currency": "INR",
+        "market_cap": "₹2.38T"
+    },
+    {
+        "ticker": "COALINDIA.NS",
+        "symbol": "COALINDIA",
+        "name": "Coal India Ltd",
+        "sector": "Energy & Mining",
+        "industry": "Thermal & Coking Coal Production",
+        "exchange": "NSE",
+        "country": "India",
+        "currency": "INR",
+        "market_cap": "₹2.97T"
+    },
+    {
+        "ticker": "IOCL.NS",
+        "symbol": "IOCL",
+        "name": "Indian Oil Corporation Ltd",
+        "sector": "Energy",
+        "industry": "Oil Refining & Downstream Fuel Retailing",
+        "exchange": "NSE",
+        "country": "India",
+        "currency": "INR",
+        "market_cap": "₹2.52T"
+    },
+    {
+        "ticker": "BPCL.NS",
+        "symbol": "BPCL",
+        "name": "Bharat Petroleum Corporation Ltd",
+        "sector": "Energy",
+        "industry": "Fuel Refining & Marketing Network",
+        "exchange": "NSE",
+        "country": "India",
+        "currency": "INR",
+        "market_cap": "₹1.48T"
+    },
+    {
+        "ticker": "ONGC.NS",
+        "symbol": "ONGC",
+        "name": "Oil & Natural Gas Corporation Ltd",
+        "sector": "Energy",
+        "industry": "Upstream Oil & Gas Exploration",
+        "exchange": "NSE",
+        "country": "India",
+        "currency": "INR",
+        "market_cap": "₹3.69T"
+    },
+    {
+        "ticker": "BEL.NS",
+        "symbol": "BEL",
+        "name": "Bharat Electronics Ltd",
+        "sector": "Aerospace & Defense",
+        "industry": "Defense Radars, Avionics & Electronic Warfare",
+        "exchange": "NSE",
+        "country": "India",
+        "currency": "INR",
+        "market_cap": "₹2.16T"
+    },
+    {
+        "ticker": "HAL.NS",
+        "symbol": "HAL",
+        "name": "Hindustan Aeronautics Ltd",
+        "sector": "Aerospace & Defense",
+        "industry": "Fighter Aircraft, Helicopters & Turbines",
+        "exchange": "NSE",
+        "country": "India",
+        "currency": "INR",
+        "market_cap": "₹3.11T"
+    },
+    {
+        "ticker": "ZOMATO.NS",
+        "symbol": "ZOMATO",
+        "name": "Zomato Ltd",
+        "sector": "Consumer Internet & Tech",
+        "industry": "Quick Commerce Blinkit & Food Delivery",
+        "exchange": "NSE",
+        "country": "India",
+        "currency": "INR",
+        "market_cap": "₹2.45T"
+    },
+    {
+        "ticker": "LT.NS",
+        "symbol": "LT",
+        "name": "Larsen & Toubro Ltd",
+        "sector": "Capital Goods & Infrastructure",
+        "industry": "EPC Projects, Heavy Engineering & Defense",
+        "exchange": "NSE",
+        "country": "India",
+        "currency": "INR",
+        "market_cap": "₹5.08T"
+    },
+    {
+        "ticker": "KOTAKBANK.NS",
+        "symbol": "KOTAKBANK",
+        "name": "Kotak Mahindra Bank Ltd",
+        "sector": "Financial Services",
+        "industry": "Private Banking, Asset Management & Cards",
+        "exchange": "NSE",
+        "country": "India",
+        "currency": "INR",
+        "market_cap": "₹3.58T"
+    },
+    {
+        "ticker": "AXISBANK.NS",
+        "symbol": "AXISBANK",
+        "name": "Axis Bank Ltd",
+        "sector": "Financial Services",
+        "industry": "Retail Lending & Corporate Banking",
+        "exchange": "NSE",
+        "country": "India",
+        "currency": "INR",
+        "market_cap": "₹3.68T"
+    },
+    {
+        "ticker": "MUTHOOTFIN.NS",
+        "symbol": "MUTHOOTFIN",
+        "name": "Muthoot Finance Ltd",
+        "sector": "Financial Services",
+        "industry": "Gold Jewelry Loans & Secured Lending",
+        "exchange": "NSE",
+        "country": "India",
+        "currency": "INR",
+        "market_cap": "₹760B"
     }
 ]
 
 # Curated institutional transmission templates for sectors and equities
 SUPPLY_CHAIN_MAPPINGS: Dict[str, Dict[str, Any]] = {
-    "TATAMOTORS.NS": {
+    "M&M.NS": {
         "sector_index": "Nifty Auto Index",
         "upstream_inputs": [
             {"title": "Hot-Rolled Sheet Steel", "metric": "+4.8%", "metricColor": "red", "category": "commodity", "badge": "Input Commodity", "badgeType": "amber", "icon": "factory", "horizon": "1–3 months"},
             {"title": "Automotive Chips & ECUs", "metric": "Stable", "metricColor": "blue", "category": "commodity", "badge": "Critical Component", "badgeType": "blue", "icon": "chip", "horizon": "Immediate"}
         ],
         "downstream_impacts": [
-            {"title": "Commercial Fleet Logistics", "metric": "-2.4%", "metricColor": "red", "category": "sector", "badge": "Freight Demand", "badgeType": "red", "icon": "ship", "horizon": "1–6 months"},
+            {"title": "Rural Farm & Tractor Incomes", "metric": "+3.4%", "metricColor": "green", "category": "sector", "badge": "Agri Demand", "badgeType": "green", "icon": "factory", "horizon": "1–6 months"},
             {"title": "Auto NBFC & Loan Rates", "metric": "8.75% avg", "metricColor": "blue", "category": "economic_variable", "badge": "Credit Transmission", "badgeType": "amber", "icon": "bank", "horizon": "1–3 months"}
         ],
         "competitors": [
-            {"title": "Mahindra & Mahindra", "metric": "+1.8%", "metricColor": "green", "category": "company", "badge": "SUV Competitor", "badgeType": "green", "icon": "factory", "horizon": "Immediate"},
-            {"title": "Maruti Suzuki", "metric": "+0.4%", "metricColor": "blue", "category": "company", "badge": "PV Peer", "badgeType": "blue", "icon": "factory", "horizon": "Immediate"}
+            {"title": "Maruti Suzuki", "metric": "+0.4%", "metricColor": "blue", "category": "company", "badge": "PV Peer", "badgeType": "blue", "icon": "factory", "horizon": "Immediate"},
+            {"title": "Hyundai Motor India", "metric": "+1.1%", "metricColor": "green", "category": "company", "badge": "SUV Competitor", "badgeType": "green", "icon": "factory", "horizon": "Immediate"}
         ]
     },
     "RELIANCE.NS": {
@@ -330,39 +539,55 @@ SUPPLY_CHAIN_MAPPINGS: Dict[str, Dict[str, Any]] = {
     }
 }
 
-def search_equities(query: str, limit: int = 10) -> List[Dict[str, Any]]:
-    """Search pre-indexed equities and match ticker, company name, or sector."""
-    q = query.strip().upper()
-    if not q:
+def search_equities(query: str, limit: int = 15) -> List[Dict[str, Any]]:
+    """
+    Search pre-indexed equities with tokenized matching (e.g. 'tata steel' -> Tata Steel Ltd / TATASTEEL.NS)
+    and dynamic fallback ticker synthesis so Indian and International users can profile ANY equity.
+    """
+    raw = query.strip()
+    if not raw:
         return EQUITY_UNIVERSE[:limit]
+    
+    tokens = raw.lower().split()
+    compact = raw.upper().replace(" ", "")
     
     matches = []
     for item in EQUITY_UNIVERSE:
-        if (q in item["symbol"] or 
-            q in item["ticker"] or 
-            q.lower() in item["name"].lower() or 
-            q.lower() in item["sector"].lower() or 
-            q.lower() in item["industry"].lower()):
+        # Check tokenized match: every token must match somewhere in the asset metadata
+        sym_l = item["symbol"].lower()
+        tick_l = item["ticker"].lower()
+        name_l = item["name"].lower()
+        sec_l = item["sector"].lower()
+        ind_l = item["industry"].lower()
+        
+        token_match = all(t in sym_l or t in tick_l or t in name_l or t in sec_l or t in ind_l for t in tokens)
+        compact_match = compact in item["symbol"].upper() or compact in item["ticker"].upper()
+        
+        if token_match or compact_match:
             matches.append(item)
             
-    # If no local catalog match, construct dynamic ticker item
-    if not matches and len(query.strip()) >= 2:
-        clean_tick = query.strip().upper()
-        if not clean_tick.endswith(".NS") and not clean_tick.endswith(".BO") and len(clean_tick) <= 12 and not any(c in clean_tick for c in [":", " "]):
+    # If no local catalog match and user provided at least 2 characters, construct dynamic ticker item
+    if not matches and len(raw) >= 2:
+        clean_tick = compact
+        is_us = any(clean_tick == us_sym for us_sym in ["PLTR", "ARM", "SMCI", "INTC", "BABA", "UBER", "COIN", "ORCL", "NFLX", "CRM"])
+        
+        if not is_us and not clean_tick.endswith(".NS") and not clean_tick.endswith(".BO") and not clean_tick.endswith(".BSE"):
             clean_tick += ".NS"
+            
         matches.append({
             "ticker": clean_tick,
-            "symbol": clean_tick.replace(".NS", ""),
-            "name": f"{clean_tick.replace('.NS', '')} Equity",
-            "sector": "Equity Asset",
-            "industry": "Market Security",
-            "exchange": "NSE" if ".NS" in clean_tick else "US",
-            "country": "India" if ".NS" in clean_tick else "Global",
-            "currency": "INR" if ".NS" in clean_tick else "USD",
-            "market_cap": "Dynamic"
+            "symbol": clean_tick.replace(".NS", "").replace(".BO", "").replace(".BSE", ""),
+            "name": f"{clean_tick.replace('.NS', '').replace('.BO', '')} Equity",
+            "sector": "Equity Market Asset",
+            "industry": "Listed Public Corporate",
+            "exchange": "NSE" if ".NS" in clean_tick else ("BSE" if ".BO" in clean_tick or ".BSE" in clean_tick else "US"),
+            "country": "India" if any(clean_tick.endswith(ext) for ext in [".NS", ".BO", ".BSE"]) else "United States",
+            "currency": "INR" if any(clean_tick.endswith(ext) for ext in [".NS", ".BO", ".BSE"]) else "USD",
+            "market_cap": "Live Calculation"
         })
         
     return matches[:limit]
+
 
 def fetch_live_news_feed(query: str, max_items: int = 6) -> List[Dict[str, Any]]:
     """

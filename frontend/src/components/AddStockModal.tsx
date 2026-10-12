@@ -18,6 +18,7 @@ import {
   DollarSign,
   Flame,
   Check,
+  Plus,
   X
 } from "lucide-react";
 
@@ -25,29 +26,41 @@ interface AddStockModalProps {
   isOpen: boolean;
   onClose: () => void;
   onApplyScenario: (scenario: FinGraphScenario) => void;
+  onAddStockToProfiler?: (ticker: string) => void;
 }
 
 const POPULAR_TICKERS = [
-  { ticker: "TATAMOTORS.NS", symbol: "TATAMOTORS", name: "Tata Motors", sector: "Auto", badge: "Commercial & PV" },
   { ticker: "RELIANCE.NS", symbol: "RELIANCE", name: "Reliance Industries", sector: "Energy", badge: "Oil & Petchem" },
-  { ticker: "HDFCBANK.NS", symbol: "HDFCBANK", name: "HDFC Bank", sector: "Banking", badge: "Private Credit" },
-  { ticker: "ASIANPAINT.NS", symbol: "ASIANPAINT", name: "Asian Paints", sector: "Paints", badge: "Coatings Leader" },
-  { ticker: "TCS.NS", symbol: "TCS", name: "TCS", sector: "IT", badge: "Global IT Services" },
-  { ticker: "ICICIBANK.NS", symbol: "ICICIBANK", name: "ICICI Bank", sector: "Banking", badge: "Universal Banking" },
-  { ticker: "MARUTI.NS", symbol: "MARUTI", name: "Maruti Suzuki", sector: "Auto", badge: "Passenger Cars" },
-  { ticker: "BHARTIARTL.NS", symbol: "BHARTIARTL", name: "Bharti Airtel", sector: "Telecom", badge: "5G & Telecom" },
+  { ticker: "HDFCBANK.NS", symbol: "HDFCBANK", name: "HDFC Bank Ltd", sector: "Banking", badge: "Private Credit" },
+  { ticker: "TCS.NS", symbol: "TCS", name: "TCS Ltd", sector: "IT", badge: "Global IT Services" },
+  { ticker: "INFY.NS", symbol: "INFY", name: "Infosys Ltd", sector: "IT", badge: "Digital Transformation" },
+  { ticker: "ICICIBANK.NS", symbol: "ICICIBANK", name: "ICICI Bank Ltd", sector: "Banking", badge: "Universal Banking" },
+  { ticker: "M&M.NS", symbol: "M&M", name: "Mahindra & Mahindra", sector: "Auto", badge: "SUVs & Farm Tech" },
+  { ticker: "TATASTEEL.NS", symbol: "TATASTEEL", name: "Tata Steel Ltd", sector: "Metals", badge: "Hot-Rolled & Rebar" },
+  { ticker: "COALINDIA.NS", symbol: "COALINDIA", name: "Coal India Ltd", sector: "Mining", badge: "Thermal Coal" },
+  { ticker: "IOCL.NS", symbol: "IOCL", name: "Indian Oil Corp", sector: "Energy", badge: "Downstream Fuels" },
+  { ticker: "BEL.NS", symbol: "BEL", name: "Bharat Electronics", sector: "Defense", badge: "Avionics & Radars" },
+  { ticker: "HAL.NS", symbol: "HAL", name: "Hindustan Aeronautics", sector: "Defense", badge: "Fighter Jets & Tejas" },
+  { ticker: "ZOMATO.NS", symbol: "ZOMATO", name: "Zomato Ltd", sector: "Tech", badge: "Quick Commerce Blinkit" },
+  { ticker: "SBIN.NS", symbol: "SBIN", name: "State Bank of India", sector: "Banking", badge: "Public Sector Banking" },
+  { ticker: "ASIANPAINT.NS", symbol: "ASIANPAINT", name: "Asian Paints Ltd", sector: "Paints", badge: "Coatings Leader" },
+  { ticker: "TITAN.NS", symbol: "TITAN", name: "Titan Company", sector: "Consumer", badge: "Tanishq & Jewelry" },
   { ticker: "NVDA", symbol: "NVDA", name: "NVIDIA Corp", sector: "Semiconductors", badge: "AI Accelerators" },
+  { ticker: "AAPL", symbol: "AAPL", name: "Apple Inc.", sector: "Hardware", badge: "iPhone & Services" },
+  { ticker: "MSFT", symbol: "MSFT", name: "Microsoft Corp", sector: "Cloud", badge: "Azure & Copilot" },
+  { ticker: "TSLA", symbol: "TSLA", name: "Tesla Inc.", sector: "Auto", badge: "EV & Energy Storage" },
 ];
 
 export const AddStockModal: React.FC<AddStockModalProps> = ({
   isOpen,
   onClose,
   onApplyScenario,
+  onAddStockToProfiler,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSector, setSelectedSector] = useState<string>("All");
   const [searchResults, setSearchResults] = useState<StockSearchResult[]>([]);
-  const [selectedStock, setSelectedStock] = useState<string>("TATAMOTORS.NS");
+  const [selectedStock, setSelectedStock] = useState<string>("RELIANCE.NS");
   const [stockProfile, setStockProfile] = useState<StockProfileData | null>(null);
   const [stockHistory, setStockHistory] = useState<StockHistory | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
@@ -153,8 +166,17 @@ export const AddStockModal: React.FC<AddStockModalProps> = ({
   const handleSetAlert = (e: React.FormEvent) => {
     e.preventDefault();
     if (!targetAlertPrice) return;
-    setAlertSuccessToast(`🎯 Price Alert Active: Monitoring Alpha Vantage feed for ${stockProfile?.symbol || selectedStock} <= ₹${targetAlertPrice}`);
-    setTimeout(() => setAlertSuccessToast(null), 4000);
+    try {
+      const existing = JSON.parse(localStorage.getItem("find_price_alerts") || "[]");
+      existing.push({
+        ticker: stockProfile?.symbol || selectedStock,
+        targetPrice: targetAlertPrice,
+        createdAt: new Date().toISOString(),
+      });
+      localStorage.setItem("find_price_alerts", JSON.stringify(existing));
+    } catch {}
+    setAlertSuccessToast(`🎯 Price Alert Saved: Monitoring live feed for ${stockProfile?.symbol || selectedStock} <= ₹${targetAlertPrice}`);
+    setTimeout(() => setAlertSuccessToast(null), 3000);
   };
 
   const sectors = ["All", "Automotive", "Energy", "Banking", "IT / Tech", "Paints", "Consumer"];
@@ -264,7 +286,7 @@ export const AddStockModal: React.FC<AddStockModalProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search ticker (TATAMOTORS, RELIANCE, TCS)..."
+              placeholder="Search any ticker (TATA STEEL, RELIANCE, NVDA)..."
               className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
             />
             <span className="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
@@ -295,6 +317,40 @@ export const AddStockModal: React.FC<AddStockModalProps> = ({
           </div>
         </div>
 
+        {/* Quick Discovery Chips */}
+        <div className="px-6 py-2 bg-slate-50/70 border-b border-slate-200/60 flex items-center gap-1.5 overflow-x-auto text-[11px]">
+          <span className="text-slate-500 font-mono flex items-center gap-1 shrink-0 font-medium">
+            <Zap className="w-3 h-3 text-amber-500" /> Quick Discovery:
+          </span>
+          {[
+            { name: "Tata Steel", ticker: "TATASTEEL.NS" },
+            { name: "Reliance", ticker: "RELIANCE.NS" },
+            { name: "Coal India", ticker: "COALINDIA.NS" },
+            { name: "BEL", ticker: "BEL.NS" },
+            { name: "Zomato", ticker: "ZOMATO.NS" },
+            { name: "NVIDIA", ticker: "NVDA" },
+            { name: "Apple", ticker: "AAPL" },
+            { name: "Tesla", ticker: "TSLA" },
+            { name: "HDFC Bank", ticker: "HDFCBANK.NS" },
+            { name: "TCS", ticker: "TCS.NS" },
+          ].map((chip) => (
+            <button
+              key={chip.ticker}
+              onClick={() => {
+                setSearchQuery(chip.name);
+                setSelectedStock(chip.ticker);
+              }}
+              className={`px-2.5 py-0.5 rounded-full border text-[10.5px] font-medium transition-all whitespace-nowrap cursor-pointer ${
+                selectedStock === chip.ticker
+                  ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:text-slate-900"
+              }`}
+            >
+              {chip.name}
+            </button>
+          ))}
+        </div>
+
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-200/80">
           
@@ -307,29 +363,58 @@ export const AddStockModal: React.FC<AddStockModalProps> = ({
 
             <div className="space-y-1.5">
               {searchQuery ? (
-                searchResults.map((item) => (
-                  <button
-                    key={item.ticker}
-                    onClick={() => setSelectedStock(item.ticker)}
-                    className={`w-full text-left p-3 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${
-                      selectedStock === item.ticker
-                        ? "bg-white border-blue-500 shadow-md ring-2 ring-blue-500/10 text-slate-900"
-                        : "bg-white border-slate-200/80 text-slate-700 hover:border-slate-300 hover:bg-slate-50/80 shadow-2xs"
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-slate-900">{item.symbol}</span>
-                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200 font-medium">{item.exchange}</span>
+                searchResults.length > 0 ? (
+                  searchResults.map((item) => (
+                    <button
+                      key={item.ticker}
+                      onClick={() => setSelectedStock(item.ticker)}
+                      className={`w-full text-left p-3 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${
+                        selectedStock === item.ticker
+                          ? "bg-white border-blue-500 shadow-md ring-2 ring-blue-500/10 text-slate-900"
+                          : "bg-white border-slate-200/80 text-slate-700 hover:border-slate-300 hover:bg-slate-50/80 shadow-2xs"
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold text-slate-900">{item.symbol}</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200 font-medium">{item.exchange}</span>
+                        </div>
+                        <p className="text-[11.5px] text-slate-500 truncate max-w-[170px] mt-0.5">{item.name}</p>
                       </div>
-                      <p className="text-[11.5px] text-slate-500 truncate max-w-[170px] mt-0.5">{item.name}</p>
+                      <div className="text-right">
+                        <span className="text-[11px] text-blue-600 font-semibold block">{item.sector}</span>
+                        <span className="text-[10px] text-slate-400 font-mono">{item.market_cap}</span>
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="p-4 rounded-2xl border border-blue-200 bg-blue-50/70 text-center space-y-2.5">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mx-auto text-sm">
+                      🔍
                     </div>
-                    <div className="text-right">
-                      <span className="text-[11px] text-blue-600 font-semibold block">{item.sector}</span>
-                      <span className="text-[10px] text-slate-400 font-mono">{item.market_cap}</span>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">
+                        Dynamic Equity Discovery
+                      </p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Add <strong className="text-blue-700 font-mono">"{searchQuery.toUpperCase()}"</strong> to live stream.
+                      </p>
                     </div>
-                  </button>
-                ))
+                    <button
+                      onClick={() => {
+                        const cleanSym = searchQuery.trim().toUpperCase().replace(/\s+/g, "");
+                        const tick = cleanSym.includes(".") || ["PLTR", "ARM", "SMCI", "INTC", "BABA", "UBER", "COIN", "ORCL", "NFLX", "CRM", "AMD", "META", "TSLA", "AAPL", "MSFT", "GOOGL", "AMZN"].includes(cleanSym)
+                          ? cleanSym
+                          : `${cleanSym}.NS`;
+                        setSelectedStock(tick);
+                      }}
+                      className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs cursor-pointer transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Profile {searchQuery.toUpperCase()} Live</span>
+                    </button>
+                  </div>
+                )
               ) : (
                 filteredPopular.map((item) => (
                   <button
@@ -441,7 +526,7 @@ export const AddStockModal: React.FC<AddStockModalProps> = ({
                       onClick={() => setActiveTab("supply_chain")}
                       className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                         activeTab === "supply_chain"
-                          ? "bg-purple-700 text-white shadow-xs font-semibold"
+                          ? "bg-indigo-600 text-white shadow-xs font-semibold"
                           : "bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70"
                       }`}
                     >
@@ -724,7 +809,7 @@ export const AddStockModal: React.FC<AddStockModalProps> = ({
                         </div>
                         <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex justify-between items-center">
                           <span className="text-slate-700 font-medium">Institutional Accumulation Flow</span>
-                          <span className="text-purple-700 font-mono font-bold">+12 pts</span>
+                          <span className="text-indigo-700 font-mono font-bold">+12 pts</span>
                         </div>
                       </div>
                     </div>
@@ -883,28 +968,43 @@ export const AddStockModal: React.FC<AddStockModalProps> = ({
                   </div>
                 )}
 
-                {/* Primary CTA Button */}
-                <div className="pt-3 flex items-center justify-between border-t border-slate-200">
+                {/* Primary CTA Buttons */}
+                <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-200">
                   <div className="text-xs text-slate-500">
-                    Projects <span className="text-slate-900 font-bold">{stockProfile.name}</span> across radial supply chain & sectors.
+                    Add <span className="text-slate-900 font-bold">{stockProfile.name}</span> to Asset Profiler or project onto Impact Graph.
                   </div>
-                  <button
-                    onClick={() => handleLaunchScenario()}
-                    disabled={isGenerating}
-                    className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Calculating Shock Pathways...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Project Transmission Graph on Canvas</span>
-                        <span>→</span>
-                      </>
+                  <div className="flex items-center gap-2 flex-wrap justify-end">
+                    {onAddStockToProfiler && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onAddStockToProfiler(selectedStock);
+                          onClose();
+                        }}
+                        className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-bold shadow-sm hover:shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add to Asset Profiler & Watchlist</span>
+                      </button>
                     )}
-                  </button>
+                    <button
+                      onClick={() => handleLaunchScenario()}
+                      disabled={isGenerating}
+                      className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+                    >
+                      {isGenerating ? (
+                        <>
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span>Calculating Shock Pathways...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Project Transmission Graph</span>
+                          <span>→</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </>
             ) : (

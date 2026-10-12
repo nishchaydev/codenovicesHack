@@ -70,11 +70,11 @@ export const EventRegressionModal: React.FC<EventRegressionModalProps> = ({
 
     setTimeout(() => {
       setComputeStep("Calculating covariance matrix & transmission decay factors...");
-    }, 400);
+    }, 100);
 
     setTimeout(() => {
       setComputeStep("Sorting causal nodes by impact magnitude priority (P1 Critical first)...");
-    }, 750);
+    }, 200);
 
     setTimeout(() => {
       setIsComputing(false);
@@ -95,7 +95,7 @@ export const EventRegressionModal: React.FC<EventRegressionModalProps> = ({
         tStat: 3.86,
         pValue: 0.001,
       });
-    }, 1100);
+    }, 320);
   };
 
   return (

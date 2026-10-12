@@ -8,7 +8,6 @@ import {
   History, 
   Grid,
   FileText,
-  Bookmark, 
   Pin, 
   PinOff, 
   EyeOff, 
@@ -32,7 +31,6 @@ export type NavTab =
   | "contagion_matrix" 
   | "geo_map"
   | "audit_reports" 
-  | "saved_analyses" 
   | "settings" 
   | "help_docs";
 
@@ -71,7 +69,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpen
     { id: "contagion_matrix", label: "Sector Heatmap", icon: <Grid className="w-4 h-4 flex-shrink-0 text-emerald-600" />, badge: "HEATMAP" },
     { id: "geo_map", label: "Geo News Map", icon: <Network className="w-4 h-4 flex-shrink-0 text-sky-500" />, badge: "GEO" },
     { id: "audit_reports", label: "Audit Reports", icon: <FileText className="w-4 h-4 flex-shrink-0 text-[#626260]" />, badge: "LOGS" },
-    { id: "saved_analyses", label: "Saved Watchlists", icon: <Bookmark className="w-4 h-4 flex-shrink-0 text-[#626260]" /> },
   ];
 
   // System & Methodology Settings
@@ -112,10 +109,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpen
           return (
             <button
               key={item.id}
-              onClick={() => {
-                if (item.id === "asset_profiler" && onOpenAddStock) onOpenAddStock();
-                else onTabChange(item.id);
-              }}
+              onClick={() => onTabChange(item.id)}
               className={`w-full flex items-center justify-start gap-3 py-2 px-2.5 rounded-lg text-xs relative transition-colors duration-150 cursor-pointer ${
                 isActive ? "bg-[#111111] text-white font-medium shadow-xs" : "text-[#626260] hover:text-[#111111] hover:bg-black/5"
               }`}

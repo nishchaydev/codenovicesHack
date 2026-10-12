@@ -44,12 +44,13 @@ export const LiveMarketTicker: React.FC = () => {
       setIsLoading(false);
     }
 
-    // Micro-fluctuation fallback so ticker always lives and streams
+    // Micro-fluctuation fallback so ticker always lives and streams while mathematically locked
     setQuotes((prev) =>
       prev.map((q) => {
+        const pClose = q.price / (1 + q.change_pct / 100);
         const deltaPct = (Math.random() - 0.49) * 0.15;
         const newPrice = Math.max(0.1, Number((q.price * (1 + deltaPct / 100)).toFixed(2)));
-        const newChg = Number((q.change_pct + deltaPct).toFixed(2));
+        const newChg = Number((((newPrice - pClose) / pClose) * 100).toFixed(2));
         return {
           ...q,
           price: newPrice,
