@@ -253,7 +253,7 @@ export const ThinkBeforeBuyCard: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">
-                Card 3 • Valuation & Timing Engine
+                Card 1 • Valuation & Timing Engine
               </span>
               <span className="text-[10px] font-mono text-slate-400">
                 Live Algorithmic Scoring
@@ -295,180 +295,7 @@ export const ThinkBeforeBuyCard: React.FC = () => {
         </div>
       </div>
 
-      {/* ─── 1. PRICE HISTORY CHART (EXACT MATCH FROM IMAGE 1) ─── */}
-      <div className="rounded-[20px] bg-white border border-slate-200/90 shadow-2xs p-4 sm:p-6 flex flex-col gap-4">
-        {/* Header with Title and 1 Month / 3 Month / Max Selector */}
-        <div className="flex items-center justify-between gap-3">
-          <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-            Price History
-          </h3>
-
-          <div className="flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl">
-            {(["1 Month", "3 Month", "Max"] as const).map((r) => {
-              const code = r === "1 Month" ? "1M" : r === "3 Month" ? "3M" : "Max";
-              const isActive = timeRange === code;
-              return (
-                <button
-                  key={r}
-                  onClick={() => setTimeRange(code)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    isActive
-                      ? "bg-white text-indigo-700 shadow-xs"
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  {r}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* SVG Interactive Area Chart Container */}
-        <div className="w-full overflow-x-auto">
-          <div className="min-w-[640px] relative">
-            <svg
-              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-              className="w-full h-auto select-none overflow-visible"
-              onMouseLeave={() => setHoverIndex(null)}
-            >
-              <defs>
-                {/* Yellow-Amber to Mint-Green Gradient Fill Under Curve (Exact Image 1 Match) */}
-                <linearGradient id="priceDropGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#fef08a" stopOpacity="0.75" />
-                  <stop offset="60%" stopColor="#d1fae5" stopOpacity="0.45" />
-                  <stop offset="100%" stopColor="#ecfdf5" stopOpacity="0.02" />
-                </linearGradient>
-
-                <filter id="chartGlow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#ef4444" floodOpacity="0.25" />
-                </filter>
-              </defs>
-
-              {/* Horizontal Gridlines & Y-Axis Labels */}
-              {([
-                { val: maxPriceScale, label: maxPriceScale > 2000 ? "₹3.5K" : "₹1.5K" },
-                { val: maxPriceScale > 2000 ? 2500 : 1000, label: maxPriceScale > 2000 ? "₹2.5K" : "₹1000" },
-                { val: maxPriceScale > 2000 ? 1500 : 500, label: maxPriceScale > 2000 ? "₹1.5K" : "₹500" },
-                { val: minPriceScale, label: "0" },
-              ]).map((tick, i) => {
-                const yPos = getY(tick.val);
-                return (
-                  <g key={i}>
-                    <line
-                      x1={paddingLeft}
-                      y1={yPos}
-                      x2={chartWidth - paddingRight}
-                      y2={yPos}
-                      stroke="#f1f5f9"
-                      strokeWidth="1.2"
-                      strokeDasharray={tick.val === 0 ? undefined : "3,3"}
-                    />
-                    <text
-                      x={paddingLeft - 12}
-                      y={yPos + 4}
-                      textAnchor="end"
-                      fontSize="11.5"
-                      fontWeight="600"
-                      fill="#94a3b8"
-                      className="font-mono"
-                    >
-                      {tick.label}
-                    </text>
-                  </g>
-                );
-              })}
-
-              {/* Gradient Area Fill */}
-              {areaPath && (
-                <path d={areaPath} fill="url(#priceDropGradient)" />
-              )}
-
-              {/* Stepped / Smooth Red Price Line */}
-              {linePath && (
-                <path
-                  d={linePath}
-                  fill="none"
-                  stroke="#ef4444"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  filter="url(#chartGlow)"
-                />
-              )}
-
-              {/* X-Axis Date Labels & Hover Target Circles */}
-              {dataPoints.map((pt, idx) => {
-                const cx = getX(idx);
-                const cy = getY(pt.price);
-                const isHovered = hoverIndex === idx;
-
-                return (
-                  <g key={idx}>
-                    {/* Date label at bottom */}
-                    <text
-                      x={cx}
-                      y={chartHeight - paddingBottom + 22}
-                      textAnchor="middle"
-                      fontSize="10.5"
-                      fontWeight="600"
-                      fill={isHovered ? "#0f172a" : "#64748b"}
-                      className="font-sans"
-                    >
-                      {pt.date}
-                    </text>
-
-                    {/* Interactive hover circle & target hit-area */}
-                    <circle
-                      cx={cx}
-                      cy={cy}
-                      r="16"
-                      fill="transparent"
-                      className="cursor-pointer"
-                      onMouseEnter={() => setHoverIndex(idx)}
-                    />
-
-                    {isHovered && (
-                      <g>
-                        {/* Vertical dotted guide line */}
-                        <line
-                          x1={cx}
-                          y1={paddingTop}
-                          x2={cx}
-                          y2={chartHeight - paddingBottom}
-                          stroke="#cbd5e1"
-                          strokeWidth="1.5"
-                          strokeDasharray="3,3"
-                        />
-                        {/* Point dot */}
-                        <circle cx={cx} cy={cy} r="6" fill="#ef4444" stroke="#ffffff" strokeWidth="2.5" />
-                      </g>
-                    )}
-                  </g>
-                );
-              })}
-            </svg>
-
-            {/* Floating Tooltip Pill */}
-            {hoverIndex !== null && dataPoints[hoverIndex] && (
-              <div
-                className="absolute z-30 pointer-events-none -translate-x-1/2 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs shadow-xl flex items-center gap-2 border border-slate-700 animate-in fade-in duration-100"
-                style={{
-                  left: `${(getX(hoverIndex) / chartWidth) * 100}%`,
-                  top: `${Math.max(10, getY(dataPoints[hoverIndex].price) - 38)}px`,
-                }}
-              >
-                <span className="font-mono text-slate-300">{dataPoints[hoverIndex].date}:</span>
-                <span className="font-bold font-mono text-emerald-400">
-                  ₹{dataPoints[hoverIndex].price.toLocaleString()}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ─── 2. DEAL SCANNER & PRICE DROP MATRIX (EXACT MATCH FROM IMAGES 2 & 3) ─── */}
+      {/* ─── 1. DEAL SCANNER & PRICE DROP MATRIX (EXACT MATCH FROM IMAGES 2 & 3) ─── */}
       <div className="rounded-[20px] bg-white border border-slate-200/90 shadow-2xs overflow-hidden flex flex-col">
         {/* Tab Header Switcher: Deal Scanner | Price Drop */}
         <div className="grid grid-cols-2 border-b border-slate-200 bg-slate-50/50">
@@ -768,6 +595,179 @@ export const ThinkBeforeBuyCard: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* ─── 2. PRICE HISTORY CHART (EXACT MATCH FROM IMAGE 1) ─── */}
+      <div className="rounded-[20px] bg-white border border-slate-200/90 shadow-2xs p-4 sm:p-6 flex flex-col gap-4">
+        {/* Header with Title and 1 Month / 3 Month / Max Selector */}
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+            Price History
+          </h3>
+
+          <div className="flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl">
+            {(["1 Month", "3 Month", "Max"] as const).map((r) => {
+              const code = r === "1 Month" ? "1M" : r === "3 Month" ? "3M" : "Max";
+              const isActive = timeRange === code;
+              return (
+                <button
+                  key={r}
+                  onClick={() => setTimeRange(code)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-white text-indigo-700 shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  {r}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* SVG Interactive Area Chart Container */}
+        <div className="w-full overflow-x-auto">
+          <div className="min-w-[640px] relative">
+            <svg
+              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+              className="w-full h-auto select-none overflow-visible"
+              onMouseLeave={() => setHoverIndex(null)}
+            >
+              <defs>
+                {/* Yellow-Amber to Mint-Green Gradient Fill Under Curve (Exact Image 1 Match) */}
+                <linearGradient id="priceDropGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#fef08a" stopOpacity="0.75" />
+                  <stop offset="60%" stopColor="#d1fae5" stopOpacity="0.45" />
+                  <stop offset="100%" stopColor="#ecfdf5" stopOpacity="0.02" />
+                </linearGradient>
+
+                <filter id="chartGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#ef4444" floodOpacity="0.25" />
+                </filter>
+              </defs>
+
+              {/* Horizontal Gridlines & Y-Axis Labels */}
+              {([
+                { val: maxPriceScale, label: maxPriceScale > 2000 ? "₹3.5K" : "₹1.5K" },
+                { val: maxPriceScale > 2000 ? 2500 : 1000, label: maxPriceScale > 2000 ? "₹2.5K" : "₹1000" },
+                { val: maxPriceScale > 2000 ? 1500 : 500, label: maxPriceScale > 2000 ? "₹1.5K" : "₹500" },
+                { val: minPriceScale, label: "0" },
+              ]).map((tick, i) => {
+                const yPos = getY(tick.val);
+                return (
+                  <g key={i}>
+                    <line
+                      x1={paddingLeft}
+                      y1={yPos}
+                      x2={chartWidth - paddingRight}
+                      y2={yPos}
+                      stroke="#f1f5f9"
+                      strokeWidth="1.2"
+                      strokeDasharray={tick.val === 0 ? undefined : "3,3"}
+                    />
+                    <text
+                      x={paddingLeft - 12}
+                      y={yPos + 4}
+                      textAnchor="end"
+                      fontSize="11.5"
+                      fontWeight="600"
+                      fill="#94a3b8"
+                      className="font-mono"
+                    >
+                      {tick.label}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* Gradient Area Fill */}
+              {areaPath && (
+                <path d={areaPath} fill="url(#priceDropGradient)" />
+              )}
+
+              {/* Stepped / Smooth Red Price Line */}
+              {linePath && (
+                <path
+                  d={linePath}
+                  fill="none"
+                  stroke="#ef4444"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  filter="url(#chartGlow)"
+                />
+              )}
+
+              {/* X-Axis Date Labels & Hover Target Circles */}
+              {dataPoints.map((pt, idx) => {
+                const cx = getX(idx);
+                const cy = getY(pt.price);
+                const isHovered = hoverIndex === idx;
+
+                return (
+                  <g key={idx}>
+                    {/* Date label at bottom */}
+                    <text
+                      x={cx}
+                      y={chartHeight - paddingBottom + 22}
+                      textAnchor="middle"
+                      fontSize="10.5"
+                      fontWeight="600"
+                      fill={isHovered ? "#0f172a" : "#64748b"}
+                      className="font-sans"
+                    >
+                      {pt.date}
+                    </text>
+
+                    {/* Interactive hover circle & target hit-area */}
+                    <circle
+                      cx={cx}
+                      cy={cy}
+                      r="16"
+                      fill="transparent"
+                      className="cursor-pointer"
+                      onMouseEnter={() => setHoverIndex(idx)}
+                    />
+
+                    {isHovered && (
+                      <g>
+                        {/* Vertical dotted guide line */}
+                        <line
+                          x1={cx}
+                          y1={paddingTop}
+                          x2={cx}
+                          y2={chartHeight - paddingBottom}
+                          stroke="#cbd5e1"
+                          strokeWidth="1.5"
+                          strokeDasharray="3,3"
+                        />
+                        {/* Point dot */}
+                        <circle cx={cx} cy={cy} r="6" fill="#ef4444" stroke="#ffffff" strokeWidth="2.5" />
+                      </g>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+
+            {/* Floating Tooltip Pill */}
+            {hoverIndex !== null && dataPoints[hoverIndex] && (
+              <div
+                className="absolute z-30 pointer-events-none -translate-x-1/2 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs shadow-xl flex items-center gap-2 border border-slate-700 animate-in fade-in duration-100"
+                style={{
+                  left: `${(getX(hoverIndex) / chartWidth) * 100}%`,
+                  top: `${Math.max(10, getY(dataPoints[hoverIndex].price) - 38)}px`,
+                }}
+              >
+                <span className="font-mono text-slate-300">{dataPoints[hoverIndex].date}:</span>
+                <span className="font-bold font-mono text-emerald-400">
+                  ₹{dataPoints[hoverIndex].price.toLocaleString()}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ─── PRICE DROP ALERT MODAL ─── */}

@@ -1,13 +1,10 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { FinGraphScenario } from "../types";
 import { LiveMarketTicker } from "./LiveMarketTicker";
 import { ThinkBeforeBuyCard } from "./ThinkBeforeBuyCard";
 import { 
   Activity, 
-  Flame, 
-  ArrowRight, 
   ChevronRight, 
-  AlertTriangle, 
   TrendingDown, 
   Sparkles,
   Zap,
@@ -23,166 +20,18 @@ interface AIHubInsightsViewProps {
   onNavigateToGraph: () => void;
 }
 
-interface AIInsightItem {
-  id: string;
-  title: string;
-  category: "Macro Shock" | "Contagion Alert" | "Supply Chain" | "Corporate Margin" | "Central Bank";
-  urgency: "Critical" | "High" | "Moderate";
-  urgencyColor: "rose" | "amber" | "blue";
-  date: string;
-  summary: string;
-  causalChain: string[];
-  affectedTickers: Array<{ ticker: string; name: string; impact: string; isNegative: boolean }>;
-  transmissionHorizon: string;
-  scenarioId?: string;
-  confidenceScore: number;
-}
-
-const AI_INSIGHTS: AIInsightItem[] = [
-  {
-    id: "ins-1",
-    title: "Crude Oil Rally Induces 140–180 bps Margin Compression in Decorative Paints & Solvents",
-    category: "Corporate Margin",
-    urgency: "High",
-    urgencyColor: "rose",
-    date: "10 Oct 2026 • Real-Time AI Synthesis",
-    summary: "Brent crude holding above $82.40/bbl exerts immediate cost inflation on titanium dioxide (TiO2), phthalic anhydride, and solvent feedstocks. Because raw materials represent 50–55% of paint COGS, price pass-throughs lag by 45–60 days, dampening quarterly EBITDA margins.",
-    causalChain: ["Crude Oil Benchmark ($82.40)", "Petrochemical Solvents (+8.4%)", "Indian Paint Gross Margins (-160 bps)", "Retail Consumer Price Pass-Through"],
-    affectedTickers: [
-      { ticker: "ASIANPAINT.NS", name: "Asian Paints", impact: "-2.4% Est.", isNegative: true },
-      { ticker: "BERGEPAINT.NS", name: "Berger Paints", impact: "-3.1% Est.", isNegative: true },
-      { ticker: "INDIGO.NS", name: "IndiGo Airlines", impact: "-4.6% ATF Lag", isNegative: true },
-      { ticker: "RELIANCE.NS", name: "Reliance Ind.", impact: "+$1.80 GRM", isNegative: false },
-    ],
-    transmissionHorizon: "45–60 Days Lag",
-    scenarioId: "scenario_oil_shock",
-    confidenceScore: 94,
-  },
-  {
-    id: "ins-2",
-    title: "Automotive Commercial Vehicle Demand Sensitivity to Interbank Liquidity & NBFC Rates",
-    category: "Contagion Alert",
-    urgency: "Moderate",
-    urgencyColor: "amber",
-    date: "10 Oct 2026 • Autonomous Predictive Matrix",
-    summary: "Empirical transmission analysis shows commercial fleet financing demand decelerates -2.4% for every 25 bps tightening in NBFC borrowing costs. Tata Motors CV division experiences order backlog deferrals when freight operators face higher working capital financing.",
-    causalChain: ["System Liquidity Deficit", "NBFC Wholesale Borrowing Costs (+35 bps)", "Commercial Fleet Finance Rates (9.2%)", "CV Order Inflow Deceleration"],
-    affectedTickers: [
-      { ticker: "TATAMOTORS.NS", name: "Tata Motors", impact: "-1.8% CV Sensitivity", isNegative: true },
-      { ticker: "BAJFINANCE.NS", name: "Bajaj Finance", impact: "+18 bps NIM", isNegative: false },
-      { ticker: "HDFCBANK.NS", name: "HDFC Bank", impact: "Wholesale Credit Solid", isNegative: false },
-      { ticker: "MARUTI.NS", name: "Maruti Suzuki", impact: "PV Segment Resilient", isNegative: false },
-    ],
-    transmissionHorizon: "1–3 Months",
-    scenarioId: "scenario_tatamotors",
-    confidenceScore: 89,
-  },
-  {
-    id: "ins-3",
-    title: "Sub-5nm Wafer Outage Contagion: TSMC Fab 18 Disruption Cascades to Global AI & Auto MCUs",
-    category: "Supply Chain",
-    urgency: "Critical",
-    urgencyColor: "rose",
-    date: "09 Oct 2026 • Global Hardware Model",
-    summary: "Pure-play foundry capacity halt at TSMC Fab 18 triggers immediate inventory allocation rationing. Automotive electronic control units (ECUs) and enterprise GPU accelerators experience a 2–3 week delivery latency, forcing tier-1 assembly lines into safety stock depletion.",
-    causalChain: ["TSMC Fab 18 Wafer Halt", "Sub-5nm Packaging Bottleneck", "Automotive ECU Allocation Quotas", "Tier-1 Auto Assembler Delivery Delays"],
-    affectedTickers: [
-      { ticker: "TSM", name: "TSMC", impact: "Allocation Quotas", isNegative: true },
-      { ticker: "NVDA", name: "NVIDIA Corp", impact: "Lead-Time Buffer Stress", isNegative: true },
-      { ticker: "TCS.NS", name: "TCS", impact: "Enterprise Cloud Sustained", isNegative: false },
-    ],
-    transmissionHorizon: "Immediate to 2 Months",
-    scenarioId: "scenario_tsmc_shock",
-    confidenceScore: 96,
-  },
-  {
-    id: "ins-4",
-    title: "USD/INR Depreciatory Pressure Transmits $1.8B/Month Net Import Bill Expansion",
-    category: "Macro Shock",
-    urgency: "High",
-    urgencyColor: "rose",
-    date: "09 Oct 2026 • Macroeconomic Vector",
-    summary: "US Treasury yield divergence and sustained crude import invoices place upward pressure on USD/INR near 83.60. For India's net hydrocarbon import bill, this widens current account pressure by ~₹15,000 Cr/month, stimulating non-food wholesale price transmission.",
-    causalChain: ["US 10Y Yield Anchor (^TNX)", "FII Debt Portfolio Outflows", "USD/INR Currency Depreciation", "Domestic Petroleum Import Bill Spike"],
-    affectedTickers: [
-      { ticker: "DXY", name: "US Dollar Index", impact: "+0.8% Strength", isNegative: false },
-      { ticker: "TCS.NS", name: "TCS", impact: "+35 bps FX Tailwinds", isNegative: false },
-      { ticker: "INDIGO.NS", name: "IndiGo Airlines", impact: "FX Forex Leases Drag", isNegative: true },
-    ],
-    transmissionHorizon: "1–4 Weeks",
-    scenarioId: "scenario_oil_shock",
-    confidenceScore: 92,
-  },
-];
-
 export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
-  scenarios,
+  scenarios: _scenarios,
   activeScenario,
   hasUserSynthesized,
   onSelectScenario,
   onNavigateToGraph,
 }) => {
-  const [selectedFilter, setSelectedFilter] = useState<string>("All");
   const [radarTab, setRadarTab] = useState<"stocks" | "vectors">("stocks");
   const [userQuery, setUserQuery] = useState<string>("");
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [isSynthesizing, setIsSynthesizing] = useState<boolean>(false);
   const [activeCardModule, setActiveCardModule] = useState<"card1" | "card2" | "card3" | null>("card1");
-
-  const filters = [
-    "All",
-    "Corporate Margin",
-    "Contagion Alert",
-    "Supply Chain",
-    "Macro Shock",
-  ];
-
-  // Dynamically synthesize a featured brief from the active synthesized shock
-  const dynamicInsights: AIInsightItem[] = useMemo(() => {
-    if (!hasUserSynthesized || !activeScenario) return [];
-
-    const affected = activeScenario.radialNodes.flatMap((n) => {
-      const tickers = n.tickers && n.tickers.length > 0 ? n.tickers : [n.title];
-      return tickers.map((t) => ({
-        ticker: t,
-        name: n.title,
-        impact: n.metric || "-1.9%",
-        isNegative: n.metricColor === "red" || n.metricColor === "green",
-      }));
-    }).slice(0, 5);
-
-    const chain = activeScenario.pathways.map((p) => `${p.source} → ${p.target}`);
-    if (chain.length === 0) {
-      chain.push(activeScenario.centerNode.title, "Primary Transmission", "Equity Revaluation");
-    }
-
-    return [
-      {
-        id: `synth-${activeScenario.id}`,
-        title: `${activeScenario.title}: Autonomous Multi-Hop Shock Audit`,
-        category: "Contagion Alert" as const,
-        urgency: "Critical" as const,
-        urgencyColor: "rose" as const,
-        date: "Just Synthesized • Live Knowledge Graph Synced",
-        summary: activeScenario.narrative || "Multi-hop propagation analyzed across macroeconomic and equity channels.",
-        causalChain: chain.slice(0, 4),
-        affectedTickers: affected.length > 0 ? affected : [
-          { ticker: "RELIANCE.NS", name: "Reliance Ind.", impact: "+$1.80 GRM", isNegative: false },
-          { ticker: "ASIANPAINT.NS", name: "Asian Paints", impact: "-2.4% Est.", isNegative: true },
-        ],
-        transmissionHorizon: activeScenario.radialNodes[0]?.timeHorizon || "1–3 Months",
-        scenarioId: activeScenario.id,
-        confidenceScore: 96,
-      },
-    ];
-  }, [hasUserSynthesized, activeScenario]);
-
-  const allInsights = [...dynamicInsights, ...AI_INSIGHTS];
-
-  const filteredInsights = allInsights.filter((ins) => {
-    if (selectedFilter === "All") return true;
-    return ins.category === selectedFilter;
-  });
 
   const handleRunAiQuery = async (promptText?: string) => {
     const q = promptText || userQuery;
@@ -212,16 +61,6 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
     } finally {
       setIsSynthesizing(false);
     }
-  };
-
-  const handleLaunchInsightScenario = (scenarioId?: string) => {
-    if (!scenarioId) {
-      onNavigateToGraph();
-      return;
-    }
-    const target = scenarios.find((s) => s.id === scenarioId) || scenarios[0];
-    onSelectScenario(target);
-    onNavigateToGraph();
   };
 
   return (
@@ -275,53 +114,58 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* RECTANGULAR CARD 1: AI Systemic Risk & Domino Radar */}
+          {/* RECTANGULAR CARD 1: ThinkBeforeBuy Radar */}
           <div
             onClick={() => setActiveCardModule(activeCardModule === "card1" ? null : "card1")}
             className={`p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between gap-4 group ${
               activeCardModule === "card1"
-                ? "bg-gradient-to-b from-orange-50/60 to-white border-orange-500 shadow-md ring-2 ring-orange-400/30"
-                : "bg-white border-slate-200/90 hover:border-orange-300 hover:shadow-sm"
+                ? "bg-gradient-to-b from-indigo-50/60 to-white border-indigo-600 shadow-md ring-2 ring-indigo-400/30"
+                : "bg-white border-slate-200/90 hover:border-indigo-300 hover:shadow-sm"
             }`}
           >
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
-                <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-md font-extrabold border ${
-                  activeCardModule === "card1"
-                    ? "bg-orange-100 text-orange-800 border-orange-300"
-                    : "bg-slate-100 text-slate-600 border-slate-200"
-                }`}>
-                  Card 1 • Risk Radar
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-[10px] font-bold">
-                  74.2 Index
+                <div className="flex items-center gap-1.5">
+                  <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-md font-extrabold border ${
+                    activeCardModule === "card1"
+                      ? "bg-indigo-100 text-indigo-800 border-indigo-300"
+                      : "bg-slate-100 text-slate-600 border-slate-200"
+                  }`}>
+                    Card 1 • Valuation
+                  </span>
+                  <span className="px-1.5 py-0.2 rounded-md bg-indigo-600 text-white text-[9.5px] font-black uppercase">
+                    NEW
+                  </span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+                  Score 92
                 </span>
               </div>
 
               <div className="flex items-center gap-2.5 mt-1">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
                   activeCardModule === "card1"
-                    ? "bg-orange-500 text-white shadow-xs"
-                    : "bg-orange-50 text-orange-600 group-hover:bg-orange-100"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100"
                 }`}>
-                  <Activity className="w-5 h-5" />
+                  <ShoppingBag className="w-5 h-5" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 leading-tight">
-                  AI Systemic Risk & Domino Radar
+                  ThinkBeforeBuy Radar
                 </h3>
               </div>
 
               <p className="text-xs text-slate-500 leading-relaxed">
-                Real-time cross-asset contagion velocity, cascade propagation, and institutional shock vulnerability.
+                Empirical price drop tracking, deal verification score breakup, and optimal capital timing recommendation.
               </p>
             </div>
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
               <span className="text-[11px] text-slate-400 font-mono">
-                5 Exposed Assets • 3 Hops
+                Lowest: ₹449 • Steal 🚀
               </span>
               <span className={`flex items-center gap-1 text-[11px] font-bold ${
-                activeCardModule === "card1" ? "text-orange-600" : "text-slate-500 group-hover:text-slate-900"
+                activeCardModule === "card1" ? "text-indigo-600" : "text-slate-500 group-hover:text-slate-900"
               }`}>
                 {activeCardModule === "card1" ? "● Active View" : "Click to Open"}
                 <ChevronRight className={`w-3.5 h-3.5 transition-transform ${activeCardModule === "card1" ? "rotate-90" : "group-hover:translate-x-0.5"}`} />
@@ -383,58 +227,53 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
             </div>
           </div>
 
-          {/* RECTANGULAR CARD 3: ThinkBeforeBuy Radar */}
+          {/* RECTANGULAR CARD 3: AI Systemic Risk & Domino Radar */}
           <div
             onClick={() => setActiveCardModule(activeCardModule === "card3" ? null : "card3")}
             className={`p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between gap-4 group ${
               activeCardModule === "card3"
-                ? "bg-gradient-to-b from-indigo-50/60 to-white border-indigo-600 shadow-md ring-2 ring-indigo-400/30"
-                : "bg-white border-slate-200/90 hover:border-indigo-300 hover:shadow-sm"
+                ? "bg-gradient-to-b from-orange-50/60 to-white border-orange-500 shadow-md ring-2 ring-orange-400/30"
+                : "bg-white border-slate-200/90 hover:border-orange-300 hover:shadow-sm"
             }`}
           >
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-md font-extrabold border ${
-                    activeCardModule === "card3"
-                      ? "bg-indigo-100 text-indigo-800 border-indigo-300"
-                      : "bg-slate-100 text-slate-600 border-slate-200"
-                  }`}>
-                    Card 3 • Valuation
-                  </span>
-                  <span className="px-1.5 py-0.2 rounded-md bg-indigo-600 text-white text-[9.5px] font-black uppercase">
-                    NEW
-                  </span>
-                </div>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
-                  Score 92
+                <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-md font-extrabold border ${
+                  activeCardModule === "card3"
+                    ? "bg-orange-100 text-orange-800 border-orange-300"
+                    : "bg-slate-100 text-slate-600 border-slate-200"
+                }`}>
+                  Card 3 • Risk Radar
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-[10px] font-bold">
+                  74.2 Index
                 </span>
               </div>
 
               <div className="flex items-center gap-2.5 mt-1">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
                   activeCardModule === "card3"
-                    ? "bg-indigo-600 text-white shadow-xs"
-                    : "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100"
+                    ? "bg-orange-500 text-white shadow-xs"
+                    : "bg-orange-50 text-orange-600 group-hover:bg-orange-100"
                 }`}>
-                  <ShoppingBag className="w-5 h-5" />
+                  <Activity className="w-5 h-5" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 leading-tight">
-                  ThinkBeforeBuy Radar
+                  AI Systemic Risk & Domino Radar
                 </h3>
               </div>
 
               <p className="text-xs text-slate-500 leading-relaxed">
-                Empirical price drop tracking, deal verification score breakup, and optimal capital timing recommendation.
+                Real-time cross-asset contagion velocity, cascade propagation, and institutional shock vulnerability.
               </p>
             </div>
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
               <span className="text-[11px] text-slate-400 font-mono">
-                Lowest: ₹449 • Steal 🚀
+                5 Exposed Assets • 3 Hops
               </span>
               <span className={`flex items-center gap-1 text-[11px] font-bold ${
-                activeCardModule === "card3" ? "text-indigo-600" : "text-slate-500 group-hover:text-slate-900"
+                activeCardModule === "card3" ? "text-orange-600" : "text-slate-500 group-hover:text-slate-900"
               }`}>
                 {activeCardModule === "card3" ? "● Active View" : "Click to Open"}
                 <ChevronRight className={`w-3.5 h-3.5 transition-transform ${activeCardModule === "card3" ? "rotate-90" : "group-hover:translate-x-0.5"}`} />
@@ -452,13 +291,20 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
           </div>
           <h3 className="text-sm font-bold text-slate-700">No Intelligence Card Opened</h3>
           <p className="text-xs text-slate-500 max-w-md">
-            Click on any of the 3 rectangular cards above (Systemic Risk, Ask AI Analyst, or ThinkBeforeBuy Radar) to view its interactive analytical dashboard.
+            Click on any of the 3 rectangular cards above (ThinkBeforeBuy Radar, Ask AI Analyst, or Systemic Risk) to view its interactive analytical dashboard.
           </p>
         </div>
       )}
 
-      {/* ─── CARD 1: AI SYSTEMIC RISK & DOMINO RADAR WIDGET (OPENS ON CLICK) ─── */}
+      {/* ─── CARD 1: THINKBEFOREBUY (OPENS ON CLICK) ─── */}
       {activeCardModule === "card1" && (
+        <div id="card-think-before-buy" className="scroll-mt-20 animate-in fade-in duration-200">
+          <ThinkBeforeBuyCard />
+        </div>
+      )}
+
+      {/* ─── CARD 3: AI SYSTEMIC RISK & DOMINO RADAR WIDGET (OPENS ON CLICK) ─── */}
+      {activeCardModule === "card3" && (
         <div id="card-systemic-risk" className="p-5 sm:p-6 rounded-[24px] bg-white border border-[#e5e7eb] shadow-sm flex flex-col gap-5 scroll-mt-20 animate-in fade-in duration-200">
           {/* Header */}
           <div className="flex items-center justify-between gap-3">
@@ -469,7 +315,7 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 font-bold border border-orange-200">
-                  Card 1 • Contagion Radar
+                  Card 3 • Contagion Radar
                 </span>
               </div>
               <h2 className="text-lg sm:text-xl font-bold text-slate-900 leading-tight mt-0.5">
@@ -873,137 +719,6 @@ export const AIHubInsightsView: React.FC<AIHubInsightsViewProps> = ({
       </div>
       )}
 
-      {/* ─── CARD 3: THINKBEFOREBUY (OPENS ON CLICK) ─── */}
-      {activeCardModule === "card3" && (
-        <div id="card-think-before-buy" className="scroll-mt-20 animate-in fade-in duration-200">
-          <ThinkBeforeBuyCard />
-        </div>
-      )}
-
-      {/* 4. Filter Tabs for AI Insights */}
-      <div id="card-briefs" className="flex items-center justify-between border-b border-slate-200 pb-2 scroll-mt-20">
-        <div className="flex items-center gap-2">
-          <h2 className="text-base font-bold text-slate-900">Featured Systemic Intelligence Briefs</h2>
-          <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">
-            {filteredInsights.length} Briefs
-          </span>
-        </div>
-
-        <div className="flex items-center gap-1.5 overflow-x-auto">
-          {filters.map((fil) => (
-            <button
-              key={fil}
-              onClick={() => setSelectedFilter(fil)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
-                selectedFilter === fil
-                  ? "bg-slate-900 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
-            >
-              {fil}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 5. The Insight Cards List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredInsights.map((ins) => (
-          <div
-            key={ins.id}
-            className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between gap-4"
-          >
-            <div className="space-y-3">
-              {/* Category & Urgency Badges */}
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold font-mono text-[11px]">
-                    {ins.category}
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold font-mono uppercase ${
-                      ins.urgencyColor === "rose"
-                        ? "bg-rose-50 text-rose-700 border border-rose-200"
-                        : "bg-amber-50 text-amber-800 border border-amber-200"
-                    }`}
-                  >
-                    {ins.urgency} Urgency
-                  </span>
-                </div>
-                <span className="text-[11px] text-slate-400 font-mono">{ins.transmissionHorizon}</span>
-              </div>
-
-              {/* Title */}
-              <h3 className="text-sm font-bold text-slate-900 leading-snug">
-                {ins.title}
-              </h3>
-
-              {/* Narrative Summary */}
-              <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                {ins.summary}
-              </p>
-
-              {/* Multi-Hop Causal Chain Vector */}
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
-                <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
-                  Transmission Sequence
-                </span>
-                <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
-                  {ins.causalChain.map((step, idx) => (
-                    <React.Fragment key={idx}>
-                      <span className="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-medium shadow-2xs">
-                        {step}
-                      </span>
-                      {idx < ins.causalChain.length - 1 && (
-                        <span className="text-slate-400 text-xs font-bold">→</span>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </div>
-              </div>
-
-              {/* Affected Securities Pills */}
-              <div className="space-y-1">
-                <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
-                  Impacted Equities & Sensitivity
-                </span>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {ins.affectedTickers.map((tick, i) => (
-                    <div
-                      key={i}
-                      className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200/80 text-[11px] flex items-center gap-1.5"
-                    >
-                      <span className="font-bold font-mono text-slate-800">{tick.name}</span>
-                      <span
-                        className={`font-mono text-[10px] ${
-                          tick.isNegative ? "text-rose-600 font-semibold" : "text-emerald-600 font-semibold"
-                        }`}
-                      >
-                        {tick.impact}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Card Actions */}
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span className="text-slate-400 text-[11px] font-mono">
-                Model Confidence: <strong className="text-slate-700">{ins.confidenceScore}%</strong>
-              </span>
-
-              <button
-                onClick={() => handleLaunchInsightScenario(ins.scenarioId)}
-                className="px-3 py-1.5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 cursor-pointer"
-              >
-                <span>Project in Impact Graph</span>
-                <span>→</span>
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };
