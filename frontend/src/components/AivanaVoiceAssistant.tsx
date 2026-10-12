@@ -7,30 +7,26 @@ import {
   Volume2, 
   VolumeX, 
   Sparkles, 
-  Bot, 
-  User, 
-  ChevronDown,
-  RotateCcw,
-  Zap,
-  Activity
+  User
 } from "lucide-react";
 
 interface ChatMessage {
   id: string;
-  sender: "user" | "aivana";
+  sender: "user" | "flora";
   text: string;
   timestamp: string;
 }
 
 const QUICK_PROMPTS = [
+  "What is Nifty & Sensex?",
+  "Tell me about Reliance & Tata Motors",
   "How does Crude Oil shock affect Asian Paints?",
+  "What is SIP & long term compounding?",
   "Explain US PERM visa freeze impact on Indian IT",
-  "What is our current systemic risk score?",
-  "How does Hop 1 cascade into Hop 2?",
-  "Is it safe to buy Tata Motors right now?"
+  "How does ThinkBeforeBuy Deal Scanner work?"
 ];
 
-export const AivanaVoiceAssistant: React.FC = () => {
+export const FloraVoiceAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -40,8 +36,8 @@ export const AivanaVoiceAssistant: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "welcome",
-      sender: "aivana",
-      text: "Hi! I am Aivana, your autonomous financial intelligence and causal market impact voice assistant. Ask me anything about breaking catalysts, sector contagion, or stock sensitivity.",
+      sender: "flora",
+      text: "Hi! I am Flora, your autonomous financial intelligence and stock market assistant. Ask me anything about share markets, companies, trading, or economics!",
       timestamp: "Just now"
     }
   ]);
@@ -80,7 +76,7 @@ export const AivanaVoiceAssistant: React.FC = () => {
       };
 
       recognition.onerror = (event: any) => {
-        console.warn("[Aivana SpeechRecognition Error]", event.error);
+        console.warn("[Flora SpeechRecognition Error]", event.error);
         setIsListening(false);
       };
 
@@ -156,33 +152,57 @@ export const AivanaVoiceAssistant: React.FC = () => {
     setInputQuery("");
     setIsThinking(true);
 
+    // 1. Try real fast generative AI inference first (4.5s timeout)
     try {
-      // 1. Try real backend chat endpoint first
-      const res = await fetch("http://localhost:8000/api/chat", {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4500);
+
+      const sysPrompt = "You are Flora, a smart, friendly, and knowledgeable AI assistant specializing in stock markets, finance, economy, and general queries. Give a clear, insightful, and concise answer in 2-3 sentences.";
+      const pollUrl = `https://text.pollinations.ai/${encodeURIComponent(q)}?system=${encodeURIComponent(sysPrompt)}`;
+      
+      const pollRes = await fetch(pollUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (pollRes.ok) {
+        const pollText = await pollRes.text();
+        if (pollText && pollText.trim().length > 15 && !pollText.includes("<!DOCTYPE")) {
+          deliverAiResponse(pollText.trim());
+          return;
+        }
+      }
+    } catch {
+      // Proceed to next fallback tier
+    }
+
+    // 2. Try backend chat endpoint if backend is live
+    try {
+      const backendRes = await fetch("http://localhost:8000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q })
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        const aiResponse = data.answer || "Analyzed through multi-hop knowledge graph.";
-        deliverAiResponse(aiResponse);
-        return;
+      if (backendRes.ok) {
+        const data = await backendRes.json();
+        if (data.answer && !data.answer.includes("Simulate an event first")) {
+          deliverAiResponse(data.answer);
+          return;
+        }
       }
-      throw new Error("Backend chat returned non-200");
-    } catch (err) {
-      // 2. Intelligent domain fallback for seamless demo continuity
-      const fallbackAns = generateIntelligentFallback(q);
-      deliverAiResponse(fallbackAns);
+    } catch {
+      // Backend unavailable or error
     }
+
+    // 3. Comprehensive Flora Built-in Knowledge Engine (Instant, zero latency)
+    const engineAns = generateIntelligentFloraResponse(q);
+    deliverAiResponse(engineAns);
   };
 
   const deliverAiResponse = (ansText: string) => {
     setIsThinking(false);
     const aiMsg: ChatMessage = {
       id: "ai_" + Date.now(),
-      sender: "aivana",
+      sender: "flora",
       text: ansText,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     };
@@ -190,52 +210,147 @@ export const AivanaVoiceAssistant: React.FC = () => {
     speakText(ansText);
   };
 
-  const generateIntelligentFallback = (q: string): string => {
+  const generateIntelligentFloraResponse = (q: string): string => {
     const lower = q.toLowerCase();
 
-    if (lower.includes("crude") || lower.includes("oil") || lower.includes("asian paint")) {
-      return "When Brent Crude surges above $82/bbl, petrochemical solvents (like phthalic anhydride) expand by +8.4%. Since raw materials comprise ~50% of Asian Paints' COGS, we project a 140–180 bps EBITDA gross margin compression with an asymmetric 45-day pass-through lag.";
+    // ─── GREETINGS & IDENTITY ───
+    if (lower.match(/\b(who are you|your name|naam kya|who r u)\b/)) {
+      return "I am Flora, your autonomous financial intelligence and stock market assistant. I can help you analyze equities, macroeconomic trends, company balance sheets, and smart consumer buying decisions!";
     }
 
-    if (lower.includes("visa") || lower.includes("perm") || lower.includes("tcs") || lower.includes("infosys")) {
-      return "The US PERM green card certification suspension freezes onshore visa conversions, directly accelerating offshore IT delivery allocation to Indian tech majors (TCS, Infosys, Tech Mahindra). We observe positive margin expansion and sustained tier-1 billing rates.";
+    if (lower.match(/\b(how are you|kese ho|kaise ho|kya haal)\b/)) {
+      return "I'm doing fantastic! The financial markets are dynamic today, and I'm ready to answer any question about stocks, sector trends, or macro catalysts.";
+    }
+
+    if (lower.match(/^(hi|hello|hey|namaste|pranam|good morning|good evening|good afternoon)\b/)) {
+      return "Hello! I am Flora. Ask me anything about the share market, Indian or global equities, economic catalysts, or personal finance!";
+    }
+
+    if (lower.match(/\b(thank you|thanks|shukriya|dhanyawad)\b/)) {
+      return "You're very welcome! Feel free to ask whenever you need market insights or stock analysis.";
+    }
+
+    // ─── SHARE MARKET CORE CONCEPTS ───
+    if (lower.includes("what is share market") || lower.includes("stock market") || lower.includes("share bazaar") || lower.includes("share market kya hai")) {
+      return "The share market is an organized exchange (like NSE and BSE in India) where shares of publicly listed companies are bought and sold. It enables companies to raise capital for growth while providing investors an avenue for capital appreciation and dividend yields.";
+    }
+
+    if (lower.includes("nifty") || lower.includes("sensex") || lower.includes("bank nifty") || lower.includes("index")) {
+      return "NIFTY 50 tracks the 50 largest blue-chip companies on the National Stock Exchange (NSE), while SENSEX represents the top 30 corporations on the Bombay Stock Exchange (BSE). They serve as primary benchmarks reflecting India's overall economic pulse and investor confidence.";
+    }
+
+    if (lower.includes("bull") || lower.includes("bear") || lower.includes("rally") || lower.includes("crash")) {
+      return "A Bull Market indicates sustained investor optimism with asset prices rising 20% or more from recent troughs. A Bear Market represents a sustained 20%+ decline driven by risk aversion, monetary tightening, or economic headwinds.";
+    }
+
+    if (lower.includes("sip") || lower.includes("mutual fund") || lower.includes("compounding")) {
+      return "A Systematic Investment Plan (SIP) allows disciplined, periodic investing in mutual funds, benefiting from rupee-cost averaging and exponential long-term compounding without the stress of market timing.";
+    }
+
+    if (lower.includes("ipo")) {
+      return "An Initial Public Offering (IPO) is when a privately held company issues shares to the public for the first time on a stock exchange, transforming into a publicly traded firm to raise capital for expansion and debt reduction.";
+    }
+
+    if (lower.includes("dividend") || lower.includes("pe ratio") || lower.includes("p/e") || lower.includes("valuation")) {
+      return "The P/E (Price-to-Earnings) ratio compares a company's market price to its per-share earnings to gauge valuation against peers. Dividends represent cash profit distributions paid out directly to shareholders.";
+    }
+
+    if (lower.includes("intraday") || lower.includes("f&o") || lower.includes("futures") || lower.includes("options") || lower.includes("derivative")) {
+      return "Intraday trading involves squaring off buy and sell positions within the same session before 3:30 PM. Futures and Options (F&O) are leveraged derivative contracts used by institutional desks for hedging and directional speculation.";
+    }
+
+    // ─── BLUE-CHIP COMPANIES & STOCKS ───
+    if (lower.includes("reliance") || lower.includes("jio") || lower.includes("mukesh ambani")) {
+      return "Reliance Industries (RELIANCE) is India's largest conglomerate by market cap, leading across petrochemicals, retail store chains, and Jio telecom, while aggressively scaling green hydrogen and solar energy infrastructure.";
+    }
+
+    if (lower.includes("tata motors") || lower.includes("tata motor") || lower.includes("ev")) {
+      return "Tata Motors dominates India's commercial vehicle market and holds over 65% market share in domestic Electric Vehicles (EVs). Its global cash flow is further supported by luxury brand Jaguar Land Rover (JLR).";
+    }
+
+    if (lower.includes("tcs") || lower.includes("infosys") || lower.includes("wipro") || lower.includes("hcl") || lower.includes("it sector")) {
+      return "Indian IT majors like TCS and Infosys generate strong operating margins (~22-25%) with high free cash flow conversion. Key growth drivers include enterprise cloud migration, generative AI integration, and offshore client delivery.";
+    }
+
+    if (lower.includes("hdfc") || lower.includes("icici") || lower.includes("sbi") || lower.includes("bank")) {
+      return "Leading Indian banks (HDFC Bank, ICICI Bank, SBI) maintain healthy balance sheets with net interest margins around 3.4–4.0% and multi-year low non-performing assets (NPAs), benefiting from robust domestic credit expansion.";
+    }
+
+    if (lower.includes("adani")) {
+      return "The Adani Group operates essential national infrastructure across deep-sea ports (APSEZ), green solar power, electricity transmission, airports, and city gas distribution networks with strong domestic capex pipeline.";
+    }
+
+    if (lower.includes("itc")) {
+      return "ITC is an established cash cow boasting monopoly profits in cigarettes that fund rapid scaling in FMCG foods, personal care, paperboards, and agribusiness, alongside high dividend yields.";
+    }
+
+    if (lower.includes("asian paint") || lower.includes("paint") || lower.includes("crude") || lower.includes("oil")) {
+      return "When Brent Crude surges, petrochemical solvents (like phthalic anhydride) jump by +8.4%. Since raw materials represent ~50% of Asian Paints' cost structure, margins experience a 140–180 bps compression with a 45-day lag.";
+    }
+
+    // ─── MACROECONOMICS, SHOCKS & POLICY ───
+    if (lower.includes("rbi") || lower.includes("repo rate") || lower.includes("interest rate") || lower.includes("fed")) {
+      return "The RBI repo rate determines borrowing costs across the economy. A rate cut lowers home and auto loan EMIs, boosting consumption and equity valuations, while rate hikes control inflation at the expense of liquidity.";
+    }
+
+    if (lower.includes("inflation") || lower.includes("cpi") || lower.includes("mehangai")) {
+      return "Inflation erodes real purchasing power and prompts central banks to raise policy rates. High inflation typically impacts rate-sensitive sectors like real estate, auto, and consumer discretionary spending.";
+    }
+
+    if (lower.includes("gold") || lower.includes("silver") || lower.includes("sona")) {
+      return "Gold and silver act as traditional safe-haven hedges against fiat currency debasement, geopolitical instability, and sudden equity market drawdowns.";
+    }
+
+    if (lower.includes("dollar") || lower.includes("rupee") || lower.includes("usd") || lower.includes("inr") || lower.includes("forex")) {
+      return "A stronger US Dollar against the Indian Rupee benefits export-driven industries like IT services and Pharmaceuticals, but raises import bills for crude oil, electronics, and fertilizers.";
+    }
+
+    if (lower.includes("visa") || lower.includes("perm")) {
+      return "The US PERM green card certification suspension freezes onshore visa conversions, directly accelerating offshore IT delivery allocation to Indian tech majors (TCS, Infosys, Tech Mahindra) with sustained tier-1 billing rates.";
     }
 
     if (lower.includes("risk") || lower.includes("systemic") || lower.includes("score")) {
       return "Current systemic stress gauge sits at 78/100 (Critical Macro Contagion). Key pressure points originate from crude energy volatility and tightening interbank borrowing spreads.";
     }
 
-    if (lower.includes("hop 1") || lower.includes("hop 2") || lower.includes("cascade")) {
+    if (lower.includes("hop 1") || lower.includes("hop 2") || lower.includes("cascade") || lower.includes("contagion")) {
       return "Hop 1 captures direct counterparties and immediate cost shocks (e.g., fuel price directly hitting airlines). Hop 2 traces second-order dominoes—such as flight surcharge hikes, reduced discretionary tourism spend, and delayed sovereign rate cuts.";
     }
 
-    if (lower.includes("tata") || lower.includes("motors") || lower.includes("buy")) {
-      return "Tata Motors Commercial Vehicle (CV) orders are sensitive to interbank NBFC borrowing costs (9.2%). Under the ThinkBeforeBuy model, we advise monitoring freight operator fleet financing rates before aggressive capital accumulation.";
+    // ─── PLATFORM & THINKBEFOREBUY ───
+    if (lower.includes("thinkbeforebuy") || lower.includes("deal scanner") || lower.includes("price drop") || lower.includes("findlilly")) {
+      return "ThinkBeforeBuy is FinDlilly's proprietary consumer intelligence engine that analyzes real-time price histories and volatility across Amazon and Flipkart to stop impulse buying and identify authentic discounts.";
     }
 
-    return `I analyzed "${q}" across our NetworkX causal knowledge graph. The transmission factor indicates an active contagion pathway propagating through upstream commodities, midstream operating margins, and final equity beta sensitivity.`;
+    if (lower.includes("crypto") || lower.includes("bitcoin") || lower.includes("ethereum")) {
+      return "Cryptocurrencies like Bitcoin and Ethereum are decentralized digital assets secured by cryptographic blockchains, exhibiting high volatility and growing adoption as alternative digital stores of value.";
+    }
+
+    // ─── INTELLIGENT DYNAMIC SYNTHESIS FOR ANY OTHER QUERY ───
+    const cleanQ = q.replace(/[?!.]/g, "").trim();
+    return `Regarding "${cleanQ}": In modern financial markets, this interacts directly with sector capital allocation, macroeconomic transmission, and asset valuation dynamics. Flora monitors these signals across supply chains and equities to identify actionable trends.`;
   };
 
   return (
     <>
-      {/* ─── 1. CORNER FLOATING TRIGGER WIDGET (MATCHING IMAGE 1) ─── */}
+      {/* ─── 1. CORNER FLOATING TRIGGER WIDGET ─── */}
       <div 
         className="fixed bottom-6 right-6 z-40 flex items-center gap-3 cursor-pointer select-none group"
         onClick={() => {
           setIsOpen(true);
           if (messages.length === 1) {
-            speakText("Hi! I am Aivana. How can I assist with your market research today?");
+            speakText("Hi! I am Flora. How can I assist with your market research today?");
           }
         }}
       >
         {/* Hover Pill Tooltip */}
         <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0F172A]/90 border border-slate-700/80 shadow-2xl backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <span className="text-xs font-semibold text-slate-200">Talk to Aivana</span>
+          <span className="text-xs font-semibold text-slate-200">Talk to Flora</span>
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">Voice AI</span>
         </div>
 
-        {/* Floating Animated Orb Container */}
+        {/* Floating Animated Orb Container (6px reduced for sleek ergonomics) */}
         <div className="relative w-[58px] h-[58px] sm:w-[66px] sm:h-[66px] flex items-center justify-center">
           {/* Multi-color ambient glow waves */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 via-amber-400 to-cyan-400 opacity-60 blur-xl group-hover:opacity-90 group-hover:scale-110 transition-all duration-500 animate-pulse" />
@@ -245,21 +360,20 @@ export const AivanaVoiceAssistant: React.FC = () => {
             <div className="w-full h-full rounded-full bg-[#07090E]" />
           </div>
 
-          {/* Actual Orb Image (From Uploaded Design) */}
+          {/* Actual Orb Image */}
           <div className="relative w-[50px] h-[50px] sm:w-[58px] sm:h-[58px] rounded-full overflow-hidden flex items-center justify-center shadow-2xl transition-transform duration-300 group-hover:scale-105 border border-white/20">
             <img 
               src="/aivana_orb.png" 
-              alt="Hi Aivana Voice Assistant" 
+              alt="Hi Flora Voice Assistant" 
               className="w-full h-full object-cover"
               onError={(e) => {
-                // Graceful fallback if image path resolution differs
                 (e.target as HTMLElement).style.display = "none";
               }}
             />
             {/* Fallback Center Badge if image is loading */}
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#07090E]/60 backdrop-blur-[2px]">
               <span className="text-[10px] sm:text-[11px] font-bold tracking-tight text-white drop-shadow-md">
-                Hi Aivana
+                Hi Flora
               </span>
             </div>
           </div>
@@ -272,7 +386,7 @@ export const AivanaVoiceAssistant: React.FC = () => {
         </div>
       </div>
 
-      {/* ─── 2. EXPANDED VOICE ASSISTANT MODAL (MATCHING IMAGE 2) ─── */}
+      {/* ─── 2. EXPANDED VOICE ASSISTANT MODAL ─── */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
           <div 
@@ -286,10 +400,10 @@ export const AivanaVoiceAssistant: React.FC = () => {
             <div className="flex items-center justify-between px-6 pt-5 pb-3">
               <div>
                 <div className="text-sm font-semibold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">
-                  “Hi Aivana ”
+                  “Hi Flora ”
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-                  Voice Assistant
+                  Flora AI Assistant
                   <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
                     Live
                   </span>
@@ -322,9 +436,9 @@ export const AivanaVoiceAssistant: React.FC = () => {
               </div>
             </div>
 
-            {/* Central Animated Aivana Orb Visual (Matching Image 2) */}
+            {/* Central Animated Flora Orb Visual */}
             <div className="relative py-6 flex flex-col items-center justify-center bg-radial from-slate-900/60 to-transparent">
-              {/* Outer Radiant Sound Waves (pulsing when active) */}
+              {/* Outer Radiant Sound Waves */}
               <div 
                 className={`relative w-44 h-44 sm:w-52 sm:h-52 flex items-center justify-center transition-transform duration-500 ${
                   isSpeaking ? "scale-105" : isListening ? "scale-110" : "scale-100"
@@ -345,11 +459,11 @@ export const AivanaVoiceAssistant: React.FC = () => {
                   <div className="w-full h-full rounded-full bg-[#07090E]" />
                 </div>
 
-                {/* Center Image from User Reference */}
+                {/* Center Image */}
                 <div className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden shadow-2xl flex items-center justify-center border-2 border-white/20">
                   <img 
                     src="/aivana_assistant.png" 
-                    alt="Hi Aivana Voice Assistant" 
+                    alt="Hi Flora Voice Assistant" 
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       (e.target as HTMLElement).style.display = "none";
@@ -357,7 +471,7 @@ export const AivanaVoiceAssistant: React.FC = () => {
                   />
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#07090E]/50 backdrop-blur-[2px]">
                     <span className="text-base sm:text-lg font-bold tracking-tight text-white drop-shadow-lg">
-                      Hi Aivana
+                      Hi Flora
                     </span>
                   </div>
                 </div>
@@ -373,17 +487,17 @@ export const AivanaVoiceAssistant: React.FC = () => {
                 ) : isThinking ? (
                   <>
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-                    <span className="text-amber-300 font-semibold">Analyzing market contagion...</span>
+                    <span className="text-amber-300 font-semibold">Flora analyzing intelligence...</span>
                   </>
                 ) : isSpeaking ? (
                   <>
                     <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-bounce" />
-                    <span className="text-cyan-300 font-semibold">Speaking response...</span>
+                    <span className="text-cyan-300 font-semibold">Flora speaking...</span>
                   </>
                 ) : (
                   <>
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                    <span>Ask Aivana any financial shock query</span>
+                    <span>Ask Flora about share market, stocks, or anything</span>
                   </>
                 )}
               </div>
@@ -398,9 +512,9 @@ export const AivanaVoiceAssistant: React.FC = () => {
                     msg.sender === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {msg.sender === "aivana" && (
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center shrink-0 text-white font-bold text-[10px] shadow-sm">
-                      AI
+                  {msg.sender === "flora" && (
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-pink-500 via-purple-500 to-cyan-500 flex items-center justify-center shrink-0 text-white font-bold text-[10px] shadow-sm">
+                      FL
                     </div>
                   )}
 
@@ -435,7 +549,7 @@ export const AivanaVoiceAssistant: React.FC = () => {
                     <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
                   </div>
                   <div className="px-3.5 py-2 rounded-2xl bg-slate-900 border border-slate-800 animate-pulse">
-                    Synthesizing causal impact across graph...
+                    Flora is analyzing market intelligence & generating answer...
                   </div>
                 </div>
               )}
@@ -476,7 +590,7 @@ export const AivanaVoiceAssistant: React.FC = () => {
                       ? "bg-rose-500 text-white animate-pulse shadow-rose-500/50 scale-105"
                       : "bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700/80"
                   }`}
-                  title={isListening ? "Stop listening" : "Click to speak with Aivana"}
+                  title={isListening ? "Stop listening" : "Click to speak with Flora"}
                 >
                   {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5 text-cyan-400" />}
                 </button>
@@ -487,7 +601,7 @@ export const AivanaVoiceAssistant: React.FC = () => {
                   value={inputQuery}
                   onChange={(e) => setInputQuery(e.target.value)}
                   placeholder={
-                    isListening ? "Listening to your voice..." : "Ask Aivana about any shock, company, or contagion..."
+                    isListening ? "Listening to your voice..." : "Ask Flora about stocks, companies, markets, or anything..."
                   }
                   className="flex-1 bg-slate-900 border border-slate-750 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
                 />
@@ -508,3 +622,7 @@ export const AivanaVoiceAssistant: React.FC = () => {
     </>
   );
 };
+
+// Aliases for seamless backward compatibility
+export const AivanaVoiceAssistant = FloraVoiceAssistant;
+export default FloraVoiceAssistant;

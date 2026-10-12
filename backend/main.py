@@ -305,11 +305,9 @@ async def chat_with_ai(payload: Dict[str, Any]):
         context_block = "\n\n(No events simulated yet — answering from general financial knowledge.)"
 
     system_prompt = (
-        "You are an expert AI financial market analyst embedded in a real-time event impact graph system. "
-        "You reason about how financial shocks propagate through supply chains, sectors, and assets. "
-        "Be concise and precise. Cite specific entities, percentages, and transmission timeframes when relevant. "
-        "Clearly distinguish observed facts from inferred/probabilistic relationships. "
-        "Answer in 2-4 sentences maximum."
+        "You are Flora, an expert AI financial and stock market analyst. "
+        "You reason about Indian and global markets, stocks, macroeconomic shocks, supply chains, and general investor questions. "
+        "Be concise, insightful, and clear. Answer in 2-3 sentences maximum."
     )
 
     full_prompt = f"{context_block}\n\nUser question: {question}"
@@ -338,11 +336,20 @@ async def chat_with_ai(payload: Dict[str, Any]):
         answer = result["choices"][0]["message"]["content"].strip()
     except Exception as e:
         print(f"[Chat] LLM fallback: {e}")
-        answer = (
-            f'Based on the knowledge graph: "{question}" propagates through upstream commodity channels '
-            f"and sector-weighted transmission paths. "
-            f"{'Context from ' + str(len(similar_docs)) + ' similar events retrieved.' if similar_docs else 'Simulate an event first for richer RAG context.'}"
-        )
+        try:
+            import httpx
+            poll_resp = await httpx.AsyncClient(timeout=8.0).get(
+                f"https://text.pollinations.ai/{httpx.URL(question)}?system={httpx.URL(system_prompt)}"
+            )
+            if poll_resp.status_code == 200 and len(poll_resp.text.strip()) > 10:
+                answer = poll_resp.text.strip()
+            else:
+                raise ValueError("Empty response")
+        except Exception:
+            answer = (
+                f'Based on Flora market intelligence: "{question}" directly influences asset valuations, '
+                f"sector-weighted margins, and macroeconomic transmission across major benchmark indices."
+            )
 
     return {
         "answer": answer,

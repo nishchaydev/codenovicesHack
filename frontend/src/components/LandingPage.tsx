@@ -1,27 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { 
-  Activity,
   ArrowRight, 
-  Zap, 
-  Globe2, 
-  TrendingUp, 
-  ShieldAlert, 
-  Sparkles, 
-  Network, 
+  Play, 
+  FileText, 
   BarChart3, 
-  Cpu, 
-  Layers, 
-  Search, 
-  Radio, 
-  CheckCircle2, 
-  ChevronRight,
-  Database,
-  LineChart,
-  ShieldCheck,
-  Flame,
-  Binary
+  Globe2, 
+  GitFork, 
+  Building2, 
+  Car, 
+  Building, 
+  Laptop, 
+  Fuel, 
+  Plane, 
+  Truck, 
+  Factory, 
+  TrendingUp, 
+  AlertTriangle, 
+  Lightbulb, 
+  Landmark, 
+  ArrowUpRight, 
+  ArrowDownRight, 
+  Minus
 } from "lucide-react";
-import { LiveMarketTicker } from "./LiveMarketTicker";
 
 interface LandingPageProps {
   onEnter: () => void;
@@ -29,342 +29,505 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onSelectScenario }) => {
-  const [riskIndex, setRiskIndex] = useState(0);
-  const [activeShocks, setActiveShocks] = useState(0);
-  const [sectorsAffected, setSectorsAffected] = useState(0);
-
-  // Animate counters on mount
-  useEffect(() => {
-    const riskTarget = 74;
-    const shockTarget = 3;
-    const sectorTarget = 7;
-    let frame = 0;
-    const total = 45;
-    const timer = setInterval(() => {
-      frame++;
-      setRiskIndex(Math.round((riskTarget * frame) / total));
-      setActiveShocks(Math.round((shockTarget * frame) / total));
-      setSectorsAffected(Math.round((sectorTarget * frame) / total));
-      if (frame >= total) clearInterval(timer);
-    }, 20);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Gauge calculations
-  const r = 80;
-  const cx = 120;
-  const cy = 100;
-  const semiCircumference = Math.PI * r;
-  const strokeDashoffset = semiCircumference - (riskIndex / 100) * semiCircumference;
-  const riskColor = riskIndex > 70 ? "#ef4444" : riskIndex > 40 ? "#f59e0b" : "#22c55e";
-  const riskLabel = riskIndex > 70 ? "Elevated Contagion Risk" : riskIndex > 40 ? "Moderate Risk" : "Low Risk";
-
-  const breakingCatalysts = [
-    {
-      id: "oil-supply-shock",
-      title: "Black Sea Drone Strike on Russian Crude Infrastructure",
-      category: "Commodity Disruption",
-      transmission: "Crude Spikes +14.2% → Indian CAD Widens → Paint & Aviation Margins Compressed",
-      impactLevel: "Critical",
-      impactColor: "text-rose-600 bg-rose-50 border-rose-200",
-      propagationSteps: "4 Degrees of Separation",
-      affectedAssets: ["Brent Crude", "Asian Paints", "InterGlobe Aviation", "USD/INR"],
-    },
-    {
-      id: "tsmc-supply-chain",
-      title: "TSMC Hsinchu Advanced Sub-5nm Fab Line Unscheduled Outage",
-      category: "Hardware Supply Bottleneck",
-      transmission: "Wafer Lead Times Double → Auto MCU Scarcity → Consumer Hardware Capex Frozen",
-      impactLevel: "Severe",
-      impactColor: "text-amber-600 bg-amber-50 border-amber-200",
-      propagationSteps: "3 Degrees of Separation",
-      affectedAssets: ["NVIDIA", "Apple", "Tata Motors", "Infineon"],
-    },
-    {
-      id: "rbi-rate-decision",
-      title: "Red Sea Maritime Diversions + Escalated Freight Rate Index",
-      category: "Macro & Geopolitical",
-      transmission: "Asia-Europe Shipping +320% → Core Imported Inflation → MPC Rate Cuts Deferred",
-      impactLevel: "High",
-      impactColor: "text-orange-600 bg-orange-50 border-orange-200",
-      propagationSteps: "3 Degrees of Separation",
-      affectedAssets: ["10Y G-Sec", "HDFC Bank", "Container Corp", "Nifty 50"],
-    },
-  ];
-
   return (
-    <div className="flex flex-col items-center justify-start min-h-full gap-8 px-4 sm:px-8 py-3 text-center max-w-6xl mx-auto w-full pb-16">
-      {/* ─── ELEGANT LANDING TOP BAR ─── */}
-      <header className="w-full flex items-center justify-between py-3 border-b border-slate-200/70">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-xs">
-            <Activity className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="flex flex-col text-left">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-900 tracking-tight text-sm">FinGraph</span>
-              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-orange-50 text-orange-600 border border-orange-200">
-                v1.2
-              </span>
-            </div>
-            <span className="text-[11px] text-slate-500 hidden sm:inline">Autonomous Financial Event Impact Graph</span>
-          </div>
+    <div className="min-h-screen bg-white text-slate-800 font-sans antialiased selection:bg-orange-500 selection:text-white flex flex-col justify-between overflow-x-hidden">
+      
+      {/* ─── 1. TOP NAVIGATION BAR ─── */}
+      <header className="w-full max-w-7xl mx-auto px-6 sm:px-10 py-5 flex items-center justify-between z-20">
+        {/* Brand Logo */}
+        <div 
+          onClick={onEnter} 
+          className="flex items-center gap-1 cursor-pointer select-none group"
+        >
+          <span className="font-extrabold text-2xl tracking-tight text-[#0A1128]">
+            Fin<span className="text-[#EA580C]">D</span>
+          </span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#EA580C] mt-2 group-hover:scale-125 transition-transform" />
         </div>
 
-        {/* Clean right side of header */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-slate-500 font-medium">FinGraph Causal Engine</span>
+        {/* Center Nav Links */}
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+          <a href="#product" className="hover:text-slate-900 transition-colors">Product</a>
+          <a href="#how-it-works" className="hover:text-slate-900 transition-colors">How it Works</a>
+          <a href="#use-cases" className="hover:text-slate-900 transition-colors">Use Cases</a>
+          <a href="#pricing" className="hover:text-slate-900 transition-colors">Pricing</a>
+          <a href="#about" className="hover:text-slate-900 transition-colors">About</a>
+        </nav>
+
+        {/* Right Action Buttons */}
+        <div className="flex items-center gap-5">
+          <button 
+            onClick={onEnter}
+            className="text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
+          >
+            Sign in
+          </button>
+          <button 
+            onClick={onEnter}
+            className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#0A1128] hover:bg-slate-850 text-white text-sm font-semibold transition-all shadow-sm hover:shadow-md hover:scale-[1.02] cursor-pointer"
+          >
+            <span>Get Started</span>
+            <ArrowRight className="w-4 h-4 ml-0.5" />
+          </button>
         </div>
       </header>
 
-      {/* ─── LIVE STREAMING YFINANCE TICKER ─── */}
-      <LiveMarketTicker />
+      {/* ─── 2. HERO SECTION ─── */}
+      <section className="relative w-full max-w-7xl mx-auto px-6 sm:px-10 pt-6 pb-20 overflow-hidden">
+        {/* Subtle Decorative Faint Globe Arc Background in Top-Right */}
+        <div className="absolute -top-10 -right-20 w-[680px] h-[680px] rounded-full bg-gradient-to-br from-orange-100/40 via-blue-50/30 to-transparent pointer-events-none -z-10 blur-2xl" />
+        
+        {/* Ambient SVG Orbital Wire Lines */}
+        <svg 
+          className="absolute top-0 right-0 w-[620px] h-[580px] opacity-25 pointer-events-none -z-10" 
+          viewBox="0 0 620 580" 
+          fill="none"
+        >
+          <circle cx="480" cy="220" r="260" stroke="#EA580C" strokeWidth="1.2" strokeDasharray="4 6" />
+          <circle cx="480" cy="220" r="320" stroke="#0284C7" strokeWidth="1" strokeOpacity="0.4" />
+          <path d="M 120 220 Q 300 100 480 220" stroke="#EA580C" strokeWidth="1.5" strokeOpacity="0.6" />
+          <circle cx="360" cy="140" r="4" fill="#EA580C" />
+          <circle cx="210" cy="180" r="3.5" fill="#0284C7" />
+          <circle cx="540" cy="380" r="4.5" fill="#EA580C" />
+        </svg>
 
-      {/* ─── HERO HEADER SECTION ─── */}
-      <div className="flex flex-col items-center gap-5 max-w-4xl pt-2">
-        {/* Top Status Pill: Sleek Black */}
-        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-black text-white text-xs font-semibold shadow-md tracking-wide border border-slate-800">
-          <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          <span className="text-slate-200">Autonomous Financial Causal Engine</span>
-          <span className="text-slate-500">·</span>
-          <span className="text-emerald-400 font-mono text-[11px]">Real-time Telemetry Active</span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          
+          {/* Left Column: Headline, Subtitle, and CTAs */}
+          <div className="lg:col-span-6 flex flex-col items-start text-left z-10">
+            {/* Kicker Tag */}
+            <div className="text-[11px] sm:text-xs font-bold tracking-[0.16em] uppercase text-slate-400 mb-3.5">
+              STRUCTURED FINANCIAL INTELLIGENCE
+            </div>
+
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-extrabold text-[#0A1128] tracking-tight leading-[1.08] mb-6">
+              From News to <br />
+              What Actually <br />
+              <span className="text-[#EA580C]">Matters.</span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-base sm:text-lg text-slate-500 leading-relaxed max-w-lg mb-8 font-normal">
+              FinD turns scattered financial news into structured, analytical insights — helping you see the real impact on markets, sectors and the economy.
+            </p>
+
+            {/* Action Buttons Row */}
+            <div className="flex flex-wrap items-center gap-4 mb-10 w-full sm:w-auto">
+              <button 
+                onClick={onEnter}
+                className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#0A1128] hover:bg-slate-850 text-white text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
+              >
+                <span>Get Started</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button 
+                onClick={onEnter}
+                className="flex items-center justify-center gap-3 px-5 py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-sm font-semibold transition-all shadow-2xs hover:shadow-sm cursor-pointer"
+              >
+                <span className="w-6 h-6 rounded-full bg-[#EA580C] text-white flex items-center justify-center shadow-xs">
+                  <Play className="w-3 h-3 fill-white ml-0.5" />
+                </span>
+                <span>See How It Works</span>
+              </button>
+            </div>
+
+            {/* Quick Feature Badges Row */}
+            <div className="flex items-center gap-6 sm:gap-8 pt-3 border-t border-slate-100 w-full">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <FileText className="w-3.5 h-3.5" />
+                </div>
+                <div className="text-xs font-semibold text-slate-700 leading-tight">
+                  Structured <br /> News
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
+                  <BarChart3 className="w-3.5 h-3.5" />
+                </div>
+                <div className="text-xs font-semibold text-slate-700 leading-tight">
+                  Impact <br /> Analysis
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <Globe2 className="w-3.5 h-3.5" />
+                </div>
+                <div className="text-xs font-semibold text-slate-700 leading-tight">
+                  Global <br /> Coverage
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Floating Interactive Cards Overlaid on Global Graph */}
+          <div className="lg:col-span-6 relative flex flex-col gap-6 items-center lg:items-end w-full">
+            
+            {/* Decorative Globe Illustration Background */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
+              <div className="w-[420px] h-[420px] rounded-full border border-orange-200/50 bg-gradient-to-tr from-orange-50/60 to-blue-50/40" />
+            </div>
+
+            {/* ── CARD 1: MONETARY POLICY (RBI) ── */}
+            <div 
+              onClick={() => onSelectScenario ? onSelectScenario("rbi-rate-decision") : onEnter()}
+              className="flex flex-col sm:flex-row items-stretch gap-3 w-full max-w-lg cursor-pointer transform hover:-translate-y-1 transition-all duration-300"
+            >
+              {/* Event Card (Left) */}
+              <div className="flex-1 p-4 rounded-2xl bg-white border border-slate-200/90 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border border-slate-200">
+                  <Landmark className="w-6 h-6 text-slate-600" />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-[10px] font-bold text-sky-600 uppercase tracking-wider mb-0.5">
+                    Monetary Policy
+                  </span>
+                  <h4 className="text-xs sm:text-[13px] font-bold text-slate-900 leading-snug">
+                    RBI keeps policy rate unchanged at 6.5%
+                  </h4>
+                  <span className="text-[10px] text-slate-400 mt-1">2h ago</span>
+                </div>
+              </div>
+
+              {/* Potential Impact Card (Right) */}
+              <div className="w-full sm:w-44 p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col justify-between">
+                <div className="text-[11px] font-bold text-slate-900 text-left mb-2">
+                  Potential Impact
+                </div>
+                <div className="space-y-1.5 text-[11px]">
+                  <div className="flex items-center justify-between text-slate-700">
+                    <span className="flex items-center gap-1.5">
+                      <Building2 className="w-3 h-3 text-orange-500" /> Banking
+                    </span>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />
+                  </div>
+                  <div className="flex items-center justify-between text-slate-700">
+                    <span className="flex items-center gap-1.5">
+                      <Car className="w-3 h-3 text-orange-500" /> Auto
+                    </span>
+                    <ArrowDownRight className="w-3.5 h-3.5 text-emerald-500" />
+                  </div>
+                  <div className="flex items-center justify-between text-slate-700">
+                    <span className="flex items-center gap-1.5">
+                      <Building className="w-3 h-3 text-orange-500" /> Real Estate
+                    </span>
+                    <Minus className="w-3 h-3 text-slate-400" />
+                  </div>
+                  <div className="flex items-center justify-between text-slate-700">
+                    <span className="flex items-center gap-1.5">
+                      <Laptop className="w-3 h-3 text-orange-500" /> IT
+                    </span>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Curved Connector SVG between Card 1 and Card 2 */}
+            <div className="w-full max-w-lg flex justify-start pl-16 -my-3 pointer-events-none">
+              <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
+                <path d="M 10 0 C 10 20, 30 10, 30 30" stroke="#EA580C" strokeWidth="1.5" strokeDasharray="3 3" />
+              </svg>
+            </div>
+
+            {/* ── CARD 2: GLOBAL EVENT (CRUDE OIL) ── */}
+            <div 
+              onClick={() => onSelectScenario ? onSelectScenario("scenario_oil_shock") : onEnter()}
+              className="flex flex-col sm:flex-row items-stretch gap-3 w-full max-w-lg cursor-pointer transform hover:-translate-y-1 transition-all duration-300"
+            >
+              {/* Event Card (Left) */}
+              <div className="flex-1 p-4 rounded-2xl bg-white border border-slate-200/90 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-amber-900/10 flex items-center justify-center shrink-0 overflow-hidden border border-amber-200">
+                  <Fuel className="w-6 h-6 text-amber-700" />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
+                    Global Event
+                  </span>
+                  <h4 className="text-xs sm:text-[13px] font-bold text-slate-900 leading-snug">
+                    Tensions ease as crude oil prices decline
+                  </h4>
+                  <span className="text-[10px] text-slate-400 mt-1">4h ago</span>
+                </div>
+              </div>
+
+              {/* Potential Impact Card (Right) */}
+              <div className="w-full sm:w-44 p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col justify-between">
+                <div className="text-[11px] font-bold text-slate-900 text-left mb-2">
+                  Potential Impact
+                </div>
+                <div className="space-y-1.5 text-[11px]">
+                  <div className="flex items-center justify-between text-slate-700">
+                    <span className="flex items-center gap-1.5">
+                      <Fuel className="w-3 h-3 text-orange-500" /> Oil & Gas
+                    </span>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-amber-500" />
+                  </div>
+                  <div className="flex items-center justify-between text-slate-700">
+                    <span className="flex items-center gap-1.5">
+                      <Plane className="w-3 h-3 text-orange-500" /> Aviation
+                    </span>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />
+                  </div>
+                  <div className="flex items-center justify-between text-slate-700">
+                    <span className="flex items-center gap-1.5">
+                      <Truck className="w-3 h-3 text-orange-500" /> Logistics
+                    </span>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />
+                  </div>
+                  <div className="flex items-center justify-between text-slate-700">
+                    <span className="flex items-center gap-1.5">
+                      <Factory className="w-3 h-3 text-orange-500" /> Manufacturing
+                    </span>
+                    <Minus className="w-3 h-3 text-slate-400" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 3. KEY CAPABILITIES SECTION ─── */}
+      <section id="product" className="w-full max-w-7xl mx-auto px-6 sm:px-10 py-16 text-center">
+        {/* Kicker */}
+        <div className="text-xs font-bold tracking-[0.16em] uppercase text-slate-400 mb-2">
+          KEY CAPABILITIES
         </div>
 
-        {/* Hero Title */}
-        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.12]">
-          Map Financial Shockwaves <br className="hidden sm:inline" />
-          <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 bg-clip-text text-transparent">
-            Before Markets React.
-          </span>
-        </h1>
+        {/* Section Title */}
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0A1128] tracking-tight mb-3">
+          More than just headlines
+        </h2>
 
-        {/* Hero Subtitle */}
-        <p className="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed">
-          FinGraph transforms unstructured global news into high-resolution causal dependency graphs.
-          Trace how commodity price shocks, geopolitical tensions, and monetary policy decisions cascade across supply networks, balance sheets, and asset valuations.
+        {/* Section Subtitle */}
+        <p className="text-sm sm:text-base text-slate-500 max-w-2xl mx-auto mb-12">
+          Go beyond news. Understand the connections, identify impact, and get a clearer view of the bigger financial picture.
         </p>
 
-        {/* PRIMARY CTA: GET STARTED (ORANGE) */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 pt-2 w-full justify-center">
-          <button
-            onClick={onEnter}
-            className="group flex items-center justify-center gap-3 px-10 py-4.5 rounded-2xl bg-orange-500 text-white text-base sm:text-lg font-bold hover:bg-orange-600 transition-all duration-200 shadow-xl shadow-orange-500/25 hover:shadow-2xl hover:shadow-orange-500/35 hover:-translate-y-0.5 cursor-pointer w-full sm:w-auto"
-          >
-            <span>Get Started</span>
-            <ArrowRight className="w-5 h-5 text-white/90 group-hover:translate-x-1.5 transition-transform" />
-          </button>
-        </div>
-      </div>
-
-      {/* ─── REAL-TIME SYSTEMIC GAUGE & METRICS ROW ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full items-stretch">
-        {/* Left: Gauge Card */}
-        <div className="lg:col-span-5 flex flex-col items-center justify-between p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm">
-          <div className="flex items-center justify-between w-full pb-3 border-b border-slate-100">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider font-mono flex items-center gap-1.5">
-              <Flame className="w-3.5 h-3.5 text-rose-500" />
-              Systemic Stress Gauge
-            </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">
-              LIVE INDEX
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center py-2 shrink-0">
-            <svg width="240" height="130" viewBox="0 0 240 130">
-              <path
-                d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
-                fill="none"
-                stroke="#e2e8f0"
-                strokeWidth="14"
-                strokeLinecap="round"
-              />
-              <path
-                d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
-                fill="none"
-                stroke={riskColor}
-                strokeWidth="14"
-                strokeLinecap="round"
-                strokeDasharray={semiCircumference}
-                strokeDashoffset={strokeDashoffset}
-                style={{ transition: "stroke-dashoffset 0.4s ease, stroke 0.4s ease" }}
-              />
-              <text x={cx} y={cy - 12} textAnchor="middle" fontSize="32" fontWeight="800" fill={riskColor} fontFamily="monospace">
-                {riskIndex}
-              </text>
-              <text x={cx} y={cy + 8} textAnchor="middle" fontSize="9.5" fill="#475569" fontWeight="700" letterSpacing="0.05em">
-                {riskLabel.toUpperCase()}
-              </text>
-              <text x={cx - r} y={cy + 22} textAnchor="middle" fontSize="10" fill="#94a3b8" fontWeight="600">0</text>
-              <text x={cx + r} y={cy + 22} textAnchor="middle" fontSize="10" fill="#94a3b8" fontWeight="600">100</text>
-            </svg>
-            <span className="text-[11px] text-slate-400 font-mono tracking-wider mt-1">REAL-TIME SYSTEMIC STRESS GAUGE</span>
-          </div>
-
-          <div className="w-full pt-3 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
-            <span>Primary Contagion: <strong>Energy & Logistics</strong></span>
-            <span className="text-rose-500 font-semibold font-mono">High Velocity</span>
-          </div>
-        </div>
-
-        {/* Right: 3 Key Metrics */}
-        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          <div className="p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between text-left gap-2">
-            <div className="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500">
-              <Zap className="w-5 h-5" />
+        {/* 4 Feature Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          {/* Card 1: News to Insights */}
+          <div className="p-7 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md transition-all text-left flex flex-col items-start group">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <FileText className="w-5 h-5" />
             </div>
-            <div>
-              <div className="text-2xl font-black text-slate-900 font-mono">{activeShocks} Active</div>
-              <div className="text-xs font-bold text-slate-700 mt-0.5">Macro Contagions</div>
-              <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                Disruptions propagating across global trade corridors.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between text-left gap-2">
-            <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
-              <Globe2 className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-2xl font-black text-slate-900 font-mono">{sectorsAffected} Sectors</div>
-              <div className="text-xs font-bold text-slate-700 mt-0.5">Transmitted Reach</div>
-              <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                Petrochemicals, Aviation, Automotive, and Real Estate.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between text-left gap-2">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-              <Binary className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-2xl font-black text-slate-900 font-mono">25+ Nodes</div>
-              <div className="text-xs font-bold text-slate-700 mt-0.5">Causal Graph Model</div>
-              <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                First, second, and third-order network paths modeled in memory.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ─── FEATURED BREAKING CATALYSTS SECTION ─── */}
-      <div className="w-full flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between text-left gap-1">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              Featured Breaking Catalysts
-            </h2>
-            <p className="text-xs text-slate-500">
-              Select any live shock to open the full causal propagation graph or click Open Event Explorer Feed below.
+            <h3 className="text-base font-bold text-slate-900 mb-2">
+              News to Insights
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Convert unstructured news into clean, structured data.
             </p>
           </div>
-          <span className="text-xs font-mono text-slate-400">Click any card to load causal model</span>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-          {breakingCatalysts.map((c) => (
-            <div
-              key={c.id}
-              onClick={() => {
-                if (onSelectScenario) onSelectScenario(c.id);
-                else onEnter();
-              }}
-              className="p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-lg hover:border-orange-400 transition-all duration-200 cursor-pointer flex flex-col justify-between gap-4 group"
-            >
-              <div className="flex flex-col gap-2.5">
-                <div className="flex items-center justify-between">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border font-mono ${c.impactColor}`}>
-                    {c.category}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-mono">{c.propagationSteps}</span>
-                </div>
-
-                <h3 className="text-sm font-bold text-slate-900 group-hover:text-orange-600 transition leading-snug">
-                  {c.title}
-                </h3>
-
-                <p className="text-xs text-slate-600 leading-relaxed font-mono bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  {c.transmission}
-                </p>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                <div className="flex flex-wrap gap-1">
-                  {c.affectedAssets.slice(0, 2).map((a, i) => (
-                    <span key={i} className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">
-                      {a}
-                    </span>
-                  ))}
-                  {c.affectedAssets.length > 2 && (
-                    <span className="text-[10px] text-slate-400 font-mono">+{c.affectedAssets.length - 2} more</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1 text-xs font-semibold text-orange-600 group-hover:translate-x-0.5 transition-transform">
-                  <span>Synthesize</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </div>
-              </div>
+          {/* Card 2: Impact Mapping */}
+          <div className="p-7 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md transition-all text-left flex flex-col items-start group">
+            <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#EA580C] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <GitFork className="w-5 h-5" />
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ─── THREE-PILLAR CAPABILITIES ─── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full text-left">
-        <div className="p-5 rounded-3xl bg-slate-900 text-white flex flex-col gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-orange-400">
-            <Network className="w-5 h-5" />
+            <h3 className="text-base font-bold text-slate-900 mb-2">
+              Impact Mapping
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              See how events affect sectors, markets and economies.
+            </p>
           </div>
-          <h3 className="text-base font-bold text-white">Multi-Order Causal BFS</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Breadth-First decay propagation tracks 1st, 2nd, and 3rd order impacts across supply networks, isolating second-derivative market vulnerabilities.
-          </p>
-        </div>
 
-        <div className="p-5 rounded-3xl bg-slate-900 text-white flex flex-col gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-emerald-400">
-            <LineChart className="w-5 h-5" />
+          {/* Card 3: Analytical View */}
+          <div className="p-7 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md transition-all text-left flex flex-col items-start group">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <BarChart3 className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-bold text-slate-900 mb-2">
+              Analytical View
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Track trends, correlations and emerging risks.
+            </p>
           </div>
-          <h3 className="text-base font-bold text-white">Live Yahoo Finance Telemetry</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Real-time equity quotes, FX cross-rates, and commodity indices streamed straight into dynamic nodes with historical regression calibration.
-          </p>
-        </div>
 
-        <div className="p-5 rounded-3xl bg-slate-900 text-white flex flex-col gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-amber-400">
-            <ShieldCheck className="w-5 h-5" />
+          {/* Card 4: Global Perspective */}
+          <div className="p-7 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md transition-all text-left flex flex-col items-start group">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <Globe2 className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-bold text-slate-900 mb-2">
+              Global Perspective
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Covering economies, policies, commodities and more.
+            </p>
           </div>
-          <h3 className="text-base font-bold text-white">Institutional Grade Explainability</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Every edge carries explicit evidence citations, confidence calibration scores, and directionality indicators—no black-box hallucinations.
-          </p>
-        </div>
-      </div>
 
-      {/* ─── BOTTOM CTA FOOTER ─── */}
-      <div className="w-full flex flex-col items-center gap-3 p-8 rounded-3xl bg-gradient-to-br from-orange-50/80 via-amber-50/50 to-slate-50 border border-orange-200/70 text-center">
-        <h3 className="text-xl font-bold text-slate-900">
-          Ready to explore live market catalysts?
-        </h3>
-        <p className="text-xs sm:text-sm text-slate-600 max-w-md">
-          Enter the full interactive dashboard to filter news categories, synthesize custom event graphs, or run what-if simulations.
-        </p>
-        <button
-          onClick={onEnter}
-          className="mt-2 flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-orange-500 text-white text-sm sm:text-base font-bold hover:bg-orange-600 transition shadow-lg shadow-orange-500/20 cursor-pointer"
+        </div>
+      </section>
+
+      {/* ─── 4. WHY FIND (INTERACTIVE DATA CONVERGENCE DIAGRAM) ─── */}
+      <section id="how-it-works" className="w-full bg-[#F0F7FF] py-20 px-6 sm:px-10 my-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* Left Column: Heading and Description */}
+          <div className="lg:col-span-5 flex flex-col items-start text-left">
+            <div className="text-xs font-bold tracking-[0.16em] uppercase text-slate-400 mb-2.5">
+              WHY FIND
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold text-[#0A1128] tracking-tight leading-tight mb-5">
+              See the bigger <br />
+              picture, <span className="text-[#EA580C]">effortlessly.</span>
+            </h2>
+            <p className="text-sm sm:text-base text-slate-500 leading-relaxed mb-8 max-w-md">
+              FinD connects global events, policy changes and economic developments to show what they mean across different sectors and markets.
+            </p>
+            <button 
+              onClick={onEnter}
+              className="flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#0A1128] hover:bg-slate-850 text-white text-sm font-semibold transition-all shadow-md hover:shadow-lg cursor-pointer"
+            >
+              <span>Explore Use Cases</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Right Column: Node Convergence & Dispersion Network */}
+          <div className="lg:col-span-7 relative flex items-center justify-center w-full py-6">
+            
+            {/* SVG Connecting Curves */}
+            <svg 
+              className="absolute inset-0 w-full h-full pointer-events-none" 
+              viewBox="0 0 600 320" 
+              preserveAspectRatio="xMidYMid meet"
+            >
+              {/* Converging inputs (Left to Center) */}
+              <path d="M 170 70 C 230 70, 240 160, 290 160" stroke="#CBD5E1" strokeWidth="1.8" fill="none" />
+              <path d="M 170 160 C 220 160, 240 160, 290 160" stroke="#CBD5E1" strokeWidth="1.8" fill="none" />
+              <path d="M 170 250 C 230 250, 240 160, 290 160" stroke="#CBD5E1" strokeWidth="1.8" fill="none" />
+
+              {/* Diverging outputs (Center to Right) */}
+              <path d="M 310 160 C 360 160, 370 50, 420 50" stroke="#38BDF8" strokeWidth="1.8" fill="none" />
+              <path d="M 310 160 C 360 160, 370 120, 420 120" stroke="#38BDF8" strokeWidth="1.8" fill="none" />
+              <path d="M 310 160 C 360 160, 370 200, 420 200" stroke="#FB923C" strokeWidth="1.8" fill="none" />
+              <path d="M 310 160 C 360 160, 370 270, 420 270" stroke="#FB923C" strokeWidth="1.8" fill="none" />
+            </svg>
+
+            <div className="relative z-10 w-full flex items-center justify-between max-w-2xl gap-4">
+              
+              {/* Left Input Nodes Column */}
+              <div className="flex flex-col gap-5 w-44">
+                <div className="p-3 px-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-2.5 text-xs font-semibold text-slate-800">
+                  <Landmark className="w-4 h-4 text-slate-500" />
+                  <span>Policy Changes</span>
+                </div>
+                <div className="p-3 px-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-2.5 text-xs font-semibold text-slate-800">
+                  <Globe2 className="w-4 h-4 text-blue-500" />
+                  <span>Global Events</span>
+                </div>
+                <div className="p-3 px-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-2.5 text-xs font-semibold text-slate-800">
+                  <BarChart3 className="w-4 h-4 text-amber-500" />
+                  <span>Economic Data</span>
+                </div>
+              </div>
+
+              {/* Center FinD Nucleus Circle */}
+              <div className="w-20 h-20 rounded-full bg-white border-2 border-slate-200 shadow-lg flex items-center justify-center shrink-0">
+                <span className="font-extrabold text-lg text-[#0A1128] tracking-tight">
+                  Fin<span className="text-[#EA580C]">D</span>
+                </span>
+              </div>
+
+              {/* Right Output Nodes Column */}
+              <div className="flex flex-col gap-4 w-44">
+                <div className="p-2.5 px-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-2 text-xs font-semibold text-slate-800">
+                  <BarChart3 className="w-4 h-4 text-blue-600" />
+                  <span>Sector Impact</span>
+                </div>
+                <div className="p-2.5 px-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-2 text-xs font-semibold text-slate-800">
+                  <TrendingUp className="w-4 h-4 text-sky-500" />
+                  <span>Market Trends</span>
+                </div>
+                <div className="p-2.5 px-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-2 text-xs font-semibold text-slate-800">
+                  <AlertTriangle className="w-4 h-4 text-amber-500" />
+                  <span>Risk Indicators</span>
+                </div>
+                <div className="p-2.5 px-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-2 text-xs font-semibold text-slate-800">
+                  <Lightbulb className="w-4 h-4 text-orange-500" />
+                  <span>Actionable Insights</span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ─── 5. BOTTOM CTA BANNER ─── */}
+      <section className="relative w-full max-w-7xl mx-auto px-6 sm:px-10 py-20 text-center overflow-hidden">
+        
+        {/* Subtle Bottom Wave Lines with Nodes Background */}
+        <svg 
+          className="absolute bottom-0 left-0 right-0 w-full h-32 opacity-35 pointer-events-none" 
+          viewBox="0 0 1200 120" 
+          preserveAspectRatio="none"
+          fill="none"
         >
-          <span>Get Started</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      </div>
+          <path d="M 0 80 Q 300 20 600 80 T 1200 60" stroke="#EA580C" strokeWidth="1.2" />
+          <path d="M 0 100 Q 400 40 800 100 T 1200 90" stroke="#0284C7" strokeWidth="1" strokeOpacity="0.4" />
+          <circle cx="150" cy="65" r="4" fill="#EA580C" />
+          <circle cx="320" cy="85" r="3.5" fill="#0284C7" />
+          <circle cx="580" cy="78" r="4" fill="#EA580C" />
+          <circle cx="850" cy="98" r="3" fill="#EA580C" />
+          <circle cx="1020" cy="70" r="4" fill="#0284C7" />
+        </svg>
+
+        <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
+          {/* Kicker */}
+          <div className="text-xs font-bold tracking-[0.16em] uppercase text-slate-400 mb-3">
+            READY TO GET STARTED?
+          </div>
+
+          {/* Heading */}
+          <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold text-[#0A1128] tracking-tight mb-4">
+            Make sense of financial news <br />
+            with <span className="text-[#EA580C]">FinD.</span>
+          </h2>
+
+          {/* Subtitle */}
+          <p className="text-sm sm:text-base text-slate-500 max-w-xl mx-auto mb-8">
+            Join and start exploring structured insights from global financial events.
+          </p>
+
+          {/* Final CTA Button */}
+          <button 
+            onClick={onEnter}
+            className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#0A1128] hover:bg-slate-850 text-white text-base font-semibold transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
+          >
+            <span>Get Started</span>
+            <ArrowRight className="w-4 h-4 ml-0.5" />
+          </button>
+        </div>
+      </section>
+
+      {/* Subtle Footer Bar */}
+      <footer className="w-full border-t border-slate-100 py-6 px-6 sm:px-10 text-center text-xs text-slate-400">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-1 font-bold text-slate-700">
+            <span>Fin<span className="text-[#EA580C]">D</span></span>
+            <span className="text-slate-400 font-normal">© 2026. All rights reserved.</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <a href="#about" className="hover:text-slate-600 transition-colors">Privacy Policy</a>
+            <a href="#about" className="hover:text-slate-600 transition-colors">Terms of Service</a>
+            <a href="#about" className="hover:text-slate-600 transition-colors">Documentation</a>
+          </div>
+        </div>
+      </footer>
+
     </div>
   );
 };

@@ -927,7 +927,7 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* 9. Aivana Voice & Multimodal AI Assistant (Corner Orb & Voice Modal) */}
+      {/* 9. Flora Voice & Multimodal AI Assistant (Corner Orb & Voice Modal) */}
       <AivanaVoiceAssistant />
     </div>
   );
